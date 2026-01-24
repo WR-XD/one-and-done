@@ -3775,7 +3775,11 @@ See you on the course!`
 
         function emailInviteLink() {
             const pool = store.pools.find(p => p.id === currentPoolId);
-            if (!pool) return;
+            if (!pool) {
+                console.error('No pool found for currentPoolId:', currentPoolId);
+                showToast('Could not find pool', true);
+                return;
+            }
             
             const inviteLink = document.getElementById('invite-link').textContent;
             const subject = encodeURIComponent(`Join my One & Done Golf Pool: ${pool.name}`);
@@ -3792,7 +3796,8 @@ Or use invite code: ${pool.inviteCode}
 See you on the course!`
             );
             
-            window.open(`mailto:?subject=${subject}&body=${body}`, '_blank');
+            // Use location.href for better compatibility
+            window.location.href = `mailto:?subject=${subject}&body=${body}`;
         }
 
         function sendModalInvite() {
@@ -3803,7 +3808,10 @@ See you on the course!`
             }
 
             const pool = store.pools.find(p => p.id === currentPoolId);
-            if (!pool) return;
+            if (!pool) {
+                showToast('Could not find pool', true);
+                return;
+            }
 
             // Open email client with the invite
             const inviteLink = document.getElementById('invite-link').textContent;
@@ -3821,7 +3829,8 @@ Or use invite code: ${pool.inviteCode}
 See you on the course!`
             );
             
-            window.open(`mailto:${email}?subject=${subject}&body=${body}`, '_blank');
+            // Use location.href for better compatibility
+            window.location.href = `mailto:${email}?subject=${subject}&body=${body}`;
 
             // Store the invite
             store.invites.push({
