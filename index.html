@@ -1549,6 +1549,31 @@
             console.log('Supabase not available, using local storage', e);
         }
 
+        // Helper function to retry Supabase operations that fail with AbortError
+        async function supabaseRetry(operation, maxRetries = 3) {
+            for (let i = 0; i < maxRetries; i++) {
+                try {
+                    const result = await operation();
+                    if (result.error) {
+                        if (result.error.message?.includes('AbortError') && i < maxRetries - 1) {
+                            console.log(`Retry ${i + 1}/${maxRetries} after AbortError...`);
+                            await new Promise(r => setTimeout(r, 500));
+                            continue;
+                        }
+                        return result; // Return the error result if not AbortError
+                    }
+                    return result;
+                } catch (error) {
+                    if (error.message?.includes('AbortError') && i < maxRetries - 1) {
+                        console.log(`Retry ${i + 1}/${maxRetries} after AbortError...`);
+                        await new Promise(r => setTimeout(r, 500));
+                        continue;
+                    }
+                    throw error;
+                }
+            }
+        }
+
         // ==================== SUPABASE AUTH FUNCTIONS ====================
         async function supabaseSignUp(email, password, name) {
             if (!supabaseClient) throw new Error('Supabase not initialized');
@@ -2577,10 +2602,12 @@
             
             try {
                 // Load user's pool memberships
-                const { data: poolMembers, error: poolError } = await supabaseClient
-                    .from('pool_members')
-                    .select('pool_id')
-                    .eq('user_id', store.currentUser.id);
+                const { data: poolMembers, error: poolError } = await supabaseRetry(() =>
+                    supabaseClient
+                        .from('pool_members')
+                        .select('pool_id')
+                        .eq('user_id', store.currentUser.id)
+                );
                 
                 if (poolError) {
                     console.error('Error loading pool members:', poolError);
@@ -2589,20 +2616,24 @@
                     
                     // Load the actual pools
                     const poolIds = poolMembers.map(pm => pm.pool_id);
-                    const { data: pools, error: poolsError } = await supabaseClient
-                        .from('pools')
-                        .select('*')
-                        .in('id', poolIds);
+                    const { data: pools, error: poolsError } = await supabaseRetry(() =>
+                        supabaseClient
+                            .from('pools')
+                            .select('*')
+                            .in('id', poolIds)
+                    );
                     
                     if (poolsError) {
                         console.error('Error loading pools:', poolsError);
                     } else if (pools) {
                         for (const dbPool of pools) {
                             // Get members for this pool
-                            const { data: members } = await supabaseClient
-                                .from('pool_members')
-                                .select('user_id')
-                                .eq('pool_id', dbPool.id);
+                            const { data: members } = await supabaseRetry(() =>
+                                supabaseClient
+                                    .from('pool_members')
+                                    .select('user_id')
+                                    .eq('pool_id', dbPool.id)
+                            );
                             
                             const pool = {
                                 id: dbPool.id,
@@ -2627,10 +2658,12 @@
                 }
                 
                 // Load user's picks
-                const { data: picks, error: picksError } = await supabaseClient
-                    .from('picks')
-                    .select('*')
-                    .eq('user_id', store.currentUser.id);
+                const { data: picks, error: picksError } = await supabaseRetry(() =>
+                    supabaseClient
+                        .from('picks')
+                        .select('*')
+                        .eq('user_id', store.currentUser.id)
+                );
                 
                 if (picksError) {
                     console.error('Error loading picks:', picksError);
@@ -2866,16 +2899,18 @@
                     const inviteCode = Math.random().toString(36).substring(2, 8).toUpperCase();
                     
                     console.log('Inserting pool to Supabase...');
-                    const { data: newPool, error: poolError } = await supabaseClient
-                        .from('pools')
-                        .insert({
-                            name: name,
-                            season: season,
-                            invite_code: inviteCode,
-                            created_by: store.currentUser.id
-                        })
-                        .select()
-                        .single();
+                    const { data: newPool, error: poolError } = await supabaseRetry(() =>
+                        supabaseClient
+                            .from('pools')
+                            .insert({
+                                name: name,
+                                season: season,
+                                invite_code: inviteCode,
+                                created_by: store.currentUser.id
+                            })
+                            .select()
+                            .single()
+                    );
                     
                     if (poolError) {
                         console.error('Pool creation error:', poolError);
@@ -2886,9 +2921,11 @@
                     
                     // Add creator as member
                     console.log('Adding member...');
-                    const { error: memberError } = await supabaseClient
-                        .from('pool_members')
-                        .insert({ pool_id: newPool.id, user_id: store.currentUser.id });
+                    const { error: memberError } = await supabaseRetry(() =>
+                        supabaseClient
+                            .from('pool_members')
+                            .insert({ pool_id: newPool.id, user_id: store.currentUser.id })
+                    );
                     
                     if (memberError) {
                         console.error('Member add error:', memberError);
