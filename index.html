@@ -2680,32 +2680,51 @@
             const name = document.getElementById('pool-name').value;
             const season = document.getElementById('pool-season').value;
 
+            if (!name || !season) {
+                showToast('Please fill in all fields', true);
+                return;
+            }
+
+            console.log('Creating pool:', name, season);
+
             try {
                 let pool;
                 
-                if (supabaseClient) {
+                if (supabaseClient && store.currentUser) {
                     // Create pool in Supabase
                     const inviteCode = Math.random().toString(36).substring(2, 8).toUpperCase();
                     
+                    console.log('Inserting pool to Supabase...');
                     const { data: newPool, error: poolError } = await supabaseClient
                         .from('pools')
                         .insert({
-                            name,
-                            season,
+                            name: name,
+                            season: season,
                             invite_code: inviteCode,
                             created_by: store.currentUser.id
                         })
                         .select()
                         .single();
                     
-                    if (poolError) throw poolError;
+                    if (poolError) {
+                        console.error('Pool creation error:', poolError);
+                        throw poolError;
+                    }
+                    
+                    console.log('Pool created:', newPool);
                     
                     // Add creator as member
+                    console.log('Adding member...');
                     const { error: memberError } = await supabaseClient
                         .from('pool_members')
                         .insert({ pool_id: newPool.id, user_id: store.currentUser.id });
                     
-                    if (memberError) throw memberError;
+                    if (memberError) {
+                        console.error('Member add error:', memberError);
+                        throw memberError;
+                    }
+                    
+                    console.log('Member added');
                     
                     pool = {
                         id: newPool.id,
@@ -2750,6 +2769,7 @@
                 showToast('Pool created successfully!');
                 showScreen('dashboard');
             } catch (error) {
+                console.error('Create pool error:', error);
                 showToast(error.message || 'Failed to create pool', true);
             }
         }
