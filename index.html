@@ -1331,19 +1331,30 @@
         .tabs {
             display: flex;
             background: var(--white);
-            border-bottom: 2px solid #e5e7eb;
             position: relative;
+            flex: 1;
+            overflow-x: auto;
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+        }
+
+        .tabs::-webkit-scrollbar {
+            display: none;
         }
 
         .tabs-container {
             position: relative;
             width: 100%;
+            display: flex;
+            align-items: stretch;
+            background: var(--white);
+            border-bottom: 2px solid #e5e7eb;
         }
 
         .tabs-container::after {
             content: '';
             position: absolute;
-            right: 0;
+            right: 50px;
             top: 0;
             bottom: 0;
             width: 40px;
@@ -1355,6 +1366,65 @@
 
         .tabs-container.has-overflow::after {
             opacity: 1;
+        }
+
+        .pool-options-menu {
+            position: relative;
+            display: flex;
+            align-items: center;
+            margin-left: auto;
+            padding-right: 0.5rem;
+        }
+
+        .pool-options-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 0.5rem 0.75rem;
+            font-size: 1.5rem;
+            color: var(--gray);
+            border-radius: 4px;
+            transition: background 0.2s, color 0.2s;
+            line-height: 1;
+        }
+
+        .pool-options-btn:hover {
+            background: #f3f4f6;
+            color: var(--green-deep);
+        }
+
+        .pool-options-dropdown {
+            display: none;
+            position: absolute;
+            top: 100%;
+            right: 0;
+            background: var(--white);
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            min-width: 150px;
+            z-index: 100;
+            overflow: hidden;
+        }
+
+        .pool-options-dropdown.active {
+            display: block;
+        }
+
+        .pool-options-dropdown button {
+            display: block;
+            width: 100%;
+            padding: 0.75rem 1rem;
+            text-align: left;
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 0.95rem;
+            transition: background 0.2s;
+        }
+
+        .pool-options-dropdown button:hover {
+            background: #f9fafb;
         }
 
         .tab {
@@ -1626,6 +1696,16 @@
                     <button class="tab" onclick="switchPoolTab('leaderboard')">Live Leaderboard</button>
                     <button class="tab" onclick="switchPoolTab('pick')">Make Pick</button>
                     <button class="tab" onclick="switchPoolTab('history')">Pick History</button>
+                </div>
+                <div class="pool-options-menu">
+                    <button class="pool-options-btn" onclick="togglePoolOptions(event)">
+                        <span>⋮</span>
+                    </button>
+                    <div class="pool-options-dropdown" id="pool-options-dropdown">
+                        <button onclick="confirmLeaveCurrentPool()">
+                            <span style="color: var(--red);">🚪 Leave Pool</span>
+                        </button>
+                    </div>
                 </div>
             </div>
 
@@ -3198,7 +3278,6 @@
                         <div class="tournament-actions">
                             <button class="btn btn-primary" onclick="openPool('${pool.id}')">View Pool</button>
                             <button class="btn btn-secondary" onclick="showInviteModal('${pool.id}')">Invite</button>
-                            <button class="btn btn-danger-outline" onclick="confirmLeavePool('${pool.id}', '${pool.name.replace(/'/g, "\\'")}')">Leave</button>
                         </div>
                     </div>
                 `;
@@ -3623,6 +3702,31 @@ See you on the course!`
         // ==================== LEAVE POOL ====================
         let poolToLeave = null;
 
+        function togglePoolOptions(event) {
+            event.stopPropagation();
+            const dropdown = document.getElementById('pool-options-dropdown');
+            dropdown.classList.toggle('active');
+        }
+
+        // Close dropdown when clicking elsewhere
+        document.addEventListener('click', (e) => {
+            const dropdown = document.getElementById('pool-options-dropdown');
+            if (dropdown && !e.target.closest('.pool-options-menu')) {
+                dropdown.classList.remove('active');
+            }
+        });
+
+        function confirmLeaveCurrentPool() {
+            // Close the dropdown
+            document.getElementById('pool-options-dropdown').classList.remove('active');
+            
+            // Get current pool
+            const pool = store.pools.find(p => p.id === currentPoolId);
+            if (pool) {
+                confirmLeavePool(currentPoolId, pool.name);
+            }
+        }
+
         function confirmLeavePool(poolId, poolName) {
             poolToLeave = poolId;
             document.getElementById('leave-pool-name').textContent = `"${poolName}"?`;
@@ -3676,7 +3780,9 @@ See you on the course!`
 
                 closeModal('leave-pool-modal');
                 poolToLeave = null;
+                currentPoolId = null;
                 showToast('You have left the pool');
+                showScreen('dashboard');
                 renderDashboard();
 
             } catch (error) {
