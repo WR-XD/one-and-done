@@ -2559,12 +2559,20 @@
         }
 
         // Load user's pools and picks from Supabase
+        let isLoadingUserData = false;
+        
         async function loadUserData() {
             if (!supabaseClient || !store.currentUser) {
                 console.log('loadUserData: No client or user');
                 return;
             }
             
+            if (isLoadingUserData) {
+                console.log('loadUserData: Already loading, skipping...');
+                return;
+            }
+            
+            isLoadingUserData = true;
             console.log('Loading data for user:', store.currentUser.id);
             
             try {
@@ -2614,6 +2622,8 @@
                         }
                         console.log('Loaded pools:', store.pools.length);
                     }
+                } else {
+                    console.log('No pool memberships found');
                 }
                 
                 // Load user's picks
@@ -2650,8 +2660,11 @@
                     console.log('Loaded picks:', picks.length);
                 }
                 
+                console.log('loadUserData complete');
             } catch (error) {
                 console.error('Error in loadUserData:', error);
+            } finally {
+                isLoadingUserData = false;
             }
         }
 
@@ -3785,7 +3798,9 @@
             supabaseClient.auth.onAuthStateChange(async (event, session) => {
                 console.log('Auth state changed:', event);
                 
-                if ((event === 'SIGNED_IN' || event === 'INITIAL_SESSION') && session) {
+                // Only handle INITIAL_SESSION (page load with existing session)
+                // SIGNED_IN is handled by handleLogin directly
+                if (event === 'INITIAL_SESSION' && session) {
                     await setUserFromSession(session);
                 } else if (event === 'SIGNED_OUT') {
                     store.currentUser = null;
