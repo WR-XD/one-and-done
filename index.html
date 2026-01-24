@@ -2906,6 +2906,10 @@
             document.body.style.overflow = 'hidden';
         }
 
+        function showProfileModalFromElement(imgElement, userName) {
+            showProfileModal(imgElement.src, userName);
+        }
+
         function closeProfileModal() {
             const modal = document.getElementById('profile-modal');
             modal.classList.remove('active');
@@ -3070,7 +3074,11 @@
             document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
             document.querySelectorAll('.pool-tab').forEach(t => t.style.display = 'none');
 
-            event.target.classList.add('active');
+            // Find and activate the correct tab button
+            const tabButton = document.querySelector(`.tab[onclick*="'${tabName}'"]`);
+            if (tabButton) {
+                tabButton.classList.add('active');
+            }
             document.getElementById(`tab-${tabName}`).style.display = 'block';
 
             if (tabName === 'standings') renderStandings();
@@ -3146,7 +3154,7 @@
                             <div style="display: flex; align-items: center; gap: 0.5rem;">
                                 <img src="${profilePic}" alt="" class="clickable-profile" 
                                      style="width: 32px; height: 32px; border-radius: 50%; object-fit: cover;"
-                                     onclick="event.stopPropagation(); showProfileModal('${profilePic.replace(/'/g, "\\'")}', '${standing.user.name.replace(/'/g, "\\'")}')"
+                                     onclick="event.stopPropagation(); showProfileModalFromElement(this, '${standing.user.name.replace(/'/g, "\\'")}')"
                                      onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect fill=%22%23e5e7eb%22 width=%22100%22 height=%22100%22/></svg>'">
                                 <strong>${standing.user.name}</strong>
                                 ${isCurrentUser ? ' (You)' : ''}
