@@ -3184,14 +3184,16 @@
                                         store.users.push({
                                             id: memberId,
                                             name: profile.name || profile.username || 'User',
-                                            email: profile.email || ''
+                                            email: profile.email || '',
+                                            profilePicture: profile.profile_picture || null
                                         });
                                     } else {
                                         // Fallback - just use ID as placeholder
                                         store.users.push({
                                             id: memberId,
                                             name: `Player ${memberIds.indexOf(memberId) + 1}`,
-                                            email: ''
+                                            email: '',
+                                            profilePicture: null
                                         });
                                     }
                                 }
@@ -3408,7 +3410,12 @@
             if (store.currentUser && store.currentUser.id === userId && store.currentUser.profilePicture) {
                 return store.currentUser.profilePicture;
             }
-            // Check localStorage
+            // Check store.users (loaded from Supabase profiles)
+            const user = store.users.find(u => u.id === userId);
+            if (user && user.profilePicture) {
+                return user.profilePicture;
+            }
+            // Check localStorage as fallback
             const saved = localStorage.getItem('userProfilePicture_' + userId);
             if (saved) return saved;
             // Default avatar
@@ -3508,7 +3515,7 @@
             reader.readAsDataURL(file);
         }
 
-        function saveNewProfilePicture() {
+        async function saveNewProfilePicture() {
             if (!pendingProfilePicture) return;
             
             if (!canChangeProfilePicture()) {
@@ -3519,6 +3526,25 @@
             // Save to store and localStorage
             store.currentUser.profilePicture = pendingProfilePicture;
             localStorage.setItem('userProfilePicture_' + store.currentUser.id, pendingProfilePicture);
+            
+            // Save to Supabase profiles table
+            if (supabaseClient) {
+                try {
+                    const { error } = await supabaseClient
+                        .from('profiles')
+                        .upsert({
+                            id: store.currentUser.id,
+                            name: store.currentUser.name,
+                            email: store.currentUser.email,
+                            profile_picture: pendingProfilePicture
+                        });
+                    if (error) {
+                        console.error('Error saving profile picture to Supabase:', error);
+                    }
+                } catch (err) {
+                    console.error('Error saving profile picture:', err);
+                }
+            }
             
             // Record the change
             recordProfileChange();
@@ -3531,7 +3557,7 @@
             showToast('Profile picture updated!');
         }
 
-        function removeUserProfilePicture() {
+        async function removeUserProfilePicture() {
             if (!canChangeProfilePicture()) {
                 showToast('You\'ve reached the limit of 2 profile changes per 24 hours', true);
                 return;
@@ -3540,6 +3566,21 @@
             // Remove from store and localStorage
             store.currentUser.profilePicture = null;
             localStorage.removeItem('userProfilePicture_' + store.currentUser.id);
+            
+            // Remove from Supabase
+            if (supabaseClient) {
+                try {
+                    const { error } = await supabaseClient
+                        .from('profiles')
+                        .update({ profile_picture: null })
+                        .eq('id', store.currentUser.id);
+                    if (error) {
+                        console.error('Error removing profile picture from Supabase:', error);
+                    }
+                } catch (err) {
+                    console.error('Error removing profile picture:', err);
+                }
+            }
             
             // Record the change
             recordProfileChange();
