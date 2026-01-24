@@ -1131,6 +1131,49 @@
             height: 3px;
             background: var(--gold);
         }
+
+        /* Profile Picture Modal */
+        .profile-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+        }
+        .profile-modal.active {
+            display: flex;
+        }
+        .profile-modal-content {
+            max-width: 90vw;
+            max-height: 90vh;
+            border-radius: 12px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+        }
+        .profile-modal-name {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 0.5rem 1.5rem;
+            border-radius: 20px;
+            font-weight: 600;
+        }
+        .clickable-profile {
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .clickable-profile:hover {
+            transform: scale(1.1);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+        }
     </style>
 </head>
 <body>
@@ -1484,6 +1527,12 @@
                 </div>
             </div>
         </section>
+    </div>
+
+    <!-- Profile Picture Modal -->
+    <div id="profile-modal" class="profile-modal" onclick="closeProfileModal()">
+        <img id="profile-modal-image" class="profile-modal-content" src="" alt="Profile Picture">
+        <div id="profile-modal-name" class="profile-modal-name"></div>
     </div>
 
     <!-- Invite Modal -->
@@ -2844,6 +2893,32 @@
             return "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect fill='%23e5e7eb' width='100' height='100'/><text x='50' y='55' text-anchor='middle' fill='%239ca3af' font-size='24'>👤</text></svg>";
         }
 
+        function showProfileModal(imageSrc, userName) {
+            const modal = document.getElementById('profile-modal');
+            const image = document.getElementById('profile-modal-image');
+            const name = document.getElementById('profile-modal-name');
+            
+            image.src = imageSrc;
+            name.textContent = userName;
+            modal.classList.add('active');
+            
+            // Prevent scrolling while modal is open
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeProfileModal() {
+            const modal = document.getElementById('profile-modal');
+            modal.classList.remove('active');
+            document.body.style.overflow = '';
+        }
+
+        // Close modal on Escape key
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                closeProfileModal();
+            }
+        });
+
         // ==================== CREATE TOURNAMENT ====================
         function addInvite() {
             const input = document.getElementById('invite-email');
@@ -3069,7 +3144,9 @@
                         </td>
                         <td>
                             <div style="display: flex; align-items: center; gap: 0.5rem;">
-                                <img src="${profilePic}" alt="" style="width: 32px; height: 32px; border-radius: 50%; object-fit: cover;"
+                                <img src="${profilePic}" alt="" class="clickable-profile" 
+                                     style="width: 32px; height: 32px; border-radius: 50%; object-fit: cover;"
+                                     onclick="event.stopPropagation(); showProfileModal('${profilePic.replace(/'/g, "\\'")}', '${standing.user.name.replace(/'/g, "\\'")}')"
                                      onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect fill=%22%23e5e7eb%22 width=%22100%22 height=%22100%22/></svg>'">
                                 <strong>${standing.user.name}</strong>
                                 ${isCurrentUser ? ' (You)' : ''}
