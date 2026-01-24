@@ -2475,43 +2475,51 @@
 
         // Load user's pools and picks from Supabase
         async function loadUserData() {
-            if (!supabaseClient || !store.currentUser) return;
+            if (!supabaseClient || !store.currentUser) {
+                console.log('loadUserData: No client or user');
+                return;
+            }
+            
+            console.log('Loading data for user:', store.currentUser.id);
             
             try {
-                // Load user's pools
+                // Load user's pool memberships
                 const { data: poolMembers, error: poolError } = await supabaseClient
                     .from('pool_members')
-                    .select(`
-                        pool_id,
-                        pools:pool_id (
-                            id,
-                            name,
-                            season,
-                            invite_code,
-                            created_by
-                        )
-                    `)
+                    .select('pool_id')
                     .eq('user_id', store.currentUser.id);
                 
-                if (!poolError && poolMembers) {
-                    // Get all member IDs for each pool
-                    for (const pm of poolMembers) {
-                        if (pm.pools) {
+                if (poolError) {
+                    console.error('Error loading pool members:', poolError);
+                } else if (poolMembers && poolMembers.length > 0) {
+                    console.log('Found pool memberships:', poolMembers.length);
+                    
+                    // Load the actual pools
+                    const poolIds = poolMembers.map(pm => pm.pool_id);
+                    const { data: pools, error: poolsError } = await supabaseClient
+                        .from('pools')
+                        .select('*')
+                        .in('id', poolIds);
+                    
+                    if (poolsError) {
+                        console.error('Error loading pools:', poolsError);
+                    } else if (pools) {
+                        for (const dbPool of pools) {
+                            // Get members for this pool
                             const { data: members } = await supabaseClient
                                 .from('pool_members')
                                 .select('user_id')
-                                .eq('pool_id', pm.pools.id);
+                                .eq('pool_id', dbPool.id);
                             
                             const pool = {
-                                id: pm.pools.id,
-                                name: pm.pools.name,
-                                season: pm.pools.season,
-                                inviteCode: pm.pools.invite_code,
-                                createdBy: pm.pools.created_by,
+                                id: dbPool.id,
+                                name: dbPool.name,
+                                season: dbPool.season,
+                                inviteCode: dbPool.invite_code,
+                                createdBy: dbPool.created_by,
                                 members: members ? members.map(m => m.user_id) : [store.currentUser.id]
                             };
                             
-                            // Add or update pool in store
                             const existingIndex = store.pools.findIndex(p => p.id === pool.id);
                             if (existingIndex >= 0) {
                                 store.pools[existingIndex] = pool;
@@ -2519,16 +2527,19 @@
                                 store.pools.push(pool);
                             }
                         }
+                        console.log('Loaded pools:', store.pools.length);
                     }
                 }
                 
-                // Load user's picks for all pools
+                // Load user's picks
                 const { data: picks, error: picksError } = await supabaseClient
                     .from('picks')
                     .select('*')
                     .eq('user_id', store.currentUser.id);
                 
-                if (!picksError && picks) {
+                if (picksError) {
+                    console.error('Error loading picks:', picksError);
+                } else if (picks) {
                     picks.forEach(pick => {
                         const pickData = {
                             id: pick.id,
@@ -2551,24 +2562,11 @@
                             store.picks.push(pickData);
                         }
                     });
+                    console.log('Loaded picks:', picks.length);
                 }
                 
-                // Load all pool members' user info for display
-                const memberIds = [...new Set(store.pools.flatMap(p => p.members))];
-                for (const memberId of memberIds) {
-                    if (!store.users.find(u => u.id === memberId)) {
-                        // Try to get user info (will need profiles table in production)
-                        store.users.push({
-                            id: memberId,
-                            name: 'Pool Member',
-                            email: ''
-                        });
-                    }
-                }
-                
-                console.log('Loaded pools:', store.pools.length, 'picks:', store.picks.length);
             } catch (error) {
-                console.error('Error loading user data:', error);
+                console.error('Error in loadUserData:', error);
             }
         }
 
