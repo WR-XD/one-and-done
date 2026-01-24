@@ -1127,15 +1127,6 @@
                 flex-shrink: 0;
             }
 
-            /* On mobile, dropdown appears centered */
-            .pool-options-dropdown {
-                position: fixed;
-                top: 50%;
-                left: 50%;
-                transform: translate(-50%, -50%);
-                right: auto;
-            }
-
             /* Smaller pool cards on mobile */
             .tournament-card {
                 font-size: 0.85rem;
@@ -1376,6 +1367,7 @@
             position: relative;
             flex: 1;
             overflow-x: auto;
+            overflow-y: hidden;
             scrollbar-width: none;
             -ms-overflow-style: none;
         }
@@ -1389,6 +1381,7 @@
             width: 100%;
             background: var(--white);
             border-bottom: 2px solid #e5e7eb;
+            overflow: visible;
         }
 
         .pool-options-menu {
@@ -1419,15 +1412,13 @@
 
         .pool-options-dropdown {
             display: none;
-            position: absolute;
-            top: 100%;
-            right: 0;
+            position: fixed;
             background: var(--white);
             border: 1px solid #e5e7eb;
             border-radius: 8px;
             box-shadow: 0 4px 12px rgba(0,0,0,0.15);
             min-width: 150px;
-            z-index: 100;
+            z-index: 1000;
             overflow: hidden;
         }
 
@@ -3729,6 +3720,14 @@ See you on the course!`
         function togglePoolOptions(event) {
             event.stopPropagation();
             const dropdown = document.getElementById('pool-options-dropdown');
+            const btn = event.currentTarget;
+            const rect = btn.getBoundingClientRect();
+            
+            // Position dropdown below the button, aligned to right edge
+            dropdown.style.top = (rect.bottom + 5) + 'px';
+            dropdown.style.right = (window.innerWidth - rect.right) + 'px';
+            dropdown.style.left = 'auto';
+            
             dropdown.classList.toggle('active');
         }
 
