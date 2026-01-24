@@ -1517,11 +1517,24 @@
         let supabaseClient = null;
         try {
             if (typeof supabase !== 'undefined' && supabase.createClient) {
-                supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+                supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+                    auth: {
+                        persistSession: true,
+                        autoRefreshToken: true,
+                        detectSessionInUrl: false,
+                        flowType: 'implicit',
+                        lock: {
+                            debug: false
+                        }
+                    },
+                    global: {
+                        headers: {}
+                    }
+                });
                 console.log('Supabase client initialized');
             }
         } catch (e) {
-            console.log('Supabase not available, using local storage');
+            console.log('Supabase not available, using local storage', e);
         }
 
         // ==================== SUPABASE AUTH FUNCTIONS ====================
@@ -2374,7 +2387,7 @@
 
             try {
                 if (supabaseClient) {
-                    // Use Supabase auth
+                    // Use Supabase auth - onAuthStateChange will handle the rest
                     const { data, error } = await supabaseClient.auth.signUp({
                         email,
                         password,
@@ -2382,19 +2395,8 @@
                     });
                     if (error) throw error;
                     
-                    // Set current user
-                    store.currentUser = {
-                        id: data.user.id,
-                        name: name,
-                        email: email
-                    };
-                    
-                    // Also add to local users for compatibility
-                    if (!store.users.find(u => u.id === data.user.id)) {
-                        store.users.push(store.currentUser);
-                    }
-                    
                     showToast('Account created! Check your email to confirm.');
+                    // onAuthStateChange listener will call setUserFromSession
                 } else {
                     // Fallback to local storage
                     if (store.users.find(u => u.email === email)) {
@@ -2404,12 +2406,10 @@
                     const user = { id: generateId(), name, email, password };
                     store.users.push(user);
                     store.currentUser = user;
+                    updateNavigation();
                     showToast('Account created successfully!');
+                    showScreen('dashboard');
                 }
-
-                updateNavigation();
-                await loadUserData();
-                showScreen('dashboard');
             } catch (error) {
                 showToast(error.message || 'Signup failed', true);
             }
@@ -2422,22 +2422,15 @@
 
             try {
                 if (supabaseClient) {
-                    // Use Supabase auth
+                    // Use Supabase auth - onAuthStateChange will handle the rest
                     const { data, error } = await supabaseClient.auth.signInWithPassword({
                         email,
                         password
                     });
                     if (error) throw error;
                     
-                    store.currentUser = {
-                        id: data.user.id,
-                        name: data.user.user_metadata?.name || email.split('@')[0],
-                        email: email
-                    };
-                    
-                    if (!store.users.find(u => u.id === data.user.id)) {
-                        store.users.push(store.currentUser);
-                    }
+                    // onAuthStateChange listener will call setUserFromSession
+                    showToast('Welcome back!');
                 } else {
                     // Fallback to local storage
                     const user = store.users.find(u => u.email === email && u.password === password);
@@ -2446,12 +2439,10 @@
                         return;
                     }
                     store.currentUser = user;
+                    updateNavigation();
+                    showToast('Welcome back!');
+                    showScreen('dashboard');
                 }
-
-                updateNavigation();
-                await loadUserData();
-                showToast('Welcome back!');
-                showScreen('dashboard');
             } catch (error) {
                 showToast(error.message || 'Login failed', true);
             }
