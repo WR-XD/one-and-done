@@ -4916,16 +4916,26 @@ See you on the course!`
             try {
                 showToast('Joining pool...');
                 
+                console.log('Looking for pool with invite code:', inviteCode.toUpperCase());
+                
                 // Find the pool by invite code
                 const { data: pool, error: poolError } = await supabaseRetry(() =>
                     supabaseClient
                         .from('pools')
                         .select('*')
                         .eq('invite_code', inviteCode.toUpperCase())
-                        .single()
+                        .maybeSingle()
                 );
 
-                if (poolError || !pool) {
+                console.log('Pool lookup result:', pool, poolError);
+
+                if (poolError) {
+                    console.error('Pool lookup error:', poolError);
+                    showToast('Error finding pool', true);
+                    return;
+                }
+
+                if (!pool) {
                     showToast('Invalid invite code', true);
                     return;
                 }
@@ -4937,7 +4947,7 @@ See you on the course!`
                         .select('*')
                         .eq('pool_id', pool.id)
                         .eq('user_id', store.currentUser.id)
-                        .single()
+                        .maybeSingle()
                 );
 
                 if (existingMember) {
@@ -4948,14 +4958,13 @@ See you on the course!`
                     return;
                 }
 
-                // Add user to pool
+                // Add user to pool (without role field)
                 const { error: memberError } = await supabaseRetry(() =>
                     supabaseClient
                         .from('pool_members')
                         .insert({
                             pool_id: pool.id,
-                            user_id: store.currentUser.id,
-                            role: 'member'
+                            user_id: store.currentUser.id
                         })
                 );
 
