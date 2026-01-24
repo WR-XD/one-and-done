@@ -3166,13 +3166,44 @@
                                     .eq('pool_id', dbPool.id)
                             );
                             
+                            const memberIds = members ? members.map(m => m.user_id) : [store.currentUser.id];
+                            
+                            // Load user info for all pool members
+                            for (const memberId of memberIds) {
+                                if (!store.users.find(u => u.id === memberId)) {
+                                    // Try to get user metadata from auth.users (via profiles or just store basic info)
+                                    const { data: profile } = await supabaseRetry(() =>
+                                        supabaseClient
+                                            .from('profiles')
+                                            .select('*')
+                                            .eq('id', memberId)
+                                            .maybeSingle()
+                                    );
+                                    
+                                    if (profile) {
+                                        store.users.push({
+                                            id: memberId,
+                                            name: profile.name || profile.username || 'User',
+                                            email: profile.email || ''
+                                        });
+                                    } else {
+                                        // Fallback - just use ID as placeholder
+                                        store.users.push({
+                                            id: memberId,
+                                            name: `Player ${memberIds.indexOf(memberId) + 1}`,
+                                            email: ''
+                                        });
+                                    }
+                                }
+                            }
+                            
                             const pool = {
                                 id: dbPool.id,
                                 name: dbPool.name,
                                 season: dbPool.season,
                                 inviteCode: dbPool.invite_code,
                                 createdBy: dbPool.created_by,
-                                members: members ? members.map(m => m.user_id) : [store.currentUser.id]
+                                members: memberIds
                             };
                             
                             const existingIndex = store.pools.findIndex(p => p.id === pool.id);
@@ -3188,40 +3219,44 @@
                     console.log('No pool memberships found');
                 }
                 
-                // Load user's picks
-                const { data: picks, error: picksError } = await supabaseRetry(() =>
-                    supabaseClient
-                        .from('picks')
-                        .select('*')
-                        .eq('user_id', store.currentUser.id)
-                );
-                
-                if (picksError) {
-                    console.error('Error loading picks:', picksError);
-                } else if (picks) {
-                    picks.forEach(pick => {
-                        const pickData = {
-                            id: pick.id,
-                            poolId: pick.pool_id,
-                            userId: pick.user_id,
-                            tournamentId: pick.tournament_id,
-                            playerId: pick.player_id,
-                            playerName: pick.player_name,
-                            earnings: pick.final_earnings || 0
-                        };
-                        
-                        const existingIndex = store.picks.findIndex(
-                            p => p.poolId === pickData.poolId && 
-                                 p.userId === pickData.userId && 
-                                 p.tournamentId === pickData.tournamentId
-                        );
-                        if (existingIndex >= 0) {
-                            store.picks[existingIndex] = pickData;
-                        } else {
-                            store.picks.push(pickData);
-                        }
-                    });
-                    console.log('Loaded picks:', picks.length);
+                // Load ALL picks for the user's pools (needed for standings)
+                const poolIds = store.pools.map(p => p.id);
+                if (poolIds.length > 0) {
+                    const { data: allPicks, error: allPicksError } = await supabaseRetry(() =>
+                        supabaseClient
+                            .from('picks')
+                            .select('*')
+                            .in('pool_id', poolIds)
+                    );
+                    
+                    if (allPicksError) {
+                        console.error('Error loading all picks:', allPicksError);
+                    } else if (allPicks) {
+                        allPicks.forEach(pick => {
+                            const pickData = {
+                                id: pick.id,
+                                poolId: pick.pool_id,
+                                userId: pick.user_id,
+                                tournamentId: pick.tournament_id,
+                                playerId: pick.player_id,
+                                playerName: pick.player_name,
+                                tournamentName: pick.tournament_name,
+                                earnings: pick.final_earnings || 0
+                            };
+                            
+                            const existingIndex = store.picks.findIndex(
+                                p => p.poolId === pickData.poolId && 
+                                     p.userId === pickData.userId && 
+                                     p.tournamentId === pickData.tournamentId
+                            );
+                            if (existingIndex >= 0) {
+                                store.picks[existingIndex] = pickData;
+                            } else {
+                                store.picks.push(pickData);
+                            }
+                        });
+                        console.log('Loaded all picks:', allPicks.length);
+                    }
                 }
                 
                 console.log('loadUserData complete');
@@ -3902,7 +3937,7 @@ See you on the course!`
             const leaderboardData = espnDataLoaded && liveLeaderboard.length > 0 ? liveLeaderboard : mockLeaderboard;
 
             const standings = pool.members.map(memberId => {
-                const user = store.users.find(u => u.id === memberId);
+                const user = store.users.find(u => u.id === memberId) || { id: memberId, name: 'Unknown User' };
                 const userPicks = store.picks.filter(p => p.poolId === currentPoolId && p.userId === memberId);
                 
                 // Calculate total from COMPLETED tournaments only (excludes current week)
@@ -3935,13 +3970,26 @@ See you on the course!`
                     currentWeekEarnings,
                     currentPlayer
                 };
-            }).sort((a, b) => b.completedEarnings - a.completedEarnings); // Sort by COMPLETED earnings only
+            }).filter(s => s.user).sort((a, b) => b.completedEarnings - a.completedEarnings); // Sort by COMPLETED earnings only
 
             const tbody = document.getElementById('standings-body');
+            
+            if (standings.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="5" style="text-align: center; padding: 2rem; color: var(--gray);">
+                            No members in this pool yet
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+            
             tbody.innerHTML = standings.map((standing, index) => {
                 const isCurrentUser = standing.user.id === store.currentUser.id;
                 const rankClass = index === 0 ? 'gold' : index === 1 ? 'silver' : index === 2 ? 'bronze' : '';
                 const profilePic = getUserProfilePicture(standing.user.id);
+                const userName = standing.user.name || 'Unknown';
 
                 return `
                     <tr class="${isCurrentUser ? 'current-user' : ''}">
@@ -3952,9 +4000,9 @@ See you on the course!`
                             <div style="display: flex; align-items: center; gap: 0.5rem;">
                                 <img src="${profilePic}" alt="" class="clickable-profile" 
                                      style="width: 32px; height: 32px; border-radius: 50%; object-fit: cover;"
-                                     onclick="event.stopPropagation(); showProfileModalFromElement(this, '${standing.user.name.replace(/'/g, "\\'")}')"
+                                     onclick="event.stopPropagation(); showProfileModalFromElement(this, '${userName.replace(/'/g, "\\'")}')"
                                      onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect fill=%22%23e5e7eb%22 width=%22100%22 height=%22100%22/></svg>'">
-                                <strong>${standing.user.name}</strong>
+                                <strong>${userName}</strong>
                                 ${isCurrentUser ? ' (You)' : ''}
                             </div>
                         </td>
