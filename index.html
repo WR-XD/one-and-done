@@ -4958,13 +4958,14 @@ See you on the course!`
                     return;
                 }
 
-                // Add user to pool (without role field)
+                // Add user to pool
                 const { error: memberError } = await supabaseRetry(() =>
                     supabaseClient
                         .from('pool_members')
                         .insert({
                             pool_id: pool.id,
-                            user_id: store.currentUser.id
+                            user_id: store.currentUser.id,
+                            role: 'member'
                         })
                 );
 
