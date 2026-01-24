@@ -1063,18 +1063,21 @@
             }
 
             .tabs {
-                flex-wrap: nowrap;
                 overflow-x: auto;
-                gap: 0;
-                padding: 0;
+                -webkit-overflow-scrolling: touch;
+                scrollbar-width: none;
+                -ms-overflow-style: none;
+            }
+
+            .tabs::-webkit-scrollbar {
+                display: none;
             }
 
             .tab {
-                padding: 0.75rem 0.5rem;
-                font-size: 0.8rem;
+                padding: 1rem 1.25rem;
+                font-size: 0.9rem;
                 white-space: nowrap;
-                flex: 1;
-                text-align: center;
+                flex-shrink: 0;
             }
 
             .leaderboard {
@@ -1268,8 +1271,31 @@
         /* Tab Navigation */
         .tabs {
             display: flex;
-            background: #f9fafb;
+            background: var(--white);
             border-bottom: 2px solid #e5e7eb;
+            position: relative;
+        }
+
+        .tabs-container {
+            position: relative;
+            width: 100%;
+        }
+
+        .tabs-container::after {
+            content: '';
+            position: absolute;
+            right: 0;
+            top: 0;
+            bottom: 0;
+            width: 40px;
+            background: linear-gradient(to right, transparent, var(--white));
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+
+        .tabs-container.has-overflow::after {
+            opacity: 1;
         }
 
         .tab {
@@ -1282,6 +1308,7 @@
             cursor: pointer;
             position: relative;
             transition: color 0.2s;
+            white-space: nowrap;
         }
 
         .tab:hover {
@@ -1290,6 +1317,7 @@
 
         .tab.active {
             color: var(--green-deep);
+            font-weight: 600;
         }
 
         .tab.active::after {
@@ -1299,7 +1327,7 @@
             left: 0;
             right: 0;
             height: 3px;
-            background: var(--gold);
+            background: var(--green-deep);
         }
 
         /* Profile Picture Modal */
@@ -1529,11 +1557,13 @@
                 </button>
             </div>
 
-            <div class="tabs">
-                <button class="tab active" onclick="switchPoolTab('standings')">Pool Standings</button>
-                <button class="tab" onclick="switchPoolTab('leaderboard')">Live Leaderboard</button>
-                <button class="tab" onclick="switchPoolTab('pick')">Make Pick</button>
-                <button class="tab" onclick="switchPoolTab('history')">Pick History</button>
+            <div class="tabs-container" id="tabs-container">
+                <div class="tabs" id="pool-tabs">
+                    <button class="tab active" onclick="switchPoolTab('standings')">Pool Standings</button>
+                    <button class="tab" onclick="switchPoolTab('leaderboard')">Live Leaderboard</button>
+                    <button class="tab" onclick="switchPoolTab('pick')">Make Pick</button>
+                    <button class="tab" onclick="switchPoolTab('history')">Pick History</button>
+                </div>
             </div>
 
             <!-- Standings Tab -->
@@ -3273,6 +3303,28 @@ See you on the course!`
             showScreen('pool-view');
             switchPoolTab('standings');
             renderPoolView();
+            checkTabsOverflow();
+        }
+
+        function checkTabsOverflow() {
+            const container = document.getElementById('tabs-container');
+            const tabs = document.getElementById('pool-tabs');
+            if (container && tabs) {
+                if (tabs.scrollWidth > tabs.clientWidth) {
+                    container.classList.add('has-overflow');
+                } else {
+                    container.classList.remove('has-overflow');
+                }
+                // Update on scroll
+                tabs.addEventListener('scroll', () => {
+                    const isAtEnd = tabs.scrollLeft + tabs.clientWidth >= tabs.scrollWidth - 10;
+                    if (isAtEnd) {
+                        container.classList.remove('has-overflow');
+                    } else {
+                        container.classList.add('has-overflow');
+                    }
+                });
+            }
         }
 
         function switchPoolTab(tabName) {
@@ -4237,6 +4289,11 @@ See you on the course!`
                 }
             });
         }
+
+        // Check tabs overflow on resize
+        window.addEventListener('resize', () => {
+            checkTabsOverflow();
+        });
     </script>
 </body>
 </html>
