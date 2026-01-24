@@ -1743,8 +1743,18 @@
             purse: 9200000,
             round: 2,
             status: "In Progress",
-            logo: "https://res.cloudinary.com/pgatour-prod/d_tournaments:logos:R000.png/tournaments/logos/R002.png"
+            logo: "https://res.cloudinary.com/pgatour-prod/d_tournaments:logos:R000.png/tournaments/logos/R002.png",
+            startTime: new Date("2026-01-22T07:00:00-08:00") // First tee time (PST)
         };
+
+        // TESTING MODE: Set to true to allow picks even after tournament starts
+        const ALLOW_LATE_PICKS = true; // Change to false for production
+
+        // Check if tournament has started
+        function hasTournamentStarted() {
+            if (ALLOW_LATE_PICKS) return false; // Bypass for testing
+            return new Date() >= currentTournament.startTime;
+        }
 
         // ESPN API configuration
         const ESPN_API_URL = 'https://site.web.api.espn.com/apis/site/v2/sports/golf/leaderboard?league=pga';
@@ -3023,9 +3033,8 @@
                 p.tournamentId === currentTournament.id
             );
 
-            // Check if tournament has started (status is "In Progress" or later)
-            const tournamentStarted = currentTournament.status === 'In Progress' || 
-                                      currentTournament.status === 'Completed';
+            // Check if tournament has started
+            const tournamentStarted = hasTournamentStarted();
 
             if (existingPick && tournamentStarted) {
                 // Tournament has started - pick is LOCKED
@@ -3036,6 +3045,21 @@
                         <p>You've selected <strong>${player ? player.name : 'a player'}</strong> for this tournament.</p>
                         <p style="color: var(--gray); margin-top: 0.5rem;">The tournament is in progress - picks can no longer be changed.</p>
                         <p style="color: var(--gray); margin-top: 0.5rem;">View the leaderboard to track their progress.</p>
+                    </div>
+                `;
+                document.getElementById('confirm-pick-btn').style.display = 'none';
+                document.getElementById('current-pick-display').style.display = 'none';
+                return;
+            }
+
+            if (!existingPick && tournamentStarted) {
+                // Tournament started and user has NO pick - too late!
+                document.getElementById('players-list').innerHTML = `
+                    <div class="empty-state">
+                        <h3>⏰ Pick Window Closed</h3>
+                        <p>The tournament has already started.</p>
+                        <p style="color: var(--gray); margin-top: 0.5rem;">You can no longer make a pick for this week.</p>
+                        <p style="color: var(--gray); margin-top: 0.5rem;">Make sure to pick before the first tee time next week!</p>
                     </div>
                 `;
                 document.getElementById('confirm-pick-btn').style.display = 'none';
@@ -3172,6 +3196,13 @@
 
         async function confirmPick() {
             if (!selectedPlayerId) return;
+
+            // Double-check tournament hasn't started (in case user had page open)
+            if (hasTournamentStarted()) {
+                showToast('Tournament has already started - picks are locked!', true);
+                renderPlayerSelection(); // Re-render to show locked state
+                return;
+            }
 
             const player = getPlayerById(selectedPlayerId);
 
