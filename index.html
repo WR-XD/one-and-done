@@ -1543,25 +1543,24 @@
                 <button class="modal-close" onclick="closeModal('invite-modal')">&times;</button>
             </div>
             <div class="modal-body">
-                <!-- Invite link to share -->
-                <div style="margin-bottom: 1.5rem;">
-                    <p style="margin-bottom: 0.5rem; font-weight: 600;">🔗 Share Invite Link</p>
-                    <p style="color: var(--gray); font-size: 0.85rem; margin-bottom: 0.5rem;">Copy and send to friends via WhatsApp, text, etc:</p>
-                    <div style="display: flex; gap: 0.5rem;">
-                        <input type="text" id="invite-link-input" readonly style="flex: 1; padding: 0.75rem; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 0.85rem; background: #f9fafb;">
-                        <button class="btn btn-primary" onclick="copyInviteLink()" style="padding: 0.75rem 1.5rem;">Copy</button>
-                    </div>
-                </div>
-
                 <!-- Email invite section -->
-                <div style="padding-top: 1.5rem; border-top: 1px solid #e5e7eb;">
-                    <p style="margin-bottom: 0.5rem; font-weight: 600;">✉️ Send Email Invite</p>
-                    <p style="color: var(--gray); font-size: 0.85rem; margin-bottom: 0.5rem;">Enter email and we'll send them an invite:</p>
+                <div style="margin-bottom: 1.5rem;">
+                    <p style="margin-bottom: 0.5rem; font-weight: 600;">Send Email Invite</p>
                     <div style="display: flex; gap: 0.5rem;">
                         <input type="email" id="modal-invite-email" placeholder="friend@email.com" style="flex: 1; padding: 0.75rem; border: 2px solid #e5e7eb; border-radius: 8px;">
                         <button class="btn btn-primary" onclick="sendEmailInvite()" style="padding: 0.75rem 1.5rem;">Send</button>
                     </div>
-                    <div id="sent-invites-list" style="margin-top: 0.75rem;"></div>
+                    <p style="color: var(--gray); font-size: 0.85rem; margin-top: 0.5rem;">They'll receive an email with a link to join</p>
+                    <div id="sent-invites-list"></div>
+                </div>
+
+                <!-- Invite link to share -->
+                <div style="padding-top: 1.5rem; border-top: 1px solid #e5e7eb;">
+                    <p style="margin-bottom: 0.5rem; font-weight: 600;">Or share the invite link:</p>
+                    <div style="display: flex; gap: 0.5rem;">
+                        <input type="text" id="invite-link-input" readonly style="flex: 1; padding: 0.75rem; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 0.85rem; background: #f9fafb;">
+                        <button class="btn btn-secondary" onclick="copyInviteLink()" style="padding: 0.75rem 1.5rem;">Copy</button>
+                    </div>
                 </div>
             </div>
         </div>
