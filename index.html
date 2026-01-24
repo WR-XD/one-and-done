@@ -3563,38 +3563,33 @@
 
         initDemoData();
 
-        // Check for existing Supabase session on page load
-        async function checkExistingSession() {
-            if (!supabaseClient) return;
-            
-            try {
-                const { data: { session } } = await supabaseClient.auth.getSession();
-                if (session && session.user) {
-                    await setUserFromSession(session);
-                }
-            } catch (error) {
-                console.log('No existing session:', error);
-            }
-        }
-
         // Helper to set user from session
+        let isLoadingSession = false;
+        
         async function setUserFromSession(session) {
             if (!session || !session.user) return;
+            if (isLoadingSession) return; // Prevent duplicate calls
             
-            store.currentUser = {
-                id: session.user.id,
-                name: session.user.user_metadata?.name || session.user.email.split('@')[0],
-                email: session.user.email
-            };
+            isLoadingSession = true;
             
-            if (!store.users.find(u => u.id === session.user.id)) {
-                store.users.push(store.currentUser);
+            try {
+                store.currentUser = {
+                    id: session.user.id,
+                    name: session.user.user_metadata?.name || session.user.email.split('@')[0],
+                    email: session.user.email
+                };
+                
+                if (!store.users.find(u => u.id === session.user.id)) {
+                    store.users.push(store.currentUser);
+                }
+                
+                await loadUserData();
+                updateNavigation();
+                showScreen('dashboard');
+                console.log('Session active for:', store.currentUser.email);
+            } finally {
+                isLoadingSession = false;
             }
-            
-            await loadUserData();
-            updateNavigation();
-            showScreen('dashboard');
-            console.log('Session active for:', store.currentUser.email);
         }
 
         // Listen for auth state changes (login, logout, token refresh)
@@ -3602,7 +3597,7 @@
             supabaseClient.auth.onAuthStateChange(async (event, session) => {
                 console.log('Auth state changed:', event);
                 
-                if (event === 'SIGNED_IN' && session) {
+                if ((event === 'SIGNED_IN' || event === 'INITIAL_SESSION') && session) {
                     await setUserFromSession(session);
                 } else if (event === 'SIGNED_OUT') {
                     store.currentUser = null;
@@ -3611,14 +3606,15 @@
                     updateNavigation();
                     showScreen('landing');
                 } else if (event === 'TOKEN_REFRESHED' && session) {
-                    // Session was refreshed, update user
-                    await setUserFromSession(session);
+                    // Just update the user info, don't reload everything
+                    store.currentUser = {
+                        id: session.user.id,
+                        name: session.user.user_metadata?.name || session.user.email.split('@')[0],
+                        email: session.user.email
+                    };
                 }
             });
         }
-
-        // Run session check on page load
-        checkExistingSession();
     </script>
 </body>
 </html>
