@@ -1522,13 +1522,7 @@
                         persistSession: true,
                         autoRefreshToken: true,
                         detectSessionInUrl: false,
-                        flowType: 'implicit',
-                        lock: {
-                            debug: false
-                        }
-                    },
-                    global: {
-                        headers: {}
+                        storageKey: 'golf-pool-auth'
                     }
                 });
                 console.log('Supabase client initialized');
