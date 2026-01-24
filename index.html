@@ -1547,17 +1547,22 @@
                 <div style="background: #f9fafb; padding: 1rem; word-break: break-all; font-family: monospace; margin-bottom: 1rem; border-radius: 8px; font-size: 0.9rem;" id="invite-link">
                     https://example.com/join/ABC123
                 </div>
-                <div style="display: flex; gap: 0.5rem;">
-                    <button class="btn btn-primary" onclick="copyInviteLink()" style="flex: 1;">📋 Copy Link</button>
-                    <button class="btn btn-secondary" onclick="emailInviteLink()" style="flex: 1;">✉️ Email Invite</button>
+                <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+                    <button class="btn btn-primary" onclick="copyInviteLink()" style="flex: 1; min-width: 140px;">📋 Copy Link</button>
+                    <button class="btn btn-secondary" onclick="copyInviteMessage()" style="flex: 1; min-width: 140px;">📝 Copy Message</button>
+                </div>
+                
+                <div style="margin-top: 1rem;">
+                    <button class="btn btn-secondary" onclick="emailInviteLink()" style="width: 100%;">✉️ Open Email App</button>
                 </div>
 
                 <div style="margin-top: 1.5rem; padding-top: 1.5rem; border-top: 1px solid #e5e7eb;">
-                    <p style="margin-bottom: 1rem; color: var(--gray);">Or send a direct invite:</p>
-                    <div style="display: flex; gap: 0.5rem;">
-                        <input type="email" id="modal-invite-email" placeholder="friend@email.com" style="flex: 1; padding: 0.75rem; border: 2px solid #e5e7eb; border-radius: 8px;">
-                        <button class="btn btn-secondary" onclick="sendModalInvite()" style="padding: 0.75rem 1.5rem;">Send</button>
+                    <p style="margin-bottom: 0.5rem; font-weight: 600;">Invite Code</p>
+                    <div style="display: flex; gap: 0.5rem; align-items: center;">
+                        <code id="invite-code-display" style="background: #f9fafb; padding: 0.75rem 1rem; border-radius: 8px; font-size: 1.1rem; letter-spacing: 2px; font-weight: bold;"></code>
+                        <button class="btn btn-secondary" onclick="copyInviteCode()" style="padding: 0.5rem 1rem;">Copy</button>
                     </div>
+                    <p style="color: var(--gray); font-size: 0.85rem; margin-top: 0.5rem;">Friends can enter this code to join</p>
                 </div>
             </div>
         </div>
@@ -3759,6 +3764,7 @@ See you on the course!`
             currentPoolId = poolId;
             const inviteLink = `${window.location.origin}${window.location.pathname}?join=${pool.inviteCode}`;
             document.getElementById('invite-link').textContent = inviteLink;
+            document.getElementById('invite-code-display').textContent = pool.inviteCode;
             document.getElementById('invite-modal').classList.add('active');
         }
 
@@ -3769,7 +3775,36 @@ See you on the course!`
         function copyInviteLink() {
             const link = document.getElementById('invite-link').textContent;
             navigator.clipboard.writeText(link).then(() => {
-                showToast('Invite link copied to clipboard!');
+                showToast('Invite link copied!');
+            });
+        }
+
+        function copyInviteCode() {
+            const code = document.getElementById('invite-code-display').textContent;
+            navigator.clipboard.writeText(code).then(() => {
+                showToast('Invite code copied!');
+            });
+        }
+
+        function copyInviteMessage() {
+            const pool = store.pools.find(p => p.id === currentPoolId);
+            if (!pool) return;
+            
+            const inviteLink = document.getElementById('invite-link').textContent;
+            const message = `Hey! Join my One & Done Golf Pool: "${pool.name}"
+
+Click here to join: ${inviteLink}
+
+Or use invite code: ${pool.inviteCode}
+
+How it works:
+• Pick one golfer each week
+• Each golfer can only be used once per season  
+• Earn their prize money winnings
+• Most earnings at season end wins!`;
+
+            navigator.clipboard.writeText(message).then(() => {
+                showToast('Invite message copied! Paste it in any messaging app.');
             });
         }
 
@@ -3798,50 +3833,6 @@ See you on the course!`
             
             // Use location.href for better compatibility
             window.location.href = `mailto:?subject=${subject}&body=${body}`;
-        }
-
-        function sendModalInvite() {
-            const email = document.getElementById('modal-invite-email').value.toLowerCase().trim();
-            if (!email || !email.includes('@')) {
-                showToast('Please enter a valid email', true);
-                return;
-            }
-
-            const pool = store.pools.find(p => p.id === currentPoolId);
-            if (!pool) {
-                showToast('Could not find pool', true);
-                return;
-            }
-
-            // Open email client with the invite
-            const inviteLink = document.getElementById('invite-link').textContent;
-            const subject = encodeURIComponent(`Join my One & Done Golf Pool: ${pool.name}`);
-            const body = encodeURIComponent(
-`Hey!
-
-I've created a One & Done golf pool and I'd love for you to join!
-
-Click this link to join:
-${inviteLink}
-
-Or use invite code: ${pool.inviteCode}
-
-See you on the course!`
-            );
-            
-            // Use location.href for better compatibility
-            window.location.href = `mailto:${email}?subject=${subject}&body=${body}`;
-
-            // Store the invite
-            store.invites.push({
-                id: generateId(),
-                poolId: pool.id,
-                email,
-                status: 'pending'
-            });
-            
-            showToast(`Email invite opened for ${email}`);
-            document.getElementById('modal-invite-email').value = '';
         }
 
         // Close modal when clicking outside
