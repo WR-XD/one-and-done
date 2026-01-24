@@ -3966,7 +3966,18 @@ See you on the course!`
                             l.playerName && l.playerName.toLowerCase() === currentPlayer.name.toLowerCase()
                         );
                     }
+                    // Also try matching by the stored player name from the pick
+                    if (!leaderboardEntry && currentPick.playerName) {
+                        leaderboardEntry = leaderboardData.find(l => 
+                            l.playerName && l.playerName.toLowerCase() === currentPick.playerName.toLowerCase()
+                        );
+                    }
                     currentWeekEarnings = leaderboardEntry ? leaderboardEntry.projectedEarnings : 0;
+                    
+                    // Debug logging
+                    if (!leaderboardEntry) {
+                        console.warn('No leaderboard entry found for pick:', currentPick.playerId, currentPlayer?.name, 'in', leaderboardData.length, 'entries');
+                    }
                 }
 
                 return {
