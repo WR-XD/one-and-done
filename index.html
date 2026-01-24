@@ -3038,6 +3038,7 @@
                     updateNavigation();
                     showToast('Account created successfully!');
                     showScreen('dashboard');
+                    checkPendingJoinCode();
                 }
             } catch (error) {
                 showToast(error.message || 'Signup failed', true);
@@ -3076,6 +3077,8 @@
                     showToast('Welcome back!');
                     showScreen('dashboard');
                     console.log('Dashboard shown');
+                    // Check if there's a pending pool to join
+                    checkPendingJoinCode();
                 } else {
                     // Fallback to local storage
                     const user = store.users.find(u => u.email === email && u.password === password);
@@ -3087,6 +3090,7 @@
                     updateNavigation();
                     showToast('Welcome back!');
                     showScreen('dashboard');
+                    checkPendingJoinCode();
                 }
             } catch (error) {
                 console.error('Login error:', error);
@@ -4854,6 +4858,9 @@ See you on the course!`
                 // SIGNED_IN is handled by handleLogin directly
                 if (event === 'INITIAL_SESSION' && session) {
                     await setUserFromSession(session);
+                    // Check for join code after user is loaded
+                    checkJoinCodeFromURL();
+                    checkPendingJoinCode();
                 } else if (event === 'SIGNED_OUT') {
                     store.currentUser = null;
                     store.pools = [];
@@ -4870,6 +4877,108 @@ See you on the course!`
                 }
             });
         }
+
+        // Check for join code in URL and handle joining a pool
+        let pendingJoinCode = null;
+
+        function checkJoinCodeFromURL() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const joinCode = urlParams.get('join');
+            
+            if (joinCode) {
+                // Clear the URL parameter
+                window.history.replaceState({}, document.title, window.location.pathname);
+                
+                if (store.currentUser) {
+                    // User is logged in, join immediately
+                    joinPoolWithCode(joinCode);
+                } else {
+                    // Save for after login/signup
+                    pendingJoinCode = joinCode;
+                    localStorage.setItem('pendingJoinCode', joinCode);
+                    showToast('Please log in or sign up to join the pool');
+                    showScreen('login');
+                }
+            }
+        }
+
+        // Check for pending join code after login
+        function checkPendingJoinCode() {
+            const savedCode = pendingJoinCode || localStorage.getItem('pendingJoinCode');
+            if (savedCode && store.currentUser) {
+                pendingJoinCode = null;
+                localStorage.removeItem('pendingJoinCode');
+                joinPoolWithCode(savedCode);
+            }
+        }
+
+        async function joinPoolWithCode(inviteCode) {
+            try {
+                showToast('Joining pool...');
+                
+                // Find the pool by invite code
+                const { data: pool, error: poolError } = await supabaseRetry(() =>
+                    supabaseClient
+                        .from('pools')
+                        .select('*')
+                        .eq('invite_code', inviteCode.toUpperCase())
+                        .single()
+                );
+
+                if (poolError || !pool) {
+                    showToast('Invalid invite code', true);
+                    return;
+                }
+
+                // Check if already a member
+                const { data: existingMember } = await supabaseRetry(() =>
+                    supabaseClient
+                        .from('pool_members')
+                        .select('*')
+                        .eq('pool_id', pool.id)
+                        .eq('user_id', store.currentUser.id)
+                        .single()
+                );
+
+                if (existingMember) {
+                    showToast('You\'re already in this pool!');
+                    // Open the pool
+                    await loadUserData();
+                    openPool(pool.id);
+                    return;
+                }
+
+                // Add user to pool
+                const { error: memberError } = await supabaseRetry(() =>
+                    supabaseClient
+                        .from('pool_members')
+                        .insert({
+                            pool_id: pool.id,
+                            user_id: store.currentUser.id,
+                            role: 'member'
+                        })
+                );
+
+                if (memberError) {
+                    console.error('Join pool error:', memberError);
+                    showToast('Failed to join pool', true);
+                    return;
+                }
+
+                // Reload data and open the pool
+                await loadUserData();
+                showToast(`Welcome to ${pool.name}!`);
+                openPool(pool.id);
+
+            } catch (error) {
+                console.error('Join pool error:', error);
+                showToast('Failed to join pool', true);
+            }
+        }
+
+        // Check URL for join code on page load
+        // This handles the case where user clicks invite link
+        checkJoinCodeFromURL();
 
         // Check tabs overflow on resize
         window.addEventListener('resize', () => {
