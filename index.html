@@ -115,6 +115,36 @@
             background: var(--gold-light);
         }
 
+        .nav-profile {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            cursor: pointer;
+            margin-right: 1rem;
+        }
+
+        .nav-profile img {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid var(--gold);
+            transition: transform 0.2s, border-color 0.2s;
+        }
+
+        .nav-profile:hover img {
+            transform: scale(1.05);
+            border-color: var(--gold-light);
+        }
+
+        .nav-profile-edit {
+            font-size: 0.7rem;
+            color: var(--gold);
+            margin-top: 2px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
         /* Main Content Areas */
         .container {
             max-width: 1400px;
@@ -1190,6 +1220,20 @@
                 height: 24px;
             }
 
+            /* Nav profile on mobile */
+            .nav-profile {
+                margin-right: 0.5rem;
+            }
+
+            .nav-profile img {
+                width: 32px;
+                height: 32px;
+            }
+
+            .nav-profile-edit {
+                font-size: 0.6rem;
+            }
+
             /* Friend tags on leaderboard */
             .friend-tags {
                 flex-wrap: wrap;
@@ -1387,6 +1431,10 @@
                 <button class="nav-btn primary" onclick="showScreen('signup')">Sign Up</button>
             </nav>
             <nav id="nav-user" style="display: none;">
+                <div class="nav-profile" onclick="openProfileEditor()">
+                    <img id="nav-profile-pic" src="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect fill='%23e5e7eb' width='100' height='100'/><text x='50' y='55' text-anchor='middle' fill='%239ca3af' font-size='24'>👤</text></svg>" alt="Profile">
+                    <span class="nav-profile-edit">Edit</span>
+                </div>
                 <button class="nav-btn" onclick="showScreen('dashboard')">My Pools</button>
                 <button class="nav-btn" onclick="logout()">Log Out</button>
             </nav>
@@ -1766,6 +1814,35 @@
         </div>
     </div>
 
+    <!-- Profile Editor Modal -->
+    <div id="profile-editor-modal" class="modal-overlay">
+        <div class="modal">
+            <div class="modal-header">
+                <h3>Edit Profile Picture</h3>
+                <button class="modal-close" onclick="closeModal('profile-editor-modal')">&times;</button>
+            </div>
+            <div class="modal-body" style="text-align: center;">
+                <img id="profile-editor-preview" src="" alt="Profile" style="width: 120px; height: 120px; border-radius: 50%; object-fit: cover; border: 3px solid var(--gold); margin-bottom: 1rem;">
+                
+                <div style="margin-bottom: 1rem;">
+                    <input type="file" id="profile-editor-input" accept="image/*" onchange="previewNewProfilePicture(event)" style="display: none;">
+                    <button class="btn btn-primary" onclick="document.getElementById('profile-editor-input').click()" style="margin-right: 0.5rem;">
+                        📷 Choose Photo
+                    </button>
+                    <button class="btn btn-secondary" onclick="removeUserProfilePicture()" id="remove-profile-btn" style="display: none;">
+                        Remove
+                    </button>
+                </div>
+                
+                <p id="profile-change-limit" style="color: var(--gray); font-size: 0.85rem; margin-bottom: 1rem;"></p>
+                
+                <button class="btn btn-primary" onclick="saveNewProfilePicture()" id="save-profile-btn" style="width: 100%; display: none;">
+                    Save Profile Picture
+                </button>
+            </div>
+        </div>
+    </div>
+
     <!-- Toast -->
     <div id="toast" class="toast">
         <span id="toast-message"></span>
@@ -2042,16 +2119,66 @@
             round: 2,
             status: "In Progress",
             logo: "https://res.cloudinary.com/pgatour-prod/d_tournaments:logos:R000.png/tournaments/logos/R002.png",
-            startTime: new Date("2026-01-22T07:00:00-08:00") // First tee time (PST)
+            startTime: new Date("2026-01-22T07:00:00-08:00"), // First tee time (PST)
+            pickWindowOpen: new Date("2026-01-19T07:00:00Z") // Monday 7am UK time
+        };
+
+        // Next tournament (for when current is in progress)
+        const nextTournament = {
+            id: 'farmers-2026',
+            name: "Farmers Insurance Open",
+            dates: "Jan 29 - Feb 1, 2026",
+            course: "Torrey Pines GC (South)",
+            location: "San Diego, CA",
+            purse: 9300000,
+            logo: "https://res.cloudinary.com/pgatour-prod/d_tournaments:logos:R000.png/tournaments/logos/R004.png",
+            startTime: new Date("2026-01-29T07:00:00-08:00"), // First tee time (PST)
+            pickWindowOpen: new Date("2026-01-26T07:00:00Z") // Monday 7am UK time
         };
 
         // TESTING MODE: Set to true to allow picks even after tournament starts
         const ALLOW_LATE_PICKS = true; // Change to false for production
 
-        // Check if tournament has started
+        // Check if tournament has started (picks should be locked)
         function hasTournamentStarted() {
             if (ALLOW_LATE_PICKS) return false; // Bypass for testing
             return new Date() >= currentTournament.startTime;
+        }
+
+        // Check if pick window is open for current tournament
+        function isPickWindowOpen() {
+            if (ALLOW_LATE_PICKS) return true; // Bypass for testing
+            const now = new Date();
+            return now >= currentTournament.pickWindowOpen && now < currentTournament.startTime;
+        }
+
+        // Check if pick window is open for next tournament
+        function isNextPickWindowOpen() {
+            if (ALLOW_LATE_PICKS) return false; // Only show next when testing is off
+            const now = new Date();
+            return now >= nextTournament.pickWindowOpen && now < nextTournament.startTime;
+        }
+
+        // Get the tournament user should be picking for
+        function getActiveTournamentForPicks() {
+            if (isPickWindowOpen()) {
+                return currentTournament;
+            } else if (isNextPickWindowOpen()) {
+                return nextTournament;
+            }
+            return null; // No pick window open
+        }
+
+        // Format date for display
+        function formatPickWindowTime(date) {
+            return date.toLocaleString('en-GB', { 
+                weekday: 'short', 
+                month: 'short', 
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit',
+                timeZoneName: 'short'
+            });
         }
 
         // ESPN API configuration
@@ -2718,6 +2845,8 @@
                 guestNav.style.display = 'none';
                 userNav.style.display = 'flex';
                 document.getElementById('user-display-name').textContent = store.currentUser.name;
+                // Update nav profile picture
+                updateNavProfilePicture();
             } else {
                 guestNav.style.display = 'flex';
                 userNav.style.display = 'none';
@@ -3099,6 +3228,153 @@
             return "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect fill='%23e5e7eb' width='100' height='100'/><text x='50' y='55' text-anchor='middle' fill='%239ca3af' font-size='24'>👤</text></svg>";
         }
 
+        // Profile picture change tracking (max 2 per 24 hours)
+        const MAX_PROFILE_CHANGES = 2;
+        const PROFILE_CHANGE_WINDOW = 24 * 60 * 60 * 1000; // 24 hours in ms
+        let pendingProfilePicture = null;
+
+        function getProfileChangeCount() {
+            if (!store.currentUser) return 0;
+            const key = 'profileChanges_' + store.currentUser.id;
+            const data = JSON.parse(localStorage.getItem(key) || '[]');
+            const now = Date.now();
+            // Filter to only changes within the last 24 hours
+            const recentChanges = data.filter(timestamp => now - timestamp < PROFILE_CHANGE_WINDOW);
+            // Clean up old entries
+            localStorage.setItem(key, JSON.stringify(recentChanges));
+            return recentChanges.length;
+        }
+
+        function recordProfileChange() {
+            if (!store.currentUser) return;
+            const key = 'profileChanges_' + store.currentUser.id;
+            const data = JSON.parse(localStorage.getItem(key) || '[]');
+            data.push(Date.now());
+            localStorage.setItem(key, JSON.stringify(data));
+        }
+
+        function canChangeProfilePicture() {
+            return getProfileChangeCount() < MAX_PROFILE_CHANGES;
+        }
+
+        function getNextProfileChangeTime() {
+            if (!store.currentUser) return null;
+            const key = 'profileChanges_' + store.currentUser.id;
+            const data = JSON.parse(localStorage.getItem(key) || '[]');
+            if (data.length === 0) return null;
+            const oldestChange = Math.min(...data);
+            const resetTime = new Date(oldestChange + PROFILE_CHANGE_WINDOW);
+            return resetTime;
+        }
+
+        function openProfileEditor() {
+            const currentPic = getUserProfilePicture(store.currentUser.id);
+            document.getElementById('profile-editor-preview').src = currentPic;
+            pendingProfilePicture = null;
+            
+            // Update change limit display
+            const changesRemaining = MAX_PROFILE_CHANGES - getProfileChangeCount();
+            const limitEl = document.getElementById('profile-change-limit');
+            
+            if (changesRemaining > 0) {
+                limitEl.textContent = `${changesRemaining} change${changesRemaining !== 1 ? 's' : ''} remaining today`;
+                limitEl.style.color = 'var(--gray)';
+            } else {
+                const resetTime = getNextProfileChangeTime();
+                if (resetTime) {
+                    limitEl.textContent = `Limit reached. You can change again at ${resetTime.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })}`;
+                } else {
+                    limitEl.textContent = 'Limit reached. Try again later.';
+                }
+                limitEl.style.color = 'var(--red)';
+            }
+            
+            // Show/hide remove button
+            const hasCustomPic = store.currentUser.profilePicture || localStorage.getItem('userProfilePicture_' + store.currentUser.id);
+            document.getElementById('remove-profile-btn').style.display = hasCustomPic ? 'inline-block' : 'none';
+            document.getElementById('save-profile-btn').style.display = 'none';
+            
+            document.getElementById('profile-editor-modal').classList.add('active');
+        }
+
+        function previewNewProfilePicture(event) {
+            if (!canChangeProfilePicture()) {
+                showToast('You\'ve reached the limit of 2 profile changes per 24 hours', true);
+                return;
+            }
+            
+            const file = event.target.files[0];
+            if (!file) return;
+            
+            // Check file size (max 2MB)
+            if (file.size > 2 * 1024 * 1024) {
+                showToast('Image must be smaller than 2MB', true);
+                return;
+            }
+            
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                pendingProfilePicture = e.target.result;
+                document.getElementById('profile-editor-preview').src = pendingProfilePicture;
+                document.getElementById('save-profile-btn').style.display = 'block';
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function saveNewProfilePicture() {
+            if (!pendingProfilePicture) return;
+            
+            if (!canChangeProfilePicture()) {
+                showToast('You\'ve reached the limit of 2 profile changes per 24 hours', true);
+                return;
+            }
+            
+            // Save to store and localStorage
+            store.currentUser.profilePicture = pendingProfilePicture;
+            localStorage.setItem('userProfilePicture_' + store.currentUser.id, pendingProfilePicture);
+            
+            // Record the change
+            recordProfileChange();
+            
+            // Update nav profile picture
+            document.getElementById('nav-profile-pic').src = pendingProfilePicture;
+            
+            pendingProfilePicture = null;
+            closeModal('profile-editor-modal');
+            showToast('Profile picture updated!');
+        }
+
+        function removeUserProfilePicture() {
+            if (!canChangeProfilePicture()) {
+                showToast('You\'ve reached the limit of 2 profile changes per 24 hours', true);
+                return;
+            }
+            
+            // Remove from store and localStorage
+            store.currentUser.profilePicture = null;
+            localStorage.removeItem('userProfilePicture_' + store.currentUser.id);
+            
+            // Record the change
+            recordProfileChange();
+            
+            // Reset to default
+            const defaultPic = "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect fill='%23e5e7eb' width='100' height='100'/><text x='50' y='55' text-anchor='middle' fill='%239ca3af' font-size='24'>👤</text></svg>";
+            document.getElementById('nav-profile-pic').src = defaultPic;
+            document.getElementById('profile-editor-preview').src = defaultPic;
+            document.getElementById('remove-profile-btn').style.display = 'none';
+            document.getElementById('save-profile-btn').style.display = 'none';
+            
+            closeModal('profile-editor-modal');
+            showToast('Profile picture removed');
+        }
+
+        function updateNavProfilePicture() {
+            if (store.currentUser) {
+                const pic = getUserProfilePicture(store.currentUser.id);
+                document.getElementById('nav-profile-pic').src = pic;
+            }
+        }
+
         function showProfileModal(imageSrc, userName) {
             const modal = document.getElementById('profile-modal');
             const image = document.getElementById('profile-modal-image');
@@ -3126,6 +3402,7 @@
         document.addEventListener('keydown', (e) => {
             if (e.key === 'Escape') {
                 closeProfileModal();
+                closeModal('profile-editor-modal');
             }
         });
 
@@ -3574,6 +3851,12 @@ See you on the course!`
         }
 
         function renderPlayerSelection() {
+            // Determine which tournament we're picking for
+            const activeTournament = getActiveTournamentForPicks();
+            const tournamentStarted = hasTournamentStarted();
+            const pickWindowOpen = isPickWindowOpen();
+
+            // Update tournament info display
             document.getElementById('pick-tournament-info').textContent = 
                 `${currentTournament.name} • ${currentTournament.dates}`;
             document.getElementById('pick-tournament-logo').src = currentTournament.logo;
@@ -3593,11 +3876,8 @@ See you on the course!`
                 p.tournamentId === currentTournament.id
             );
 
-            // Check if tournament has started
-            const tournamentStarted = hasTournamentStarted();
-
+            // SCENARIO 1: Tournament started with existing pick - LOCKED
             if (existingPick && tournamentStarted) {
-                // Tournament has started - pick is LOCKED
                 const player = getPlayerById(existingPick.playerId);
                 document.getElementById('players-list').innerHTML = `
                     <div class="empty-state">
@@ -3612,14 +3892,36 @@ See you on the course!`
                 return;
             }
 
+            // SCENARIO 2: Tournament started, NO pick - missed the window
             if (!existingPick && tournamentStarted) {
-                // Tournament started and user has NO pick - too late!
+                // Check if next tournament pick window is open
+                const nextWindowOpen = isNextPickWindowOpen();
+                
+                let nextPickMessage = '';
+                if (nextWindowOpen) {
+                    nextPickMessage = `
+                        <div style="margin-top: 1.5rem; padding: 1rem; background: #f0f9f4; border-radius: 8px; border-left: 4px solid var(--green-fairway);">
+                            <h4 style="color: var(--green-fairway); margin-bottom: 0.5rem;">✅ Pick Now Open for Next Week</h4>
+                            <p><strong>${nextTournament.name}</strong> (${nextTournament.dates})</p>
+                            <p style="color: var(--gray); margin-top: 0.25rem;">Pick closes: ${formatPickWindowTime(nextTournament.startTime)}</p>
+                        </div>
+                    `;
+                } else {
+                    nextPickMessage = `
+                        <div style="margin-top: 1.5rem; padding: 1rem; background: #f9fafb; border-radius: 8px;">
+                            <h4 style="margin-bottom: 0.5rem;">📅 Next Pick Window</h4>
+                            <p><strong>${nextTournament.name}</strong> (${nextTournament.dates})</p>
+                            <p style="color: var(--gray); margin-top: 0.25rem;">Opens: ${formatPickWindowTime(nextTournament.pickWindowOpen)}</p>
+                        </div>
+                    `;
+                }
+
                 document.getElementById('players-list').innerHTML = `
                     <div class="empty-state">
                         <h3>⏰ Pick Window Closed</h3>
-                        <p>The tournament has already started.</p>
-                        <p style="color: var(--gray); margin-top: 0.5rem;">You can no longer make a pick for this week.</p>
-                        <p style="color: var(--gray); margin-top: 0.5rem;">Make sure to pick before the first tee time next week!</p>
+                        <p><strong>${currentTournament.name}</strong> has already started.</p>
+                        <p style="color: var(--gray); margin-top: 0.5rem;">You missed the pick window for this week.</p>
+                        ${nextPickMessage}
                     </div>
                 `;
                 document.getElementById('confirm-pick-btn').style.display = 'none';
@@ -3627,8 +3929,25 @@ See you on the course!`
                 return;
             }
 
-            if (existingPick && !tournamentStarted) {
-                // Tournament hasn't started - allow changing pick
+            // SCENARIO 3: Pick window not yet open
+            if (!pickWindowOpen && !tournamentStarted) {
+                document.getElementById('players-list').innerHTML = `
+                    <div class="empty-state">
+                        <h3>🕐 Pick Window Not Open Yet</h3>
+                        <p>Picks for <strong>${currentTournament.name}</strong> open:</p>
+                        <p style="font-size: 1.2rem; font-weight: 600; color: var(--green-fairway); margin: 1rem 0;">
+                            ${formatPickWindowTime(currentTournament.pickWindowOpen)}
+                        </p>
+                        <p style="color: var(--gray);">Check back then to make your pick!</p>
+                    </div>
+                `;
+                document.getElementById('confirm-pick-btn').style.display = 'none';
+                document.getElementById('current-pick-display').style.display = 'none';
+                return;
+            }
+
+            // SCENARIO 4: Pick window open with existing pick - can change
+            if (existingPick && pickWindowOpen) {
                 const player = getPlayerById(existingPick.playerId);
                 selectedPlayerId = existingPick.playerId; // Pre-select current pick
                 
@@ -3644,6 +3963,8 @@ See you on the course!`
                 document.getElementById('pick-warning').innerHTML = 
                     `<strong>Current pick:</strong> ${player.name}. You can change your pick until the tournament starts.`;
             } else {
+                // SCENARIO 5: Pick window open, no pick yet - can pick
+                document.getElementById('current-pick-display').style.display = 'none';
                 document.getElementById('confirm-pick-btn').style.display = 'block';
                 document.getElementById('confirm-pick-btn').textContent = 'CONFIRM PICK';
             }
