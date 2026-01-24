@@ -2426,15 +2426,27 @@
 
             try {
                 if (supabaseClient) {
-                    // Use Supabase auth - onAuthStateChange will handle the rest
                     const { data, error } = await supabaseClient.auth.signInWithPassword({
                         email,
                         password
                     });
                     if (error) throw error;
                     
-                    // onAuthStateChange listener will call setUserFromSession
+                    // Set user directly instead of waiting for onAuthStateChange
+                    store.currentUser = {
+                        id: data.user.id,
+                        name: data.user.user_metadata?.name || email.split('@')[0],
+                        email: email
+                    };
+                    
+                    if (!store.users.find(u => u.id === data.user.id)) {
+                        store.users.push(store.currentUser);
+                    }
+                    
+                    await loadUserData();
+                    updateNavigation();
                     showToast('Welcome back!');
+                    showScreen('dashboard');
                 } else {
                     // Fallback to local storage
                     const user = store.users.find(u => u.email === email && u.password === password);
