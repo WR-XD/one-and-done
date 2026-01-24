@@ -2413,10 +2413,20 @@
         // ==================== NAVIGATION ====================
         function showScreen(screenId) {
             document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-            document.getElementById(screenId).classList.add('active');
+            const screen = document.getElementById(screenId);
+            if (screen) {
+                screen.classList.add('active');
+            } else {
+                console.error('Screen not found:', screenId);
+                return;
+            }
 
             if (screenId === 'dashboard') {
-                renderDashboard();
+                try {
+                    renderDashboard();
+                } catch (e) {
+                    console.error('Error rendering dashboard:', e);
+                }
             }
         }
 
@@ -2506,10 +2516,14 @@
                         store.users.push(store.currentUser);
                     }
                     
+                    console.log('Login successful, loading user data...');
                     await loadUserData();
+                    console.log('User data loaded, updating nav...');
                     updateNavigation();
+                    console.log('Showing dashboard...');
                     showToast('Welcome back!');
                     showScreen('dashboard');
+                    console.log('Dashboard shown');
                 } else {
                     // Fallback to local storage
                     const user = store.users.find(u => u.email === email && u.password === password);
@@ -2523,6 +2537,7 @@
                     showScreen('dashboard');
                 }
             } catch (error) {
+                console.error('Login error:', error);
                 showToast(error.message || 'Login failed', true);
             }
         }
@@ -2760,9 +2775,12 @@
                     userProfilePicture = saved;
                     store.currentUser.profilePicture = saved;
                     const preview = document.getElementById('profile-preview');
+                    const removeBtn = document.getElementById('remove-photo-btn');
                     if (preview) {
                         preview.src = saved;
-                        document.getElementById('remove-photo-btn').style.display = 'inline-block';
+                    }
+                    if (removeBtn) {
+                        removeBtn.style.display = 'inline-block';
                     }
                 }
             }
