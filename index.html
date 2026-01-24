@@ -1715,13 +1715,15 @@
                         <button class="pool-options-btn" onclick="togglePoolOptions(event)">
                             <span>⋮</span>
                         </button>
-                        <div class="pool-options-dropdown" id="pool-options-dropdown">
-                            <button onclick="confirmLeaveCurrentPool()">
-                                <span style="color: var(--red);">🚪 Leave Pool</span>
-                            </button>
-                        </div>
                     </div>
                 </div>
+            </div>
+
+            <!-- Pool Options Dropdown (outside tabs for proper z-index) -->
+            <div class="pool-options-dropdown" id="pool-options-dropdown">
+                <button onclick="confirmLeaveCurrentPool()">
+                    <span style="color: var(--red);">🚪 Leave Pool</span>
+                </button>
             </div>
 
             <!-- Standings Tab -->
@@ -3723,10 +3725,27 @@ See you on the course!`
             const btn = event.currentTarget;
             const rect = btn.getBoundingClientRect();
             
-            // Position dropdown below the button, aligned to right edge
+            // Reset any transforms
+            dropdown.style.transform = 'none';
+            
+            // Position dropdown below the button
             dropdown.style.top = (rect.bottom + 5) + 'px';
-            dropdown.style.right = (window.innerWidth - rect.right) + 'px';
-            dropdown.style.left = 'auto';
+            
+            // On mobile, position from left to keep it on screen
+            if (window.innerWidth < 768) {
+                const dropdownWidth = 160;
+                let leftPos = rect.left;
+                // Make sure it doesn't go off the right edge
+                if (leftPos + dropdownWidth > window.innerWidth - 10) {
+                    leftPos = window.innerWidth - dropdownWidth - 10;
+                }
+                dropdown.style.left = leftPos + 'px';
+                dropdown.style.right = 'auto';
+            } else {
+                // Desktop: align to right edge of button
+                dropdown.style.right = (window.innerWidth - rect.right) + 'px';
+                dropdown.style.left = 'auto';
+            }
             
             dropdown.classList.toggle('active');
         }
