@@ -1543,17 +1543,24 @@
                 <button class="modal-close" onclick="closeModal('invite-modal')">&times;</button>
             </div>
             <div class="modal-body">
-                <p style="margin-bottom: 1rem; color: var(--gray);">Share this link with friends to invite them to your pool:</p>
-                <div style="background: #f9fafb; padding: 1rem; word-break: break-all; font-family: monospace; margin-bottom: 1rem; border-radius: 8px; font-size: 0.9rem;" id="invite-link">
-                    https://example.com/join/ABC123
+                <div style="margin-bottom: 1.5rem;">
+                    <p style="margin-bottom: 0.5rem; font-weight: 600;">Send Email Invite</p>
+                    <div style="display: flex; gap: 0.5rem;">
+                        <input type="email" id="modal-invite-email" placeholder="friend@email.com" style="flex: 1; padding: 0.75rem; border: 2px solid #e5e7eb; border-radius: 8px;">
+                        <button class="btn btn-primary" onclick="sendEmailInvite()" style="padding: 0.75rem 1.5rem;">Send</button>
+                    </div>
+                    <p style="color: var(--gray); font-size: 0.85rem; margin-top: 0.5rem;">They'll receive an email with a link to join</p>
                 </div>
-                <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
-                    <button class="btn btn-primary" onclick="copyInviteLink()" style="flex: 1; min-width: 140px;">📋 Copy Link</button>
-                    <button class="btn btn-secondary" onclick="copyInviteMessage()" style="flex: 1; min-width: 140px;">📝 Copy Message</button>
-                </div>
-                
-                <div style="margin-top: 1rem;">
-                    <button class="btn btn-secondary" onclick="emailInviteLink()" style="width: 100%;">✉️ Open Email App</button>
+
+                <div style="padding-top: 1.5rem; border-top: 1px solid #e5e7eb;">
+                    <p style="margin-bottom: 0.5rem; font-weight: 600;">Or share the invite link:</p>
+                    <div style="background: #f9fafb; padding: 1rem; word-break: break-all; font-family: monospace; margin-bottom: 1rem; border-radius: 8px; font-size: 0.85rem;" id="invite-link">
+                        https://example.com/join/ABC123
+                    </div>
+                    <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+                        <button class="btn btn-secondary" onclick="copyInviteLink()" style="flex: 1; min-width: 140px;">📋 Copy Link</button>
+                        <button class="btn btn-secondary" onclick="copyInviteMessage()" style="flex: 1; min-width: 140px;">📝 Copy Message</button>
+                    </div>
                 </div>
 
                 <div style="margin-top: 1.5rem; padding-top: 1.5rem; border-top: 1px solid #e5e7eb;">
@@ -3806,6 +3813,84 @@ How it works:
             navigator.clipboard.writeText(message).then(() => {
                 showToast('Invite message copied! Paste it in any messaging app.');
             });
+        }
+
+        async function sendEmailInvite() {
+            const email = document.getElementById('modal-invite-email').value.toLowerCase().trim();
+            if (!email || !email.includes('@')) {
+                showToast('Please enter a valid email', true);
+                return;
+            }
+
+            const pool = store.pools.find(p => p.id === currentPoolId);
+            if (!pool) {
+                showToast('Could not find pool', true);
+                return;
+            }
+
+            const sendBtn = document.querySelector('#invite-modal .btn-primary');
+            const originalText = sendBtn.textContent;
+            sendBtn.textContent = 'Sending...';
+            sendBtn.disabled = true;
+
+            try {
+                const inviteLink = document.getElementById('invite-link').textContent;
+                
+                // Call the Edge Function to send email
+                const response = await fetch(`${SUPABASE_URL}/functions/v1/send-invite`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
+                    },
+                    body: JSON.stringify({
+                        email: email,
+                        poolName: pool.name,
+                        inviteCode: pool.inviteCode,
+                        inviteLink: inviteLink,
+                        inviterName: store.currentUser.name
+                    })
+                });
+
+                const data = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(data.error || 'Failed to send invite');
+                }
+
+                // Store invite in database
+                if (supabaseClient) {
+                    await supabaseRetry(() =>
+                        supabaseClient
+                            .from('invites')
+                            .insert({
+                                pool_id: pool.id,
+                                email: email,
+                                invite_code: pool.inviteCode,
+                                invited_by: store.currentUser.id,
+                                status: 'sent'
+                            })
+                    );
+                }
+
+                // Store locally too
+                store.invites.push({
+                    id: generateId(),
+                    poolId: pool.id,
+                    email,
+                    status: 'sent'
+                });
+
+                showToast(`Invite sent to ${email}!`);
+                document.getElementById('modal-invite-email').value = '';
+
+            } catch (error) {
+                console.error('Send invite error:', error);
+                showToast(error.message || 'Failed to send invite', true);
+            } finally {
+                sendBtn.textContent = originalText;
+                sendBtn.disabled = false;
+            }
         }
 
         function emailInviteLink() {
