@@ -1543,33 +1543,25 @@
                 <button class="modal-close" onclick="closeModal('invite-modal')">&times;</button>
             </div>
             <div class="modal-body">
+                <!-- Invite link to share -->
                 <div style="margin-bottom: 1.5rem;">
-                    <p style="margin-bottom: 0.5rem; font-weight: 600;">Send Email Invite</p>
+                    <p style="margin-bottom: 0.5rem; font-weight: 600;">🔗 Share Invite Link</p>
+                    <p style="color: var(--gray); font-size: 0.85rem; margin-bottom: 0.5rem;">Copy and send to friends via WhatsApp, text, etc:</p>
+                    <div style="display: flex; gap: 0.5rem;">
+                        <input type="text" id="invite-link-input" readonly style="flex: 1; padding: 0.75rem; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 0.85rem; background: #f9fafb;">
+                        <button class="btn btn-primary" onclick="copyInviteLink()" style="padding: 0.75rem 1.5rem;">Copy</button>
+                    </div>
+                </div>
+
+                <!-- Email invite section -->
+                <div style="padding-top: 1.5rem; border-top: 1px solid #e5e7eb;">
+                    <p style="margin-bottom: 0.5rem; font-weight: 600;">✉️ Send Email Invite</p>
+                    <p style="color: var(--gray); font-size: 0.85rem; margin-bottom: 0.5rem;">Enter email and we'll send them an invite:</p>
                     <div style="display: flex; gap: 0.5rem;">
                         <input type="email" id="modal-invite-email" placeholder="friend@email.com" style="flex: 1; padding: 0.75rem; border: 2px solid #e5e7eb; border-radius: 8px;">
                         <button class="btn btn-primary" onclick="sendEmailInvite()" style="padding: 0.75rem 1.5rem;">Send</button>
                     </div>
-                    <p style="color: var(--gray); font-size: 0.85rem; margin-top: 0.5rem;">They'll receive an email with a link to join</p>
-                </div>
-
-                <div style="padding-top: 1.5rem; border-top: 1px solid #e5e7eb;">
-                    <p style="margin-bottom: 0.5rem; font-weight: 600;">Or share the invite link:</p>
-                    <div style="background: #f9fafb; padding: 1rem; word-break: break-all; font-family: monospace; margin-bottom: 1rem; border-radius: 8px; font-size: 0.85rem;" id="invite-link">
-                        https://example.com/join/ABC123
-                    </div>
-                    <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
-                        <button class="btn btn-secondary" onclick="copyInviteLink()" style="flex: 1; min-width: 140px;">📋 Copy Link</button>
-                        <button class="btn btn-secondary" onclick="copyInviteMessage()" style="flex: 1; min-width: 140px;">📝 Copy Message</button>
-                    </div>
-                </div>
-
-                <div style="margin-top: 1.5rem; padding-top: 1.5rem; border-top: 1px solid #e5e7eb;">
-                    <p style="margin-bottom: 0.5rem; font-weight: 600;">Invite Code</p>
-                    <div style="display: flex; gap: 0.5rem; align-items: center;">
-                        <code id="invite-code-display" style="background: #f9fafb; padding: 0.75rem 1rem; border-radius: 8px; font-size: 1.1rem; letter-spacing: 2px; font-weight: bold;"></code>
-                        <button class="btn btn-secondary" onclick="copyInviteCode()" style="padding: 0.5rem 1rem;">Copy</button>
-                    </div>
-                    <p style="color: var(--gray); font-size: 0.85rem; margin-top: 0.5rem;">Friends can enter this code to join</p>
+                    <div id="sent-invites-list" style="margin-top: 0.75rem;"></div>
                 </div>
             </div>
         </div>
@@ -3770,8 +3762,10 @@ See you on the course!`
 
             currentPoolId = poolId;
             const inviteLink = `${window.location.origin}${window.location.pathname}?join=${pool.inviteCode}`;
-            document.getElementById('invite-link').textContent = inviteLink;
-            document.getElementById('invite-code-display').textContent = pool.inviteCode;
+            
+            document.getElementById('invite-link-input').value = inviteLink;
+            document.getElementById('sent-invites-list').innerHTML = '';
+            document.getElementById('modal-invite-email').value = '';
             document.getElementById('invite-modal').classList.add('active');
         }
 
@@ -3780,43 +3774,15 @@ See you on the course!`
         }
 
         function copyInviteLink() {
-            const link = document.getElementById('invite-link').textContent;
+            const link = document.getElementById('invite-link-input').value;
             navigator.clipboard.writeText(link).then(() => {
-                showToast('Invite link copied!');
-            });
-        }
-
-        function copyInviteCode() {
-            const code = document.getElementById('invite-code-display').textContent;
-            navigator.clipboard.writeText(code).then(() => {
-                showToast('Invite code copied!');
-            });
-        }
-
-        function copyInviteMessage() {
-            const pool = store.pools.find(p => p.id === currentPoolId);
-            if (!pool) return;
-            
-            const inviteLink = document.getElementById('invite-link').textContent;
-            const message = `Hey! Join my One & Done Golf Pool: "${pool.name}"
-
-Click here to join: ${inviteLink}
-
-Or use invite code: ${pool.inviteCode}
-
-How it works:
-• Pick one golfer each week
-• Each golfer can only be used once per season  
-• Earn their prize money winnings
-• Most earnings at season end wins!`;
-
-            navigator.clipboard.writeText(message).then(() => {
-                showToast('Invite message copied! Paste it in any messaging app.');
+                showToast('Link copied!');
             });
         }
 
         async function sendEmailInvite() {
-            const email = document.getElementById('modal-invite-email').value.toLowerCase().trim();
+            const emailInput = document.getElementById('modal-invite-email');
+            const email = emailInput.value.toLowerCase().trim();
             if (!email || !email.includes('@')) {
                 showToast('Please enter a valid email', true);
                 return;
@@ -3828,13 +3794,13 @@ How it works:
                 return;
             }
 
-            const sendBtn = document.querySelector('#invite-modal .btn-primary');
+            const sendBtn = event.target.closest('button') || document.querySelector('#invite-modal button[onclick*="sendEmailInvite"]');
             const originalText = sendBtn.textContent;
             sendBtn.textContent = 'Sending...';
             sendBtn.disabled = true;
 
             try {
-                const inviteLink = document.getElementById('invite-link').textContent;
+                const inviteLink = `${window.location.origin}${window.location.pathname}?join=${pool.inviteCode}`;
                 
                 // Call the Edge Function to send email
                 const response = await fetch(`${SUPABASE_URL}/functions/v1/send-invite`, {
@@ -3881,8 +3847,15 @@ How it works:
                     status: 'sent'
                 });
 
+                // Add to sent list in modal
+                const sentList = document.getElementById('sent-invites-list');
+                sentList.innerHTML += `<div style="display: flex; align-items: center; gap: 0.5rem; padding: 0.5rem; background: #f0f9f4; border-radius: 6px; margin-top: 0.5rem;">
+                    <span style="color: var(--green-fairway);">✓</span>
+                    <span style="font-size: 0.9rem;">${email}</span>
+                </div>`;
+
                 showToast(`Invite sent to ${email}!`);
-                document.getElementById('modal-invite-email').value = '';
+                emailInput.value = '';
 
             } catch (error) {
                 console.error('Send invite error:', error);
