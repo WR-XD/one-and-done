@@ -227,6 +227,19 @@
             color: var(--white);
         }
 
+        .btn-danger-outline {
+            background: var(--white);
+            color: var(--red);
+            border: 2px solid var(--red);
+            padding: 0.5rem 1rem;
+            font-size: 0.85rem;
+        }
+
+        .btn-danger-outline:hover {
+            background: var(--red);
+            color: var(--white);
+        }
+
         /* Features Grid */
         .features {
             display: grid;
@@ -1845,6 +1858,37 @@
         </div>
     </div>
 
+    <!-- Leave Pool Confirmation Modal -->
+    <div id="leave-pool-modal" class="modal-overlay">
+        <div class="modal">
+            <div class="modal-header">
+                <h3>Leave Pool</h3>
+                <button class="modal-close" onclick="closeModal('leave-pool-modal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div style="text-align: center; margin-bottom: 1.5rem;">
+                    <div style="font-size: 3rem; margin-bottom: 1rem;">⚠️</div>
+                    <p style="font-size: 1.1rem; margin-bottom: 0.5rem;">Are you sure you want to leave</p>
+                    <p style="font-size: 1.3rem; font-weight: bold; color: var(--green-deep);" id="leave-pool-name"></p>
+                </div>
+                
+                <div style="background: #fef2f2; border: 1px solid #fecaca; border-radius: 8px; padding: 1rem; margin-bottom: 1.5rem;">
+                    <p style="color: var(--red); font-weight: 600; margin-bottom: 0.5rem;">⚠️ This action cannot be undone!</p>
+                    <ul style="color: #7f1d1d; font-size: 0.9rem; margin-left: 1rem;">
+                        <li>All your picks will be deleted</li>
+                        <li>Your earnings history will be lost</li>
+                        <li>You'll need a new invite to rejoin</li>
+                    </ul>
+                </div>
+                
+                <div style="display: flex; gap: 1rem;">
+                    <button class="btn btn-secondary" onclick="closeModal('leave-pool-modal')" style="flex: 1;">Cancel</button>
+                    <button class="btn btn-danger-outline" onclick="leavePool()" style="flex: 1; background: var(--red); color: white; border-color: var(--red);">Leave Pool</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Toast -->
     <div id="toast" class="toast">
         <span id="toast-message"></span>
@@ -3154,6 +3198,7 @@
                         <div class="tournament-actions">
                             <button class="btn btn-primary" onclick="openPool('${pool.id}')">View Pool</button>
                             <button class="btn btn-secondary" onclick="showInviteModal('${pool.id}')">Invite</button>
+                            <button class="btn btn-danger-outline" onclick="confirmLeavePool('${pool.id}', '${pool.name.replace(/'/g, "\\'")}')">Leave</button>
                         </div>
                     </div>
                 `;
@@ -3572,6 +3617,71 @@ See you on the course!`
             } catch (error) {
                 console.error('Create pool error:', error);
                 showToast(error.message || 'Failed to create pool', true);
+            }
+        }
+
+        // ==================== LEAVE POOL ====================
+        let poolToLeave = null;
+
+        function confirmLeavePool(poolId, poolName) {
+            poolToLeave = poolId;
+            document.getElementById('leave-pool-name').textContent = `"${poolName}"?`;
+            document.getElementById('leave-pool-modal').classList.add('active');
+        }
+
+        async function leavePool() {
+            if (!poolToLeave) return;
+
+            try {
+                // Remove from Supabase if connected
+                if (supabaseClient) {
+                    // Delete user's picks for this pool
+                    const { error: picksError } = await supabaseRetry(() =>
+                        supabaseClient
+                            .from('picks')
+                            .delete()
+                            .eq('pool_id', poolToLeave)
+                            .eq('user_id', store.currentUser.id)
+                    );
+                    
+                    if (picksError) {
+                        console.error('Error deleting picks:', picksError);
+                    }
+
+                    // Remove user from pool members
+                    const { error: memberError } = await supabaseRetry(() =>
+                        supabaseClient
+                            .from('pool_members')
+                            .delete()
+                            .eq('pool_id', poolToLeave)
+                            .eq('user_id', store.currentUser.id)
+                    );
+                    
+                    if (memberError) {
+                        console.error('Error removing from pool:', memberError);
+                    }
+                }
+
+                // Remove from local store
+                store.picks = store.picks.filter(p => !(p.poolId === poolToLeave && p.userId === store.currentUser.id));
+                
+                const pool = store.pools.find(p => p.id === poolToLeave);
+                if (pool) {
+                    pool.members = pool.members.filter(m => m !== store.currentUser.id);
+                    // If user is no longer a member, remove from their pools list
+                    if (!pool.members.includes(store.currentUser.id)) {
+                        store.pools = store.pools.filter(p => p.id !== poolToLeave);
+                    }
+                }
+
+                closeModal('leave-pool-modal');
+                poolToLeave = null;
+                showToast('You have left the pool');
+                renderDashboard();
+
+            } catch (error) {
+                console.error('Leave pool error:', error);
+                showToast('Failed to leave pool', true);
             }
         }
 
