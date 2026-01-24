@@ -1272,6 +1272,24 @@
                         </select>
                     </div>
 
+                    <div class="form-group">
+                        <label>Your Profile Picture (optional)</label>
+                        <p style="color: var(--gray); font-size: 0.85rem; margin-bottom: 0.5rem;">This will be shown in pool standings</p>
+                        <div style="display: flex; align-items: center; gap: 1rem;">
+                            <img id="profile-preview" src="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect fill='%23e5e7eb' width='100' height='100'/><text x='50' y='55' text-anchor='middle' fill='%239ca3af' font-size='12'>No Photo</text></svg>" 
+                                 style="width: 60px; height: 60px; border-radius: 50%; object-fit: cover; border: 2px solid #e5e7eb;">
+                            <div style="flex: 1;">
+                                <input type="file" id="profile-picture-input" accept="image/*" onchange="previewProfilePicture(event)" style="display: none;">
+                                <button type="button" class="btn btn-secondary" onclick="document.getElementById('profile-picture-input').click()" style="padding: 0.5rem 1rem; font-size: 0.9rem;">
+                                    Upload Photo
+                                </button>
+                                <button type="button" id="remove-photo-btn" class="btn" onclick="removeProfilePicture()" style="padding: 0.5rem 1rem; font-size: 0.9rem; display: none; margin-left: 0.5rem; color: var(--gray);">
+                                    Remove
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
                     <div class="invite-section">
                         <h3>Invite Friends</h3>
                         <p style="color: var(--gray); font-size: 0.95rem; margin-bottom: 1rem;">Enter email addresses to send invitations</p>
@@ -2112,6 +2130,51 @@
             { id: "4358081", name: "Alejandro Tosti", country: "ARG" }
         ];
 
+        // Enrich tournament field with world rankings from pgaPlayers
+        // Players not in top 40 get estimated ranks based on other sources
+        const additionalRankings = {
+            "4410932": 53,  // Min Woo Lee
+            "4837368": 89,  // Pierceson Coody
+            "4408315": 156, // Vince Whaley
+            "4698579": 42,  // S.H. Kim
+            "4901368": 95,  // Matt McCarty
+            "4404992": 67,  // Ben Griffin
+            "4426181": 112, // Sam Stevens
+            "9506": 78,     // Jordan Smith
+            "10596": 45,    // Matthieu Pavon
+            "11332": 98,    // Andrew Novak
+            "10522": 55,    // Eric Cole
+            "5054388": 145, // Jacob Bridgeman
+            "5408": 48,     // Harris English
+            "6011": 85,     // Beau Hossler
+            "3792": 52,     // Nick Taylor
+            "4699418": 120, // Trace Crowe
+            "10505": 44,    // J.T. Poston
+            "4361187": 75,  // Lee Hodges
+            "3470": 65,     // Chez Reavie
+            "3550": 72,     // Gary Woodland
+            "8973": 12,     // Max Homa
+            "10664": 88,    // Taylor Moore
+            "9427": 18,     // Sungjae Im
+            "10863": 62,    // Cam Davis
+            "10980": 14,    // Sahith Theegala
+            "11119": 8,     // Wyndham Clark
+            "2230": 16,     // Tony Finau
+            "4602673": 34,  // Tom Kim
+        };
+
+        // Add rank to each player in tournamentField
+        tournamentField.forEach(player => {
+            const pgaPlayer = pgaPlayers.find(p => p.id === player.id);
+            if (pgaPlayer && pgaPlayer.rank) {
+                player.rank = pgaPlayer.rank;
+            } else if (additionalRankings[player.id]) {
+                player.rank = additionalRankings[player.id];
+            } else {
+                player.rank = 200; // Default for unranked players
+            }
+        });
+
         // Mock leaderboard - actual R1 results from ESPN (Jan 23, 2026)
         // Complete leaderboard so any pick can be tracked
         const mockLeaderboard = [
@@ -2579,6 +2642,9 @@
 
         // ==================== DASHBOARD ====================
         function renderDashboard() {
+            // Load user's profile picture
+            loadUserProfilePicture();
+            
             const container = document.getElementById('tournaments-container');
             const userPools = store.pools.filter(p => p.members.includes(store.currentUser.id));
 
@@ -2645,6 +2711,73 @@
                     </div>
                 `;
             }).join('');
+        }
+
+        // ==================== PROFILE PICTURE ====================
+        let userProfilePicture = null; // Base64 string
+
+        function previewProfilePicture(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            // Check file size (max 2MB)
+            if (file.size > 2 * 1024 * 1024) {
+                showToast('Image too large. Please use an image under 2MB.', true);
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                userProfilePicture = e.target.result;
+                document.getElementById('profile-preview').src = userProfilePicture;
+                document.getElementById('remove-photo-btn').style.display = 'inline-block';
+                
+                // Save to store and localStorage
+                if (store.currentUser) {
+                    store.currentUser.profilePicture = userProfilePicture;
+                    localStorage.setItem('userProfilePicture_' + store.currentUser.id, userProfilePicture);
+                }
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function removeProfilePicture() {
+            userProfilePicture = null;
+            document.getElementById('profile-preview').src = "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect fill='%23e5e7eb' width='100' height='100'/><text x='50' y='55' text-anchor='middle' fill='%239ca3af' font-size='12'>No Photo</text></svg>";
+            document.getElementById('remove-photo-btn').style.display = 'none';
+            document.getElementById('profile-picture-input').value = '';
+            
+            if (store.currentUser) {
+                store.currentUser.profilePicture = null;
+                localStorage.removeItem('userProfilePicture_' + store.currentUser.id);
+            }
+        }
+
+        function loadUserProfilePicture() {
+            if (store.currentUser) {
+                const saved = localStorage.getItem('userProfilePicture_' + store.currentUser.id);
+                if (saved) {
+                    userProfilePicture = saved;
+                    store.currentUser.profilePicture = saved;
+                    const preview = document.getElementById('profile-preview');
+                    if (preview) {
+                        preview.src = saved;
+                        document.getElementById('remove-photo-btn').style.display = 'inline-block';
+                    }
+                }
+            }
+        }
+
+        function getUserProfilePicture(userId) {
+            // Check if it's current user
+            if (store.currentUser && store.currentUser.id === userId && store.currentUser.profilePicture) {
+                return store.currentUser.profilePicture;
+            }
+            // Check localStorage
+            const saved = localStorage.getItem('userProfilePicture_' + userId);
+            if (saved) return saved;
+            // Default avatar
+            return "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect fill='%23e5e7eb' width='100' height='100'/><text x='50' y='55' text-anchor='middle' fill='%239ca3af' font-size='24'>👤</text></svg>";
         }
 
         // ==================== CREATE TOURNAMENT ====================
@@ -2859,6 +2992,7 @@
             tbody.innerHTML = standings.map((standing, index) => {
                 const isCurrentUser = standing.user.id === store.currentUser.id;
                 const rankClass = index === 0 ? 'gold' : index === 1 ? 'silver' : index === 2 ? 'bronze' : '';
+                const profilePic = getUserProfilePicture(standing.user.id);
 
                 return `
                     <tr class="${isCurrentUser ? 'current-user' : ''}">
@@ -2866,8 +3000,12 @@
                             <span class="rank-badge ${rankClass}">${index + 1}</span>
                         </td>
                         <td>
-                            <strong>${standing.user.name}</strong>
-                            ${isCurrentUser ? ' (You)' : ''}
+                            <div style="display: flex; align-items: center; gap: 0.5rem;">
+                                <img src="${profilePic}" alt="" style="width: 32px; height: 32px; border-radius: 50%; object-fit: cover;"
+                                     onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect fill=%22%23e5e7eb%22 width=%22100%22 height=%22100%22/></svg>'">
+                                <strong>${standing.user.name}</strong>
+                                ${isCurrentUser ? ' (You)' : ''}
+                            </div>
                         </td>
                         <td>
                             ${standing.currentPlayer ? `
@@ -3107,9 +3245,10 @@
             const container = document.getElementById('players-list');
             
             // Use tournament field (players in THIS WEEK'S tournament)
-            const filtered = tournamentField.filter(p => 
-                p.name.toLowerCase().includes(searchTerm.toLowerCase())
-            );
+            // Filter by search term, then sort by world ranking
+            const filtered = tournamentField
+                .filter(p => p.name.toLowerCase().includes(searchTerm.toLowerCase()))
+                .sort((a, b) => (a.rank || 999) - (b.rank || 999)); // Sort by rank, unranked at bottom
 
             container.innerHTML = filtered.map(player => {
                 const isUsed = usedPlayerIds.includes(String(player.id));
@@ -3122,6 +3261,9 @@
                 const currentScore = leaderboardEntry ? 
                     (leaderboardEntry.score < 0 ? leaderboardEntry.score : (leaderboardEntry.score === 0 ? 'E' : `+${leaderboardEntry.score}`)) : '-';
 
+                // Show world ranking
+                const worldRank = player.rank ? `#${player.rank}` : '-';
+
                 return `
                     <div class="player-item ${isUsed ? 'disabled' : ''} ${isSelected ? 'selected' : ''} ${isCurrentPick ? 'current-pick' : ''}"
                          onclick="${isUsed ? '' : `selectPlayer('${player.id}')`}">
@@ -3129,7 +3271,7 @@
                              onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect fill=%22%23e5e7eb%22 width=%22100%22 height=%22100%22/></svg>'">
                         <div class="player-info">
                             <h4>${player.name}</h4>
-                            <p>${player.country}</p>
+                            <p>${player.country} • OWGR ${worldRank}</p>
                         </div>
                         ${isUsed ? '<span class="used-badge">Already Used</span>' : ''}
                         ${isCurrentPick ? '<span class="current-badge">Current Pick</span>' : ''}
