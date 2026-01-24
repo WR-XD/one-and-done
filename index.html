@@ -1544,15 +1544,18 @@
             </div>
             <div class="modal-body">
                 <p style="margin-bottom: 1rem; color: var(--gray);">Share this link with friends to invite them to your pool:</p>
-                <div style="background: #f9fafb; padding: 1rem; word-break: break-all; font-family: monospace; margin-bottom: 1rem;" id="invite-link">
-                    https://oneanddonegolf.com/join/ABC123
+                <div style="background: #f9fafb; padding: 1rem; word-break: break-all; font-family: monospace; margin-bottom: 1rem; border-radius: 8px; font-size: 0.9rem;" id="invite-link">
+                    https://example.com/join/ABC123
                 </div>
-                <button class="btn btn-primary" onclick="copyInviteLink()" style="width: 100%;">Copy Link</button>
+                <div style="display: flex; gap: 0.5rem;">
+                    <button class="btn btn-primary" onclick="copyInviteLink()" style="flex: 1;">📋 Copy Link</button>
+                    <button class="btn btn-secondary" onclick="emailInviteLink()" style="flex: 1;">✉️ Email Invite</button>
+                </div>
 
                 <div style="margin-top: 1.5rem; padding-top: 1.5rem; border-top: 1px solid #e5e7eb;">
-                    <p style="margin-bottom: 1rem; color: var(--gray);">Or invite by email:</p>
+                    <p style="margin-bottom: 1rem; color: var(--gray);">Or send a direct invite:</p>
                     <div style="display: flex; gap: 0.5rem;">
-                        <input type="email" id="modal-invite-email" placeholder="friend@email.com" style="flex: 1; padding: 0.75rem; border: 2px solid #e5e7eb;">
+                        <input type="email" id="modal-invite-email" placeholder="friend@email.com" style="flex: 1; padding: 0.75rem; border: 2px solid #e5e7eb; border-radius: 8px;">
                         <button class="btn btn-secondary" onclick="sendModalInvite()" style="padding: 0.75rem 1.5rem;">Send</button>
                     </div>
                 </div>
@@ -3035,25 +3038,54 @@
 
                 store.pools.push(pool);
 
-                // Process invites (local only for now)
-                inviteEmails.forEach(email => {
-                    const existingUser = store.users.find(u => u.email === email);
-                    if (existingUser) {
-                        pool.members.push(existingUser.id);
-                    } else {
+                // Send invite emails
+                if (inviteEmails.length > 0) {
+                    const inviteLink = `${window.location.origin}${window.location.pathname}?join=${pool.inviteCode}`;
+                    const subject = encodeURIComponent(`Join my One & Done Golf Pool: ${pool.name}`);
+                    const body = encodeURIComponent(
+`Hey!
+
+I've created a One & Done golf pool called "${pool.name}" and I'd love for you to join!
+
+Click this link to join:
+${inviteLink}
+
+Or use invite code: ${pool.inviteCode}
+
+How it works:
+- Pick one golfer each week
+- Each golfer can only be used once per season
+- Earn their prize money winnings
+- Most earnings at season end wins!
+
+See you on the course!`
+                    );
+                    
+                    // Open mailto with all emails
+                    const mailtoLink = `mailto:${inviteEmails.join(',')}?subject=${subject}&body=${body}`;
+                    window.open(mailtoLink, '_blank');
+                    
+                    // Also store invites locally
+                    inviteEmails.forEach(email => {
                         store.invites.push({
                             id: generateId(),
                             poolId: pool.id,
                             email,
                             status: 'pending'
                         });
-                    }
-                });
+                    });
+                }
 
                 inviteEmails = [];
                 renderInviteList();
 
                 showToast('Pool created successfully!');
+                
+                // Show the invite modal with the code
+                setTimeout(() => {
+                    showInviteModal(pool.id);
+                }, 500);
+                
                 showScreen('dashboard');
             } catch (error) {
                 console.error('Create pool error:', error);
@@ -3724,8 +3756,9 @@
             const pool = store.pools.find(p => p.id === poolId);
             if (!pool) return;
 
-            document.getElementById('invite-link').textContent = 
-                `https://oneanddonegolf.com/join/${pool.inviteCode}`;
+            currentPoolId = poolId;
+            const inviteLink = `${window.location.origin}${window.location.pathname}?join=${pool.inviteCode}`;
+            document.getElementById('invite-link').textContent = inviteLink;
             document.getElementById('invite-modal').classList.add('active');
         }
 
@@ -3740,6 +3773,28 @@
             });
         }
 
+        function emailInviteLink() {
+            const pool = store.pools.find(p => p.id === currentPoolId);
+            if (!pool) return;
+            
+            const inviteLink = document.getElementById('invite-link').textContent;
+            const subject = encodeURIComponent(`Join my One & Done Golf Pool: ${pool.name}`);
+            const body = encodeURIComponent(
+`Hey!
+
+I've created a One & Done golf pool and I'd love for you to join!
+
+Click this link to join:
+${inviteLink}
+
+Or use invite code: ${pool.inviteCode}
+
+See you on the course!`
+            );
+            
+            window.open(`mailto:?subject=${subject}&body=${body}`, '_blank');
+        }
+
         function sendModalInvite() {
             const email = document.getElementById('modal-invite-email').value.toLowerCase().trim();
             if (!email || !email.includes('@')) {
@@ -3750,24 +3805,33 @@
             const pool = store.pools.find(p => p.id === currentPoolId);
             if (!pool) return;
 
-            const existingUser = store.users.find(u => u.email === email);
-            if (existingUser) {
-                if (!pool.members.includes(existingUser.id)) {
-                    pool.members.push(existingUser.id);
-                    showToast(`${existingUser.name} added to the pool!`);
-                } else {
-                    showToast('This user is already in the pool', true);
-                }
-            } else {
-                store.invites.push({
-                    id: generateId(),
-                    poolId: pool.id,
-                    email,
-                    status: 'pending'
-                });
-                showToast(`Invitation sent to ${email}`);
-            }
+            // Open email client with the invite
+            const inviteLink = document.getElementById('invite-link').textContent;
+            const subject = encodeURIComponent(`Join my One & Done Golf Pool: ${pool.name}`);
+            const body = encodeURIComponent(
+`Hey!
 
+I've created a One & Done golf pool and I'd love for you to join!
+
+Click this link to join:
+${inviteLink}
+
+Or use invite code: ${pool.inviteCode}
+
+See you on the course!`
+            );
+            
+            window.open(`mailto:${email}?subject=${subject}&body=${body}`, '_blank');
+
+            // Store the invite
+            store.invites.push({
+                id: generateId(),
+                poolId: pool.id,
+                email,
+                status: 'pending'
+            });
+            
+            showToast(`Email invite opened for ${email}`);
             document.getElementById('modal-invite-email').value = '';
         }
 
