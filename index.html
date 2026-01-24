@@ -1700,7 +1700,7 @@
         <!-- Pool View -->
         <section id="pool-view" class="screen">
             <div style="margin-bottom: 1rem;">
-                <button class="btn btn-secondary" onclick="showScreen('dashboard')" style="padding: 0.5rem 1rem; font-size: 0.9rem;">
+                <button class="btn btn-secondary" onclick="localStorage.removeItem('currentPoolId'); showScreen('dashboard')" style="padding: 0.5rem 1rem; font-size: 0.9rem;">
                     ← Back to My Pools
                 </button>
             </div>
@@ -3881,6 +3881,8 @@ See you on the course!`
         function openPool(poolId) {
             currentPoolId = poolId;
             selectedPlayerId = null;
+            // Save to localStorage so we can restore after refresh
+            localStorage.setItem('currentPoolId', poolId);
             showScreen('pool-view');
             switchPoolTab('standings');
             renderPoolView();
@@ -4898,7 +4900,15 @@ See you on the course!`
                 
                 await loadUserData();
                 updateNavigation();
-                showScreen('dashboard');
+                
+                // Check if we were viewing a pool before refresh
+                const savedPoolId = localStorage.getItem('currentPoolId');
+                if (savedPoolId && store.pools.find(p => p.id === savedPoolId)) {
+                    openPool(savedPoolId);
+                } else {
+                    showScreen('dashboard');
+                }
+                
                 console.log('Session active for:', store.currentUser.email);
             } finally {
                 isLoadingSession = false;
