@@ -1,0 +1,3606 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>One & Done Golf | PGA Tour Fantasy</title>
+    <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=Source+Sans+3:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        :root {
+            --green-deep: #0a3622;
+            --green-fairway: #1a5c3a;
+            --green-light: #2d8a5e;
+            --gold: #c4a747;
+            --gold-light: #e8d78a;
+            --cream: #f5f2e8;
+            --white: #ffffff;
+            --dark: #1a1a1a;
+            --gray: #6b7280;
+            --red: #dc2626;
+            --shadow: 0 4px 20px rgba(0,0,0,0.15);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Source Sans 3', sans-serif;
+            background: var(--cream);
+            color: var(--dark);
+            min-height: 100vh;
+        }
+
+        /* Header */
+        header {
+            background: linear-gradient(135deg, var(--green-deep) 0%, var(--green-fairway) 100%);
+            padding: 0;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: var(--shadow);
+        }
+
+        .header-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 2rem;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .logo-icon {
+            width: 48px;
+            height: 48px;
+            background: var(--gold);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+        }
+
+        .logo h1 {
+            font-family: 'Oswald', sans-serif;
+            font-size: 1.75rem;
+            font-weight: 700;
+            color: var(--white);
+            letter-spacing: 1px;
+        }
+
+        .logo span {
+            color: var(--gold);
+        }
+
+        nav {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .nav-btn {
+            padding: 0.6rem 1.25rem;
+            border: 2px solid var(--gold);
+            background: transparent;
+            color: var(--gold);
+            font-family: 'Oswald', sans-serif;
+            font-size: 0.95rem;
+            font-weight: 500;
+            letter-spacing: 0.5px;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-transform: uppercase;
+        }
+
+        .nav-btn:hover {
+            background: var(--gold);
+            color: var(--green-deep);
+        }
+
+        .nav-btn.primary {
+            background: var(--gold);
+            color: var(--green-deep);
+        }
+
+        .nav-btn.primary:hover {
+            background: var(--gold-light);
+        }
+
+        /* Main Content Areas */
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        /* Screen visibility */
+        .screen {
+            display: none;
+        }
+
+        .screen.active {
+            display: block;
+        }
+
+        /* Landing Page */
+        .hero {
+            text-align: center;
+            padding: 4rem 2rem;
+            background: linear-gradient(180deg, rgba(10,54,34,0.05) 0%, transparent 100%);
+        }
+
+        .hero h2 {
+            font-family: 'Oswald', sans-serif;
+            font-size: 3.5rem;
+            font-weight: 700;
+            color: var(--green-deep);
+            margin-bottom: 1rem;
+            line-height: 1.1;
+        }
+
+        .hero p {
+            font-size: 1.25rem;
+            color: var(--gray);
+            max-width: 600px;
+            margin: 0 auto 2rem;
+            line-height: 1.6;
+        }
+
+        .hero-cta {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+        }
+
+        .btn {
+            padding: 1rem 2rem;
+            font-family: 'Oswald', sans-serif;
+            font-size: 1.1rem;
+            font-weight: 600;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-primary {
+            background: var(--green-deep);
+            color: var(--white);
+        }
+
+        .btn-primary:hover {
+            background: var(--green-fairway);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow);
+        }
+
+        .btn-secondary {
+            background: var(--white);
+            color: var(--green-deep);
+            border: 2px solid var(--green-deep);
+        }
+
+        .btn-secondary:hover {
+            background: var(--green-deep);
+            color: var(--white);
+        }
+
+        /* Features Grid */
+        .features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 2rem;
+            margin-top: 3rem;
+        }
+
+        .feature-card {
+            background: var(--white);
+            padding: 2rem;
+            text-align: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+            border-top: 4px solid var(--gold);
+        }
+
+        .feature-icon {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .feature-card h3 {
+            font-family: 'Oswald', sans-serif;
+            font-size: 1.25rem;
+            color: var(--green-deep);
+            margin-bottom: 0.5rem;
+        }
+
+        .feature-card p {
+            color: var(--gray);
+            line-height: 1.5;
+        }
+
+        /* Auth Forms */
+        .auth-container {
+            max-width: 450px;
+            margin: 3rem auto;
+            background: var(--white);
+            padding: 2.5rem;
+            box-shadow: var(--shadow);
+        }
+
+        .auth-container h2 {
+            font-family: 'Oswald', sans-serif;
+            font-size: 2rem;
+            color: var(--green-deep);
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+            color: var(--dark);
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 0.875rem 1rem;
+            border: 2px solid #e5e7eb;
+            font-size: 1rem;
+            font-family: inherit;
+            transition: border-color 0.2s;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: var(--green-fairway);
+        }
+
+        .form-btn {
+            width: 100%;
+            padding: 1rem;
+            background: var(--green-deep);
+            color: var(--white);
+            font-family: 'Oswald', sans-serif;
+            font-size: 1.1rem;
+            font-weight: 600;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            border: none;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .form-btn:hover {
+            background: var(--green-fairway);
+        }
+
+        .auth-switch {
+            text-align: center;
+            margin-top: 1.5rem;
+            color: var(--gray);
+        }
+
+        .auth-switch a {
+            color: var(--green-fairway);
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: none;
+        }
+
+        .auth-switch a:hover {
+            text-decoration: underline;
+        }
+
+        /* Dashboard */
+        .dashboard-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .dashboard-header h2 {
+            font-family: 'Oswald', sans-serif;
+            font-size: 2rem;
+            color: var(--green-deep);
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            color: var(--gray);
+        }
+
+        .user-info strong {
+            color: var(--dark);
+        }
+
+        /* Tournament Cards */
+        .tournaments-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .tournament-card {
+            background: var(--white);
+            box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+            overflow: hidden;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .tournament-card:hover {
+            transform: translateY(-3px);
+            box-shadow: var(--shadow);
+        }
+
+        .tournament-header {
+            background: linear-gradient(135deg, var(--green-deep) 0%, var(--green-fairway) 100%);
+            padding: 1.25rem;
+            color: var(--white);
+        }
+
+        .tournament-header h3 {
+            font-family: 'Oswald', sans-serif;
+            font-size: 1.35rem;
+            margin-bottom: 0.25rem;
+        }
+
+        .tournament-header p {
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+
+        .tournament-body {
+            padding: 1.25rem;
+        }
+
+        .tournament-stat {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.75rem 0;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .tournament-stat:last-child {
+            border-bottom: none;
+        }
+
+        .tournament-stat span:first-child {
+            color: var(--gray);
+        }
+
+        .tournament-stat span:last-child {
+            font-weight: 600;
+        }
+
+        .tournament-actions {
+            padding: 1.25rem;
+            padding-top: 0;
+            display: flex;
+            gap: 0.75rem;
+        }
+
+        .tournament-actions .btn {
+            flex: 1;
+            padding: 0.75rem;
+            font-size: 0.9rem;
+        }
+
+        /* Create Tournament Form */
+        .create-tournament {
+            background: var(--white);
+            padding: 2rem;
+            box-shadow: var(--shadow);
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .create-tournament h2 {
+            font-family: 'Oswald', sans-serif;
+            font-size: 1.75rem;
+            color: var(--green-deep);
+            margin-bottom: 1.5rem;
+        }
+
+        .invite-section {
+            margin-top: 1.5rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid #e5e7eb;
+        }
+
+        .invite-section h3 {
+            font-family: 'Oswald', sans-serif;
+            color: var(--green-deep);
+            margin-bottom: 1rem;
+        }
+
+        .invite-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-top: 0.75rem;
+        }
+
+        .invite-tag {
+            background: var(--green-deep);
+            color: var(--white);
+            padding: 0.35rem 0.75rem;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .invite-tag button {
+            background: none;
+            border: none;
+            color: var(--white);
+            cursor: pointer;
+            font-size: 1rem;
+            line-height: 1;
+        }
+
+        /* Player Selection */
+        .player-selection {
+            background: var(--white);
+            box-shadow: var(--shadow);
+        }
+
+        .selection-header {
+            background: linear-gradient(135deg, var(--green-deep) 0%, var(--green-fairway) 100%);
+            padding: 1.25rem 2rem;
+            color: var(--white);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .selection-header .tournament-title {
+            flex: 1;
+        }
+
+        .selection-header h2 {
+            font-family: 'Oswald', sans-serif;
+            font-size: 1.75rem;
+            margin-bottom: 0.25rem;
+        }
+
+        .selection-header p {
+            opacity: 0.9;
+        }
+
+        .current-pick {
+            background: var(--gold);
+            color: var(--green-deep);
+            padding: 1rem 2rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .current-pick strong {
+            font-family: 'Oswald', sans-serif;
+        }
+
+        .search-filter {
+            padding: 1.5rem 2rem;
+            background: #f9fafb;
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .search-filter input {
+            flex: 1;
+            min-width: 200px;
+            padding: 0.75rem 1rem;
+            border: 2px solid #e5e7eb;
+            font-size: 1rem;
+            font-family: inherit;
+        }
+
+        .search-filter input:focus {
+            outline: none;
+            border-color: var(--green-fairway);
+        }
+
+        .players-list {
+            max-height: 500px;
+            overflow-y: auto;
+        }
+
+        .player-item {
+            display: flex;
+            align-items: center;
+            padding: 1rem 2rem;
+            border-bottom: 1px solid #e5e7eb;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .player-item:hover:not(.disabled) {
+            background: rgba(26, 92, 58, 0.05);
+        }
+
+        .player-item.disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            background: #f3f4f6;
+        }
+
+        .player-item.selected {
+            background: rgba(196, 167, 71, 0.15);
+            border-left: 4px solid var(--gold);
+        }
+
+        .player-photo {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin-right: 1rem;
+            background: #e5e7eb;
+        }
+
+        .player-info {
+            flex: 1;
+        }
+
+        .player-info h4 {
+            font-family: 'Oswald', sans-serif;
+            font-size: 1.1rem;
+            color: var(--dark);
+        }
+
+        .player-info p {
+            color: var(--gray);
+            font-size: 0.9rem;
+        }
+
+        .player-rank {
+            text-align: right;
+        }
+
+        .player-rank strong {
+            display: block;
+            font-family: 'Oswald', sans-serif;
+            font-size: 1.25rem;
+            color: var(--green-deep);
+        }
+
+        .player-rank span {
+            color: var(--gray);
+            font-size: 0.85rem;
+        }
+
+        .used-badge {
+            background: var(--red);
+            color: var(--white);
+            padding: 0.25rem 0.5rem;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .current-badge {
+            background: var(--gold);
+            color: var(--green-deep);
+            padding: 0.25rem 0.5rem;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .player-item.current-pick {
+            border: 2px solid var(--gold);
+            background: rgba(196, 167, 71, 0.1);
+        }
+
+        .confirm-selection {
+            padding: 1.5rem 2rem;
+            background: #f9fafb;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        /* Leaderboard */
+        .leaderboard {
+            background: var(--white);
+            box-shadow: var(--shadow);
+        }
+
+        .leaderboard-header {
+            background: linear-gradient(135deg, var(--green-deep) 0%, var(--green-fairway) 100%);
+            padding: 1.25rem 2rem;
+            color: var(--white);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .leaderboard-header .tournament-title {
+            flex: 1;
+        }
+
+        .tournament-logo {
+            width: 70px;
+            height: 70px;
+            object-fit: contain;
+            background: var(--white);
+            border-radius: 8px;
+            padding: 6px;
+        }
+
+        .tournament-logo-small {
+            width: 32px;
+            height: 32px;
+            object-fit: contain;
+            border-radius: 4px;
+        }
+
+        .leaderboard-header h2 {
+            font-family: 'Oswald', sans-serif;
+            font-size: 1.75rem;
+        }
+
+        .leaderboard-meta {
+            display: flex;
+            gap: 2rem;
+            margin-top: 0.5rem;
+            font-size: 0.95rem;
+            opacity: 0.9;
+        }
+
+        .my-pick-highlight {
+            background: linear-gradient(90deg, var(--gold) 0%, var(--gold-light) 100%);
+            padding: 1rem 2rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .my-pick-highlight img {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 3px solid var(--white);
+        }
+
+        .my-pick-info {
+            flex: 1;
+        }
+
+        .my-pick-info h3 {
+            font-family: 'Oswald', sans-serif;
+            font-size: 1.25rem;
+            color: var(--green-deep);
+        }
+
+        .my-pick-info p {
+            color: var(--green-deep);
+            opacity: 0.8;
+        }
+
+        .my-pick-stats {
+            text-align: right;
+        }
+
+        .my-pick-stats .position {
+            font-family: 'Oswald', sans-serif;
+            font-size: 2rem;
+            color: var(--green-deep);
+        }
+
+        .my-pick-stats .earnings {
+            color: var(--green-deep);
+            font-weight: 600;
+        }
+
+        .leaderboard-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .leaderboard-table th {
+            background: #f9fafb;
+            padding: 0.5rem 1rem;
+            text-align: left;
+            font-family: 'Oswald', sans-serif;
+            font-weight: 500;
+            color: var(--gray);
+            text-transform: uppercase;
+            font-size: 0.85rem;
+            letter-spacing: 0.5px;
+        }
+
+        .leaderboard-table td {
+            padding: 0.5rem 1rem;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .leaderboard-table tr:hover {
+            background: rgba(26, 92, 58, 0.03);
+        }
+
+        .leaderboard-table tr.my-pick {
+            background: rgba(196, 167, 71, 0.15);
+        }
+
+        .leaderboard-table tr.my-pick td {
+            font-weight: 600;
+        }
+
+        .pos-cell {
+            font-family: 'Oswald', sans-serif;
+            font-size: 1.1rem;
+            color: var(--green-deep);
+        }
+
+        .player-cell {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .player-cell img {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+
+        .pick-tag {
+            margin-left: 0.5rem;
+            font-size: 0.65rem;
+            padding: 0.1rem 0.4rem;
+            border-radius: 2px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .pick-tag.your-pick {
+            background: var(--gold);
+            color: var(--green-deep);
+        }
+
+        .pick-tag.friend-pick-0 {
+            background: #3b82f6;
+            color: var(--white);
+        }
+
+        .pick-tag.friend-pick-1 {
+            background: #8b5cf6;
+            color: var(--white);
+        }
+
+        .pick-tag.friend-pick-2 {
+            background: #ec4899;
+            color: var(--white);
+        }
+
+        .pick-tag.friend-pick-3 {
+            background: #f97316;
+            color: var(--white);
+        }
+
+        .pick-tag.friend-pick-4 {
+            background: #14b8a6;
+            color: var(--white);
+        }
+
+        .score-cell {
+            font-family: 'Oswald', sans-serif;
+            font-size: 1.1rem;
+        }
+
+        .score-cell.under {
+            color: var(--red);
+        }
+
+        .score-cell.over {
+            color: var(--green-deep);
+        }
+
+        .thru-cell {
+            color: var(--gray);
+        }
+
+        .earnings-cell {
+            font-weight: 600;
+            color: var(--green-fairway);
+        }
+
+        /* Pool Standings */
+        .standings-header {
+            background: linear-gradient(135deg, var(--green-deep) 0%, var(--green-fairway) 100%);
+            padding: 1.5rem 2rem;
+            color: var(--white);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .standings-header h2 {
+            font-family: 'Oswald', sans-serif;
+            font-size: 1.75rem;
+        }
+
+        .pool-total {
+            font-family: 'Oswald', sans-serif;
+            font-size: 1.5rem;
+        }
+
+        .pool-total span {
+            color: var(--gold);
+        }
+
+        .standings-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .standings-table th {
+            background: #f9fafb;
+            padding: 1rem;
+            text-align: left;
+            font-family: 'Oswald', sans-serif;
+            font-weight: 500;
+            color: var(--gray);
+            text-transform: uppercase;
+            font-size: 0.85rem;
+        }
+
+        .standings-table td {
+            padding: 1rem;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .standings-table tr.current-user {
+            background: rgba(196, 167, 71, 0.15);
+        }
+
+        .rank-badge {
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Oswald', sans-serif;
+            font-weight: 600;
+        }
+
+        .rank-badge.gold {
+            background: var(--gold);
+            color: var(--green-deep);
+        }
+
+        .rank-badge.silver {
+            background: #c0c0c0;
+            color: var(--dark);
+        }
+
+        .rank-badge.bronze {
+            background: #cd7f32;
+            color: var(--white);
+        }
+
+        .weekly-pick {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .weekly-pick img {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+        }
+
+        /* Modal */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.6);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s;
+        }
+
+        .modal-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .modal {
+            background: var(--white);
+            width: 90%;
+            max-width: 500px;
+            max-height: 90vh;
+            overflow-y: auto;
+            transform: translateY(20px);
+            transition: transform 0.3s;
+        }
+
+        .modal-overlay.active .modal {
+            transform: translateY(0);
+        }
+
+        .modal-header {
+            background: var(--green-deep);
+            color: var(--white);
+            padding: 1.25rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-header h3 {
+            font-family: 'Oswald', sans-serif;
+            font-size: 1.35rem;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            color: var(--white);
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
+
+        .modal-body {
+            padding: 1.5rem;
+        }
+
+        /* Toast Notification */
+        .toast {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            background: var(--green-deep);
+            color: var(--white);
+            padding: 1rem 1.5rem;
+            box-shadow: var(--shadow);
+            transform: translateX(calc(100% + 2rem));
+            transition: transform 0.3s;
+            z-index: 1001;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .toast.show {
+            transform: translateX(0);
+        }
+
+        .toast.error {
+            background: var(--red);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .header-content {
+                flex-direction: column;
+                gap: 1rem;
+            }
+
+            .hero h2 {
+                font-size: 2.5rem;
+            }
+
+            .hero-cta {
+                flex-direction: column;
+            }
+
+            .dashboard-header {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .tournaments-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .leaderboard-table,
+            .standings-table {
+                font-size: 0.9rem;
+            }
+
+            .leaderboard-table th,
+            .leaderboard-table td,
+            .standings-table th,
+            .standings-table td {
+                padding: 0.75rem 0.5rem;
+            }
+
+            .my-pick-highlight {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .my-pick-stats {
+                text-align: center;
+            }
+        }
+
+        /* Loading State */
+        .loading {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 3rem;
+            color: var(--gray);
+        }
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid #e5e7eb;
+            border-top-color: var(--green-fairway);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-right: 1rem;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 4rem 2rem;
+            color: var(--gray);
+        }
+
+        .empty-state h3 {
+            font-family: 'Oswald', sans-serif;
+            font-size: 1.5rem;
+            color: var(--dark);
+            margin-bottom: 0.5rem;
+        }
+
+        .empty-state .btn {
+            margin-top: 1.5rem;
+        }
+
+        /* Tab Navigation */
+        .tabs {
+            display: flex;
+            background: #f9fafb;
+            border-bottom: 2px solid #e5e7eb;
+        }
+
+        .tab {
+            padding: 1rem 2rem;
+            font-family: 'Oswald', sans-serif;
+            font-size: 1rem;
+            color: var(--gray);
+            background: none;
+            border: none;
+            cursor: pointer;
+            position: relative;
+            transition: color 0.2s;
+        }
+
+        .tab:hover {
+            color: var(--green-fairway);
+        }
+
+        .tab.active {
+            color: var(--green-deep);
+        }
+
+        .tab.active::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: var(--gold);
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header>
+        <div class="header-content">
+            <div class="logo">
+                <div class="logo-icon">⛳</div>
+                <h1>ONE <span>&</span> DONE</h1>
+            </div>
+            <nav id="nav-guest">
+                <button class="nav-btn" onclick="showScreen('login')">Log In</button>
+                <button class="nav-btn primary" onclick="showScreen('signup')">Sign Up</button>
+            </nav>
+            <nav id="nav-user" style="display: none;">
+                <button class="nav-btn" onclick="showScreen('dashboard')">My Pools</button>
+                <button class="nav-btn" onclick="logout()">Log Out</button>
+            </nav>
+        </div>
+    </header>
+
+    <div class="container">
+        <!-- Landing Page -->
+        <section id="landing" class="screen active">
+            <div class="hero">
+                <h2>One Pick Per Week.<br>One Season.<br>Unlimited Glory.</h2>
+                <p>The ultimate PGA Tour fantasy pool. Select one player per tournament—use each golfer only once all season. Accumulate earnings and dominate your friends.</p>
+                <div class="hero-cta">
+                    <button class="btn btn-primary" onclick="showScreen('signup')">Start a Pool</button>
+                    <button class="btn btn-secondary" onclick="showScreen('login')">Join a Pool</button>
+                </div>
+            </div>
+
+            <div class="features">
+                <div class="feature-card">
+                    <div class="feature-icon">🏆</div>
+                    <h3>Simple Rules</h3>
+                    <p>Pick one PGA Tour player each week. Their tournament earnings become your score. Use each player only once per season.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">📊</div>
+                    <h3>Live Tracking</h3>
+                    <p>Watch your player climb the leaderboard in real-time. See projected earnings update as the tournament unfolds.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">👥</div>
+                    <h3>Challenge Friends</h3>
+                    <p>Create private pools, invite friends, and compete head-to-head throughout the entire PGA Tour season.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">💰</div>
+                    <h3>Accumulate Earnings</h3>
+                    <p>Your total earnings accumulate week after week. The highest total at season's end wins the pool.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Login -->
+        <section id="login" class="screen">
+            <div class="auth-container">
+                <h2>Welcome Back</h2>
+                <form id="login-form" onsubmit="handleLogin(event)">
+                    <div class="form-group">
+                        <label>Email</label>
+                        <input type="email" id="login-email" required placeholder="your@email.com">
+                    </div>
+                    <div class="form-group">
+                        <label>Password</label>
+                        <input type="password" id="login-password" required placeholder="Enter your password">
+                    </div>
+                    <button type="submit" class="form-btn">Log In</button>
+                </form>
+                <p class="auth-switch">
+                    Don't have an account? <a onclick="showScreen('signup')">Sign up</a>
+                </p>
+            </div>
+        </section>
+
+        <!-- Signup -->
+        <section id="signup" class="screen">
+            <div class="auth-container">
+                <h2>Create Account</h2>
+                <form id="signup-form" onsubmit="handleSignup(event)">
+                    <div class="form-group">
+                        <label>Display Name</label>
+                        <input type="text" id="signup-name" required placeholder="How friends will see you">
+                    </div>
+                    <div class="form-group">
+                        <label>Email</label>
+                        <input type="email" id="signup-email" required placeholder="your@email.com">
+                    </div>
+                    <div class="form-group">
+                        <label>Password</label>
+                        <input type="password" id="signup-password" required placeholder="At least 8 characters" minlength="8">
+                    </div>
+                    <div class="form-group">
+                        <label>Confirm Password</label>
+                        <input type="password" id="signup-confirm" required placeholder="Confirm your password">
+                    </div>
+                    <button type="submit" class="form-btn">Create Account</button>
+                </form>
+                <p class="auth-switch">
+                    Already have an account? <a onclick="showScreen('login')">Log in</a>
+                </p>
+            </div>
+        </section>
+
+        <!-- Dashboard -->
+        <section id="dashboard" class="screen">
+            <div class="dashboard-header">
+                <h2>My Pools</h2>
+                <div class="user-info">
+                    <span>Logged in as <strong id="user-display-name">User</strong></span>
+                </div>
+            </div>
+
+            <button class="btn btn-primary" onclick="showScreen('create-tournament')" style="margin-bottom: 2rem;">
+                + Create New Pool
+            </button>
+
+            <div id="tournaments-container" class="tournaments-grid">
+                <!-- Tournaments will be rendered here -->
+            </div>
+        </section>
+
+        <!-- Create Tournament -->
+        <section id="create-tournament" class="screen">
+            <div class="create-tournament">
+                <h2>Create a New Pool</h2>
+                <form id="create-form" onsubmit="handleCreateTournament(event)">
+                    <div class="form-group">
+                        <label>Pool Name</label>
+                        <input type="text" id="pool-name" required placeholder="e.g., Office Golf League 2026">
+                    </div>
+                    <div class="form-group">
+                        <label>Season</label>
+                        <select id="pool-season" style="width: 100%; padding: 0.875rem 1rem; border: 2px solid #e5e7eb; font-size: 1rem;">
+                            <option value="2025-2026">2025-2026 PGA Tour Season</option>
+                        </select>
+                    </div>
+
+                    <div class="invite-section">
+                        <h3>Invite Friends</h3>
+                        <p style="color: var(--gray); font-size: 0.95rem; margin-bottom: 1rem;">Enter email addresses to send invitations</p>
+                        <div style="display: flex; gap: 0.5rem;">
+                            <input type="email" id="invite-email" placeholder="friend@email.com" style="flex: 1; padding: 0.75rem; border: 2px solid #e5e7eb;">
+                            <button type="button" class="btn btn-secondary" onclick="addInvite()" style="padding: 0.75rem 1.5rem;">Add</button>
+                        </div>
+                        <div id="invite-list" class="invite-list"></div>
+                    </div>
+
+                    <div style="display: flex; gap: 1rem; margin-top: 2rem;">
+                        <button type="button" class="btn btn-secondary" onclick="showScreen('dashboard')" style="flex: 1;">Cancel</button>
+                        <button type="submit" class="btn btn-primary" style="flex: 1;">Create Pool</button>
+                    </div>
+                </form>
+            </div>
+        </section>
+
+        <!-- Pool View -->
+        <section id="pool-view" class="screen">
+            <div style="margin-bottom: 1rem;">
+                <button class="btn btn-secondary" onclick="showScreen('dashboard')" style="padding: 0.5rem 1rem; font-size: 0.9rem;">
+                    ← Back to My Pools
+                </button>
+            </div>
+
+            <div class="tabs">
+                <button class="tab active" onclick="switchPoolTab('standings')">Pool Standings</button>
+                <button class="tab" onclick="switchPoolTab('leaderboard')">Live Leaderboard</button>
+                <button class="tab" onclick="switchPoolTab('pick')">Make Pick</button>
+                <button class="tab" onclick="switchPoolTab('history')">Pick History</button>
+            </div>
+
+            <!-- Standings Tab -->
+            <div id="tab-standings" class="pool-tab">
+                <div class="leaderboard">
+                    <div class="standings-header">
+                        <div>
+                            <h2 id="pool-title">Pool Name</h2>
+                            <p id="pool-season-display">2025-2026 Season</p>
+                        </div>
+                    </div>
+
+                    <table class="standings-table">
+                        <thead>
+                            <tr>
+                                <th>Rank</th>
+                                <th>Player</th>
+                                <th>This Week</th>
+                                <th>Total Earnings</th>
+                                <th>Picks Used</th>
+                            </tr>
+                        </thead>
+                        <tbody id="standings-body">
+                            <!-- Standings will be rendered here -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Live Leaderboard Tab -->
+            <div id="tab-leaderboard" class="pool-tab" style="display: none;">
+                <div class="leaderboard">
+                    <div class="leaderboard-header">
+                        <div class="tournament-title">
+                            <h2 id="current-tournament-name">The American Express</h2>
+                            <div class="leaderboard-meta">
+                                <span id="tournament-dates">Jan 22 - 25, 2026</span>
+                                <span id="tournament-course">Pete Dye Stadium Course</span>
+                                <span id="tournament-round">Round 1</span>
+                            </div>
+                        </div>
+                        <img id="tournament-logo" class="tournament-logo" src="" alt="Tournament Logo">
+                    </div>
+
+                    <div id="my-pick-section" class="my-pick-highlight" style="display: none;">
+                        <img id="my-pick-photo" src="" alt="">
+                        <div class="my-pick-info">
+                            <p>YOUR PICK</p>
+                            <h3 id="my-pick-name">Player Name</h3>
+                        </div>
+                        <div class="my-pick-stats">
+                            <div class="position" id="my-pick-position">T5</div>
+                            <div class="earnings" id="my-pick-earnings">Projected: $450,000</div>
+                        </div>
+                    </div>
+
+                    <table class="leaderboard-table">
+                        <thead>
+                            <tr>
+                                <th>Pos</th>
+                                <th>Player</th>
+                                <th>Score</th>
+                                <th>Today</th>
+                                <th>Thru</th>
+                                <th>Projected $</th>
+                            </tr>
+                        </thead>
+                        <tbody id="leaderboard-body">
+                            <!-- Leaderboard will be rendered here -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Make Pick Tab -->
+            <div id="tab-pick" class="pool-tab" style="display: none;">
+                <div class="player-selection">
+                    <div class="selection-header">
+                        <div class="tournament-title">
+                            <h2>Select Your Golfer</h2>
+                            <p id="pick-tournament-info">The American Express • Jan 22-25, 2026</p>
+                        </div>
+                        <img id="pick-tournament-logo" class="tournament-logo" src="" alt="Tournament Logo">
+                    </div>
+
+                    <div id="current-pick-display" class="current-pick" style="display: none;">
+                        <strong>Current Selection:</strong>
+                        <span id="selected-player-name">None</span>
+                    </div>
+
+                    <div class="search-filter">
+                        <input type="text" id="player-search" placeholder="Search players..." oninput="filterPlayers()">
+                    </div>
+
+                    <div class="players-list" id="players-list">
+                        <!-- Players will be rendered here -->
+                    </div>
+
+                    <div class="confirm-selection">
+                        <div id="pick-warning" style="color: var(--gray);">
+                            Select a player to lock in your pick for this week
+                        </div>
+                        <button id="confirm-pick-btn" class="btn btn-primary" disabled onclick="confirmPick()">
+                            Confirm Selection
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- History Tab -->
+            <div id="tab-history" class="pool-tab" style="display: none;">
+                <div class="leaderboard">
+                    <div class="leaderboard-header">
+                        <h2>Your Pick History</h2>
+                    </div>
+                    <table class="leaderboard-table">
+                        <thead>
+                            <tr>
+                                <th>Week</th>
+                                <th>Tournament</th>
+                                <th>Your Pick</th>
+                                <th>Finish</th>
+                                <th>Earnings</th>
+                            </tr>
+                        </thead>
+                        <tbody id="history-body">
+                            <!-- History will be rendered here -->
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Upcoming Schedule -->
+                <div class="leaderboard" style="margin-top: 1.5rem;">
+                    <div class="leaderboard-header">
+                        <h2>Upcoming Tournaments</h2>
+                    </div>
+                    <table class="leaderboard-table">
+                        <thead>
+                            <tr>
+                                <th>Week</th>
+                                <th>Tournament</th>
+                                <th>Dates</th>
+                                <th>Course</th>
+                                <th>Previous Winner</th>
+                            </tr>
+                        </thead>
+                        <tbody id="schedule-body">
+                            <!-- Schedule will be rendered here -->
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Friends Pick History -->
+                <div class="leaderboard" style="margin-top: 1.5rem;">
+                    <div class="leaderboard-header">
+                        <h2>Pool Members' Pick History</h2>
+                    </div>
+                    <div id="friends-history">
+                        <!-- Friends history will be rendered here -->
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <!-- Invite Modal -->
+    <div id="invite-modal" class="modal-overlay">
+        <div class="modal">
+            <div class="modal-header">
+                <h3>Invite Friends</h3>
+                <button class="modal-close" onclick="closeModal('invite-modal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p style="margin-bottom: 1rem; color: var(--gray);">Share this link with friends to invite them to your pool:</p>
+                <div style="background: #f9fafb; padding: 1rem; word-break: break-all; font-family: monospace; margin-bottom: 1rem;" id="invite-link">
+                    https://oneanddonegolf.com/join/ABC123
+                </div>
+                <button class="btn btn-primary" onclick="copyInviteLink()" style="width: 100%;">Copy Link</button>
+
+                <div style="margin-top: 1.5rem; padding-top: 1.5rem; border-top: 1px solid #e5e7eb;">
+                    <p style="margin-bottom: 1rem; color: var(--gray);">Or invite by email:</p>
+                    <div style="display: flex; gap: 0.5rem;">
+                        <input type="email" id="modal-invite-email" placeholder="friend@email.com" style="flex: 1; padding: 0.75rem; border: 2px solid #e5e7eb;">
+                        <button class="btn btn-secondary" onclick="sendModalInvite()" style="padding: 0.75rem 1.5rem;">Send</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast -->
+    <div id="toast" class="toast">
+        <span id="toast-message"></span>
+    </div>
+
+    <script>
+        // ==================== DATA STORE ====================
+        // In production, this would be backed by a database
+        const store = {
+            currentUser: null,
+            users: [],
+            pools: [],
+            picks: [],
+            invites: []
+        };
+
+        // ==================== SUPABASE CONFIGURATION ====================
+        const SUPABASE_URL = 'https://ttwtifdhlaijdswhehve.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InR0d3RpZmRobGFpamRzd2hlaHZlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njc0OTc5MTYsImV4cCI6MjA4MzA3MzkxNn0.h4YVDwZ4_TLmbjHnFSbUKPUpqBsY2Lh4WQIqUwZ3faE';
+
+        // Initialize Supabase client (will be null if Supabase SDK not loaded)
+        let supabaseClient = null;
+        try {
+            if (typeof supabase !== 'undefined' && supabase.createClient) {
+                supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+                console.log('Supabase client initialized');
+            }
+        } catch (e) {
+            console.log('Supabase not available, using local storage');
+        }
+
+        // ==================== SUPABASE AUTH FUNCTIONS ====================
+        async function supabaseSignUp(email, password, name) {
+            if (!supabaseClient) throw new Error('Supabase not initialized');
+            const { data, error } = await supabaseClient.auth.signUp({
+                email,
+                password,
+                options: { data: { name } }
+            });
+            if (error) throw error;
+            return data;
+        }
+
+        async function supabaseSignIn(email, password) {
+            if (!supabaseClient) throw new Error('Supabase not initialized');
+            const { data, error } = await supabaseClient.auth.signInWithPassword({
+                email,
+                password
+            });
+            if (error) throw error;
+            return data;
+        }
+
+        async function supabaseSignOut() {
+            if (!supabaseClient) return;
+            const { error } = await supabaseClient.auth.signOut();
+            if (error) throw error;
+        }
+
+        async function supabaseGetCurrentUser() {
+            if (!supabaseClient) return null;
+            const { data: { user } } = await supabaseClient.auth.getUser();
+            return user;
+        }
+
+        // ==================== SUPABASE POOL FUNCTIONS ====================
+        async function supabaseCreatePool(name, season) {
+            if (!supabaseClient) throw new Error('Supabase not initialized');
+            const user = await supabaseGetCurrentUser();
+            const inviteCode = Math.random().toString(36).substring(2, 8).toUpperCase();
+            
+            const { data: pool, error } = await supabaseClient
+                .from('pools')
+                .insert({
+                    name,
+                    season,
+                    invite_code: inviteCode,
+                    created_by: user.id
+                })
+                .select()
+                .single();
+            
+            if (error) throw error;
+            
+            // Add creator as member
+            await supabaseClient
+                .from('pool_members')
+                .insert({ pool_id: pool.id, user_id: user.id });
+            
+            return pool;
+        }
+
+        async function supabaseJoinPool(inviteCode) {
+            if (!supabaseClient) throw new Error('Supabase not initialized');
+            const user = await supabaseGetCurrentUser();
+            
+            const { data: pool, error: poolError } = await supabaseClient
+                .from('pools')
+                .select('id')
+                .eq('invite_code', inviteCode.toUpperCase())
+                .single();
+            
+            if (poolError) throw new Error('Invalid invite code');
+            
+            const { error } = await supabaseClient
+                .from('pool_members')
+                .insert({ pool_id: pool.id, user_id: user.id });
+            
+            if (error) throw error;
+            return pool;
+        }
+
+        async function supabaseGetUserPools() {
+            if (!supabaseClient) return [];
+            const user = await supabaseGetCurrentUser();
+            if (!user) return [];
+            
+            const { data, error } = await supabaseClient
+                .from('pool_members')
+                .select('pool:pools(*)')
+                .eq('user_id', user.id);
+            
+            if (error) throw error;
+            return data.map(pm => pm.pool);
+        }
+
+        // ==================== SUPABASE PICK FUNCTIONS ====================
+        async function supabaseMakePick(poolId, tournamentId, playerId, playerName) {
+            if (!supabaseClient) throw new Error('Supabase not initialized');
+            const user = await supabaseGetCurrentUser();
+            
+            // Check if player already used this season
+            const { data: usedCheck } = await supabaseClient
+                .from('used_players')
+                .select('id')
+                .eq('pool_id', poolId)
+                .eq('user_id', user.id)
+                .eq('player_id', playerId)
+                .eq('season', '2025-2026')
+                .single();
+            
+            if (usedCheck) {
+                throw new Error('You have already used this player this season');
+            }
+            
+            const { data, error } = await supabaseClient
+                .from('picks')
+                .upsert({
+                    pool_id: poolId,
+                    user_id: user.id,
+                    tournament_id: tournamentId,
+                    player_id: playerId,
+                    player_name: playerName
+                }, {
+                    onConflict: 'pool_id,user_id,tournament_id'
+                })
+                .select()
+                .single();
+            
+            if (error) throw error;
+            return data;
+        }
+
+        async function supabaseGetUserPicks(poolId) {
+            if (!supabaseClient) return [];
+            const user = await supabaseGetCurrentUser();
+            if (!user) return [];
+            
+            const { data, error } = await supabaseClient
+                .from('picks')
+                .select('*')
+                .eq('pool_id', poolId)
+                .eq('user_id', user.id)
+                .order('picked_at', { ascending: false });
+            
+            if (error) throw error;
+            return data;
+        }
+
+        async function supabaseGetPoolStandings(poolId) {
+            if (!supabaseClient) return [];
+            const { data, error } = await supabaseClient
+                .rpc('get_pool_standings', { p_pool_id: poolId });
+            
+            if (error) throw error;
+            return data;
+        }
+
+        // ==================== MOCK DATA ====================
+        // PGA Players with ESPN IDs (master list from pgatour.com/players for pre-tournament picks)
+        const pgaPlayers = [
+            { id: "9478", name: "Scottie Scheffler", country: "USA", rank: 1 },
+            { id: "4686087", name: "Xander Schauffele", country: "USA", rank: 2 },
+            { id: "401", name: "Rory McIlroy", country: "NIR", rank: 3 },
+            { id: "9780", name: "Jon Rahm", country: "ESP", rank: 4 },
+            { id: "10592", name: "Collin Morikawa", country: "USA", rank: 5 },
+            { id: "10046", name: "Viktor Hovland", country: "NOR", rank: 6 },
+            { id: "6007", name: "Patrick Cantlay", country: "USA", rank: 7 },
+            { id: "11119", name: "Wyndham Clark", country: "USA", rank: 8 },
+            { id: "4375972", name: "Ludvig Åberg", country: "SWE", rank: 9 },
+            { id: "4148", name: "Hideki Matsuyama", country: "JPN", rank: 10 },
+            { id: "6798", name: "Tommy Fleetwood", country: "ENG", rank: 11 },
+            { id: "8973", name: "Max Homa", country: "USA", rank: 12 },
+            { id: "1225", name: "Brian Harman", country: "USA", rank: 13 },
+            { id: "10980", name: "Sahith Theegala", country: "USA", rank: 14 },
+            { id: "5409", name: "Russell Henley", country: "USA", rank: 15 },
+            { id: "2230", name: "Tony Finau", country: "USA", rank: 16 },
+            { id: "9037", name: "Matt Fitzpatrick", country: "ENG", rank: 17 },
+            { id: "9427", name: "Sungjae Im", country: "KOR", rank: 18 },
+            { id: "4612", name: "Keegan Bradley", country: "USA", rank: 19 },
+            { id: "5321", name: "Justin Thomas", country: "USA", rank: 20 },
+            { id: "5467", name: "Jordan Spieth", country: "USA", rank: 21 },
+            { id: "6798", name: "Cameron Smith", country: "AUS", rank: 22 },
+            { id: "5013", name: "Shane Lowry", country: "IRL", rank: 23 },
+            { id: "10644", name: "Cameron Young", country: "USA", rank: 24 },
+            { id: "9576", name: "Corey Conners", country: "CAN", rank: 25 },
+            { id: "1680", name: "Jason Day", country: "AUS", rank: 26 },
+            { id: "4419142", name: "Akshay Bhatia", country: "USA", rank: 27 },
+            { id: "6993", name: "Tyrrell Hatton", country: "ENG", rank: 28 },
+            { id: "7081", name: "Si Woo Kim", country: "KOR", rank: 29 },
+            { id: "8961", name: "Sepp Straka", country: "AUT", rank: 30 },
+            { id: "3702", name: "Rickie Fowler", country: "USA", rank: 31 },
+            { id: "9877", name: "Will Zalatoris", country: "USA", rank: 32 },
+            { id: "9938", name: "Sam Burns", country: "USA", rank: 33 },
+            { id: "4602673", name: "Tom Kim", country: "KOR", rank: 34 },
+            { id: "11378", name: "Robert MacIntyre", country: "SCO", rank: 35 },
+            { id: "9025", name: "Daniel Berger", country: "USA", rank: 36 },
+            { id: "388", name: "Adam Scott", country: "AUS", rank: 37 },
+            { id: "569", name: "Justin Rose", country: "ENG", rank: 38 },
+            { id: "1651", name: "Billy Horschel", country: "USA", rank: 39 },
+            { id: "6086", name: "Tom Hoge", country: "USA", rank: 40 }
+        ];
+
+        // Current tournament (from live data)
+        const currentTournament = {
+            id: "amex2026",
+            name: "The American Express",
+            dates: "Jan 22 - 25, 2026",
+            course: "La Quinta CC / PGA West (Nicklaus) / Pete Dye Stadium",
+            location: "La Quinta, CA",
+            purse: 9200000,
+            round: 2,
+            status: "In Progress",
+            logo: "https://res.cloudinary.com/pgatour-prod/d_tournaments:logos:R000.png/tournaments/logos/R002.png"
+        };
+
+        // ESPN API configuration
+        const ESPN_API_URL = 'https://site.web.api.espn.com/apis/site/v2/sports/golf/leaderboard?league=pga';
+
+        // Purse payout percentages (based on PGA Tour standard)
+        const PURSE_PAYOUTS = {
+            1: 0.18, 2: 0.109, 3: 0.069, 4: 0.049, 5: 0.041,
+            6: 0.0363, 7: 0.0338, 8: 0.0313, 9: 0.0293, 10: 0.0273,
+            11: 0.0253, 12: 0.0233, 13: 0.0213, 14: 0.0193, 15: 0.0183,
+            16: 0.0173, 17: 0.0163, 18: 0.0153, 19: 0.0143, 20: 0.0133,
+            21: 0.0123, 22: 0.0113, 23: 0.0105, 24: 0.0097, 25: 0.0089,
+            26: 0.0081, 27: 0.0078, 28: 0.0075, 29: 0.0072, 30: 0.0069,
+            31: 0.0066, 32: 0.0063, 33: 0.006, 34: 0.0057, 35: 0.0055,
+            36: 0.0052, 37: 0.005, 38: 0.0048, 39: 0.0046, 40: 0.0044,
+            41: 0.0042, 42: 0.004, 43: 0.0038, 44: 0.0036, 45: 0.0034,
+            46: 0.0032, 47: 0.003, 48: 0.0028, 49: 0.0027, 50: 0.0026,
+            51: 0.0025, 52: 0.0025, 53: 0.0024, 54: 0.0024, 55: 0.0024,
+            56: 0.0023, 57: 0.0023, 58: 0.0023, 59: 0.0023, 60: 0.0023,
+            61: 0.0022, 62: 0.0022, 63: 0.0022, 64: 0.0022, 65: 0.0022
+        };
+
+        function calculateProjectedEarnings(position, purse) {
+            if (!position || position === '-' || position === 'WD' || position === 'CUT' || position === 'MC') return 0;
+            const posNum = parseInt(position.replace('T', ''));
+            if (isNaN(posNum) || posNum > 65) return 0;
+            const pct = PURSE_PAYOUTS[posNum] || 0.002;
+            return Math.round(purse * pct);
+        }
+
+        // Live leaderboard data from ESPN
+        let liveLeaderboard = [];
+        let espnDataLoaded = false;
+
+        // Fetch live leaderboard from ESPN API
+        async function fetchESPNLeaderboard() {
+            try {
+                const response = await fetch(ESPN_API_URL);
+                if (!response.ok) throw new Error('ESPN API request failed');
+                
+                const data = await response.json();
+                
+                if (!data.events || !data.events[0] || !data.events[0].competitions) {
+                    throw new Error('Invalid ESPN data structure');
+                }
+
+                const event = data.events[0];
+                const competition = event.competitions[0];
+                
+                // Update tournament info
+                if (event.purse) currentTournament.purse = event.purse;
+                if (competition.status && competition.status.period) {
+                    currentTournament.round = competition.status.period;
+                }
+
+                // Build leaderboard from competitors
+                liveLeaderboard = [];
+                const competitors = competition.competitors || [];
+                
+                // Sort by position
+                competitors.sort((a, b) => (a.sortOrder || 999) - (b.sortOrder || 999));
+
+                competitors.forEach(comp => {
+                    const athlete = comp.athlete || {};
+                    const status = comp.status || {};
+                    const position = status.position ? status.position.displayName : '-';
+                    const scoreToPar = comp.statistics ? comp.statistics.find(s => s.name === 'scoreToPar') : null;
+                    
+                    // Parse today's score from todayDetail (e.g., "-6(14)" or "E(F)")
+                    let todayScore = 0;
+                    if (status.todayDetail) {
+                        const match = status.todayDetail.match(/^([+-]?\d+|E)/);
+                        if (match) {
+                            todayScore = match[1] === 'E' ? 0 : parseInt(match[1]);
+                        }
+                    }
+
+                    liveLeaderboard.push({
+                        playerId: athlete.id,
+                        playerName: athlete.displayName || 'Unknown',
+                        pos: position,
+                        score: scoreToPar ? scoreToPar.value : 0,
+                        today: todayScore,
+                        thru: status.displayThru || status.thru || '-',
+                        projectedEarnings: calculateProjectedEarnings(position, currentTournament.purse),
+                        headshot: athlete.headshot ? athlete.headshot.href : null,
+                        flag: athlete.flag ? athlete.flag.href : null
+                    });
+                });
+
+                espnDataLoaded = true;
+                console.log('ESPN leaderboard loaded:', liveLeaderboard.length, 'players');
+                return liveLeaderboard;
+
+            } catch (error) {
+                console.error('Error fetching ESPN leaderboard:', error);
+                espnDataLoaded = false;
+                return null;
+            }
+        }
+
+        // Tournament logos and data (from PGA Tour schedule)
+        const tournamentLogos = {
+            "sony2026": "https://res.cloudinary.com/pgatour-prod/d_tournaments:logos:R000.png/tournaments/logos/R006.png",
+            "amex2026": "https://res.cloudinary.com/pgatour-prod/d_tournaments:logos:R000.png/tournaments/logos/R002.png",
+            "farmers2026": "https://res.cloudinary.com/pgatour-prod/d_tournaments:logos:R000.png/tournaments/logos/R004.png",
+            "atandt2026": "https://res.cloudinary.com/pgatour-prod/d_tournaments:logos:R000.png/tournaments/logos/R054.png",
+            "wmphoenix2026": "https://res.cloudinary.com/pgatour-prod/d_tournaments:logos:R000.png/tournaments/logos/R003.png",
+            "genesis2026": "https://res.cloudinary.com/pgatour-prod/d_tournaments:logos:R000.png/tournaments/logos/R011.png"
+        };
+
+        // 2026 PGA Tour Schedule (upcoming tournaments)
+        const upcomingSchedule = [
+            {
+                id: "farmers2026",
+                name: "Farmers Insurance Open",
+                dates: "Jan 29 - Feb 1",
+                week: 3,
+                course: "Torrey Pines GC (South)",
+                location: "San Diego, CA",
+                purse: 9600000,
+                previousWinner: "Harris English",
+                previousWinnings: 1674000
+            },
+            {
+                id: "atandt2026",
+                name: "AT&T Pebble Beach Pro-Am",
+                dates: "Feb 5 - 8",
+                week: 4,
+                course: "Pebble Beach GL",
+                location: "Pebble Beach, CA",
+                purse: 20000000,
+                previousWinner: "Wyndham Clark",
+                previousWinnings: 3600000
+            },
+            {
+                id: "wmphoenix2026",
+                name: "WM Phoenix Open",
+                dates: "Feb 12 - 15",
+                week: 5,
+                course: "TPC Scottsdale",
+                location: "Scottsdale, AZ",
+                purse: 20000000,
+                previousWinner: "Scottie Scheffler",
+                previousWinnings: 3600000
+            },
+            {
+                id: "genesis2026",
+                name: "The Genesis Invitational",
+                dates: "Feb 19 - 22",
+                week: 6,
+                course: "Riviera CC",
+                location: "Pacific Palisades, CA",
+                purse: 20000000,
+                previousWinner: "Hideki Matsuyama",
+                previousWinnings: 4000000
+            }
+        ];
+
+        // Completed tournaments this season
+        const completedTournaments = [
+            {
+                id: "sony2026",
+                name: "Sony Open in Hawaii",
+                dates: "Jan 15 - 18",
+                week: 1,
+                course: "Waialae CC",
+                location: "Honolulu, HI",
+                purse: 9100000,
+                winner: "Chris Gotterup",
+                winnerEarnings: 1638000
+            }
+        ];
+
+        // PGA Tour player photo URL helper - uses ESPN player IDs
+        // Format: https://a.espncdn.com/i/headshots/golf/players/full/{espnId}.png
+        function getPlayerPhoto(espnId) {
+            return `https://a.espncdn.com/i/headshots/golf/players/full/${espnId}.png`;
+        }
+
+        // Complete tournament field - ALL players in THIS WEEK'S tournament
+        // This is the full field from The American Express 2026 (156 players)
+        // In production, this would be fetched from pgatour.com/tournaments/.../field
+        const tournamentField = [
+            // T1 (-10)
+            { id: "4410932", name: "Min Woo Lee", country: "AUS" },
+            { id: "4837368", name: "Pierceson Coody", country: "USA" },
+            // T3 (-9)
+            { id: "4408315", name: "Vince Whaley", country: "USA" },
+            { id: "7081", name: "Si Woo Kim", country: "KOR" },
+            { id: "9478", name: "Scottie Scheffler", country: "USA" },
+            { id: "4698579", name: "S.H. Kim", country: "KOR" },
+            { id: "11378", name: "Robert MacIntyre", country: "SCO" },
+            { id: "1680", name: "Jason Day", country: "AUS" },
+            { id: "4901368", name: "Matt McCarty", country: "USA" },
+            { id: "6007", name: "Patrick Cantlay", country: "USA" },
+            { id: "4404992", name: "Ben Griffin", country: "USA" },
+            // T12 (-8)
+            { id: "4426181", name: "Sam Stevens", country: "USA" },
+            { id: "1651", name: "Billy Horschel", country: "USA" },
+            { id: "9506", name: "Jordan Smith", country: "ENG" },
+            { id: "10596", name: "Matthieu Pavon", country: "FRA" },
+            { id: "11332", name: "Andrew Novak", country: "USA" },
+            { id: "6086", name: "Tom Hoge", country: "USA" },
+            { id: "10522", name: "Eric Cole", country: "USA" },
+            { id: "5054388", name: "Jacob Bridgeman", country: "USA" },
+            // T20 (-7)
+            { id: "5408", name: "Harris English", country: "USA" },
+            { id: "9877", name: "Will Zalatoris", country: "USA" },
+            { id: "6011", name: "Beau Hossler", country: "USA" },
+            { id: "5409", name: "Russell Henley", country: "USA" },
+            { id: "388", name: "Adam Scott", country: "AUS" },
+            { id: "3792", name: "Nick Taylor", country: "CAN" },
+            { id: "9938", name: "Sam Burns", country: "USA" },
+            { id: "4699418", name: "Keita Nakajima", country: "JPN" },
+            { id: "5113338", name: "Davis Chatfield", country: "USA" },
+            { id: "10030", name: "Zach Bauchou", country: "USA" },
+            // T30 (-6)
+            { id: "9143", name: "Mark Hubbard", country: "USA" },
+            { id: "4425904", name: "Michael Thorbjornsen", country: "USA" },
+            { id: "8889", name: "Zecheng Dou", country: "CHN" },
+            { id: "4982182", name: "Jackson Suber", country: "USA" },
+            { id: "3683", name: "Rafael Campos", country: "PUR" },
+            { id: "10548", name: "Matt Wallace", country: "ENG" },
+            { id: "10058", name: "Davis Riley", country: "USA" },
+            { id: "10505", name: "J.T. Poston", country: "USA" },
+            { id: "4844", name: "Harry Higgs", country: "USA" },
+            { id: "5692", name: "Peter Malnati", country: "USA" },
+            { id: "3550", name: "Gary Woodland", country: "USA" },
+            { id: "11119", name: "Wyndham Clark", country: "USA" },
+            { id: "4349547", name: "Kevin Yu", country: "TPE" },
+            { id: "11056", name: "Austin Smotherman", country: "USA" },
+            { id: "4423323", name: "Dylan Wu", country: "USA" },
+            { id: "257", name: "Matt Kuchar", country: "USA" },
+            { id: "4425898", name: "Austin Eckroat", country: "USA" },
+            { id: "5076025", name: "William Mouw", country: "USA" },
+            { id: "11383", name: "Max McGreevy", country: "USA" },
+            { id: "4587989", name: "Chandler Phillips", country: "USA" },
+            { id: "8973", name: "Max Homa", country: "USA" },
+            // T51 (-5)
+            { id: "5338", name: "Bud Cauley", country: "USA" },
+            { id: "4410612", name: "Takumi Kanaya", country: "JPN" },
+            { id: "5882", name: "Emiliano Grillo", country: "ARG" },
+            { id: "1077", name: "Kevin Streelman", country: "USA" },
+            { id: "6001", name: "Séamus Power", country: "IRL" },
+            { id: "9364", name: "Erik van Rooyen", country: "RSA" },
+            { id: "4566443", name: "Matti Schmid", country: "GER" },
+            { id: "4671", name: "John Parry", country: "ENG" },
+            { id: "11101", name: "Max Greyserman", country: "USA" },
+            { id: "3702", name: "Rickie Fowler", country: "USA" },
+            { id: "10054", name: "Denny McCarthy", country: "USA" },
+            { id: "10057", name: "Chad Ramey", country: "USA" },
+            { id: "4408316", name: "Nico Echavarria", country: "COL" },
+            { id: "5147097", name: "Karl Vilips", country: "AUS" },
+            { id: "5150294", name: "David Ford", country: "USA" },
+            { id: "5211425", name: "Blades Brown", country: "USA" },
+            { id: "686", name: "Zach Johnson", country: "USA" },
+            { id: "9484", name: "Alex Smalley", country: "USA" },
+            { id: "9658", name: "Taylor Pendrith", country: "CAN" },
+            { id: "1407", name: "Dan Brown", country: "ENG" },
+            // T71 (-4)
+            { id: "11456", name: "Doug Ghim", country: "USA" },
+            { id: "5217048", name: "Johnny Keefer", country: "USA" },
+            { id: "9025", name: "Daniel Berger", country: "USA" },
+            { id: "4375972", name: "Ludvig Åberg", country: "SWE" },
+            { id: "9221", name: "Haotong Li", country: "CHN" },
+            { id: "4358083", name: "Patrick Fishburn", country: "USA" },
+            { id: "6701", name: "David Lipsky", country: "USA" },
+            { id: "4858572", name: "Ryo Hisatsune", country: "JPN" },
+            { id: "2230", name: "Tony Finau", country: "USA" },
+            { id: "4589406", name: "Isaiah Salinda", country: "USA" },
+            { id: "5113335", name: "Emilio González", country: "MEX" },
+            { id: "4419142", name: "Akshay Bhatia", country: "USA" },
+            { id: "6962", name: "Adrien Saddier", country: "FRA" },
+            { id: "7001", name: "Sam Ryder", country: "USA" },
+            { id: "11387", name: "Hank Lebioda", country: "USA" },
+            { id: "3832", name: "Alex Noren", country: "SWE" },
+            { id: "8906", name: "Keith Mitchell", country: "USA" },
+            { id: "9243", name: "Christiaan Bezuidenhout", country: "RSA" },
+            { id: "11253", name: "Rasmus Højgaard", country: "DEN" },
+            { id: "4426182", name: "Steven Fisk", country: "USA" },
+            { id: "4691931", name: "Ricky Castillo", country: "USA" },
+            { id: "4877953", name: "S.T. Lee", country: "KOR" },
+            // T93 (-3)
+            { id: "5075548", name: "Kensei Hirata", country: "JPN" },
+            { id: "4585548", name: "Sami Välimäki", country: "FIN" },
+            { id: "4602218", name: "Davis Thompson", country: "USA" },
+            { id: "5724", name: "Chan Kim", country: "USA" },
+            { id: "6196", name: "Joel Dahmen", country: "USA" },
+            { id: "3449", name: "Chris Kirk", country: "USA" },
+            { id: "110", name: "Jason Dufner", country: "USA" },
+            { id: "5139663", name: "Gordon Sargent", country: "USA" },
+            { id: "1264", name: "Camilo Villegas", country: "COL" },
+            { id: "9037", name: "Matt Fitzpatrick", country: "ENG" },
+            { id: "11143", name: "Carson Young", country: "USA" },
+            { id: "3980", name: "Patton Kizzire", country: "USA" },
+            { id: "4618114", name: "Chandler Blanchet", country: "USA" },
+            // T106 (-2)
+            { id: "6825", name: "Patrick Rodgers", country: "USA" },
+            { id: "4791222", name: "Mac Meissner", country: "USA" },
+            { id: "4404991", name: "Lee Hodges", country: "USA" },
+            { id: "4868733", name: "Joe Highsmith", country: "USA" },
+            { id: "10664", name: "Taylor Moore", country: "USA" },
+            { id: "10863", name: "Cam Davis", country: "AUS" },
+            { id: "5143175", name: "Sudarshan Yellamaraju", country: "CAN" },
+            { id: "2283", name: "Brice Garnett", country: "USA" },
+            { id: "5076021", name: "Ryan Gerard", country: "USA" },
+            { id: "1030", name: "Jhonattan Vegas", country: "VEN" },
+            { id: "5215039", name: "Luke Clanton", country: "USA" },
+            { id: "4351896", name: "Kris Ventura", country: "NOR" },
+            // T118 (-1)
+            { id: "10980", name: "Sahith Theegala", country: "USA" },
+            { id: "5962", name: "Lanto Griffin", country: "USA" },
+            { id: "10364", name: "Kurt Kitayama", country: "USA" },
+            { id: "4921329", name: "Michael Brennan", country: "USA" },
+            { id: "7120", name: "Marcelo Rozo", country: "COL" },
+            { id: "10469", name: "Frankie Capan III", country: "USA" },
+            { id: "8974", name: "Michael Kim", country: "USA" },
+            { id: "9144", name: "Justin Lower", country: "USA" },
+            { id: "1222", name: "Brandt Snedeker", country: "USA" },
+            { id: "4682", name: "Andrew Landry", country: "USA" },
+            { id: "6937", name: "Stephan Jaeger", country: "GER" },
+            { id: "5075652", name: "A.J. Ewart", country: "CAN" },
+            // T130 (E)
+            { id: "4408320", name: "Kevin Roy", country: "USA" },
+            { id: "6931", name: "Mackenzie Hughes", country: "CAN" },
+            { id: "4602673", name: "Tom Kim", country: "KOR" },
+            { id: "4699329", name: "Jesper Svensson", country: "SWE" },
+            { id: "569", name: "Justin Rose", country: "ENG" },
+            { id: "4589438", name: "Harry Hall", country: "ENG" },
+            { id: "4408319", name: "Danny Walker", country: "USA" },
+            { id: "5209442", name: "Neal Shipley", country: "USA" },
+            { id: "205", name: "Charley Hoffman", country: "USA" },
+            { id: "5502", name: "Andrew Putnam", country: "USA" },
+            { id: "8961", name: "Sepp Straka", country: "AUT" },
+            { id: "5076011", name: "Adrien Dumont de Chassart", country: "BEL" },
+            // T142 (+1)
+            { id: "5080439", name: "Aldrich Potgieter", country: "RSA" },
+            { id: "4408318", name: "Jeffrey Kang", country: "USA" },
+            { id: "6015", name: "Adam Long", country: "USA" },
+            { id: "3312", name: "Michael Block", country: "USA" },
+            { id: "1225", name: "Brian Harman", country: "USA" },
+            // T147 (+2)
+            { id: "4361934", name: "John VanDerLaan", country: "USA" },
+            { id: "9127", name: "Adam Svensson", country: "CAN" },
+            { id: "9525", name: "Brian Campbell", country: "USA" },
+            // 150 (+3)
+            { id: "10372", name: "Adam Schenk", country: "USA" },
+            // T151 (+5)
+            { id: "11395", name: "Christo Lamprecht", country: "RSA" },
+            { id: "11385", name: "Rico Hoey", country: "PHI" },
+            { id: "4832046", name: "Nick Dunlap", country: "USA" },
+            { id: "10990", name: "Jimmy Stanger", country: "USA" },
+            // T155 (+6)
+            { id: "4375977", name: "Pontus Nyholm", country: "SWE" },
+            { id: "4358081", name: "Alejandro Tosti", country: "ARG" }
+        ];
+
+        // Mock leaderboard - actual R1 results from ESPN (Jan 23, 2026)
+        // Complete leaderboard so any pick can be tracked
+        const mockLeaderboard = [
+            // T1 (-10) - Projected 1st place: $1,656,000 (solo winner payout)
+            { playerId: "4410932", pos: "T1", score: -10, today: -10, thru: "F", round1: 62, projectedEarnings: 1656000 },
+            { playerId: "4837368", pos: "T1", score: -10, today: -10, thru: "F", round1: 62, projectedEarnings: 1656000 },
+            // T3 (-9) - Projected 3rd place: $634,800
+            { playerId: "4408315", pos: "T3", score: -9, today: -9, thru: "F", round1: 63, projectedEarnings: 634800 },
+            { playerId: "7081", pos: "T3", score: -9, today: -9, thru: "F", round1: 63, projectedEarnings: 634800 },
+            { playerId: "9478", pos: "T3", score: -9, today: -9, thru: "F", round1: 63, projectedEarnings: 634800 },
+            { playerId: "4698579", pos: "T3", score: -9, today: -9, thru: "F", round1: 63, projectedEarnings: 634800 },
+            { playerId: "11378", pos: "T3", score: -9, today: -9, thru: "F", round1: 63, projectedEarnings: 634800 },
+            { playerId: "1680", pos: "T3", score: -9, today: -9, thru: "F", round1: 63, projectedEarnings: 634800 },
+            { playerId: "4901368", pos: "T3", score: -9, today: -9, thru: "F", round1: 63, projectedEarnings: 634800 },
+            { playerId: "6007", pos: "T3", score: -9, today: -9, thru: "F", round1: 63, projectedEarnings: 634800 },
+            { playerId: "4404992", pos: "T3", score: -9, today: -9, thru: "F", round1: 63, projectedEarnings: 634800 },
+            // T12 (-8) - Projected 12th place: $213,900
+            { playerId: "4426181", pos: "T12", score: -8, today: -8, thru: "F", round1: 64, projectedEarnings: 213900 },
+            { playerId: "1651", pos: "T12", score: -8, today: -8, thru: "F", round1: 64, projectedEarnings: 213900 },
+            { playerId: "9506", pos: "T12", score: -8, today: -8, thru: "F", round1: 64, projectedEarnings: 213900 },
+            { playerId: "10596", pos: "T12", score: -8, today: -8, thru: "F", round1: 64, projectedEarnings: 213900 },
+            { playerId: "11332", pos: "T12", score: -8, today: -8, thru: "F", round1: 64, projectedEarnings: 213900 },
+            { playerId: "6086", pos: "T12", score: -8, today: -8, thru: "F", round1: 64, projectedEarnings: 213900 },
+            { playerId: "10522", pos: "T12", score: -8, today: -8, thru: "F", round1: 64, projectedEarnings: 213900 },
+            { playerId: "5054388", pos: "T12", score: -8, today: -8, thru: "F", round1: 64, projectedEarnings: 213900 },
+            // T20 (-7) - Projected 20th place: $121,900
+            { playerId: "5408", pos: "T20", score: -7, today: -7, thru: "F", round1: 65, projectedEarnings: 121900 },
+            { playerId: "9877", pos: "T20", score: -7, today: -7, thru: "F", round1: 65, projectedEarnings: 121900 },
+            { playerId: "6011", pos: "T20", score: -7, today: -7, thru: "F", round1: 65, projectedEarnings: 121900 },
+            { playerId: "5409", pos: "T20", score: -7, today: -7, thru: "F", round1: 65, projectedEarnings: 121900 },
+            { playerId: "388", pos: "T20", score: -7, today: -7, thru: "F", round1: 65, projectedEarnings: 121900 },
+            { playerId: "3792", pos: "T20", score: -7, today: -7, thru: "F", round1: 65, projectedEarnings: 121900 },
+            { playerId: "9938", pos: "T20", score: -7, today: -7, thru: "F", round1: 65, projectedEarnings: 121900 },
+            { playerId: "4699418", pos: "T20", score: -7, today: -7, thru: "F", round1: 65, projectedEarnings: 121900 },
+            { playerId: "5113338", pos: "T20", score: -7, today: -7, thru: "F", round1: 65, projectedEarnings: 121900 },
+            { playerId: "10030", pos: "T20", score: -7, today: -7, thru: "F", round1: 65, projectedEarnings: 121900 },
+            // T30 (-6) - Projected 30th place: $63,020
+            { playerId: "9143", pos: "T30", score: -6, today: -6, thru: "F", round1: 66, projectedEarnings: 63020 },
+            { playerId: "4425904", pos: "T30", score: -6, today: -6, thru: "F", round1: 66, projectedEarnings: 63020 },
+            { playerId: "8889", pos: "T30", score: -6, today: -6, thru: "F", round1: 66, projectedEarnings: 63020 },
+            { playerId: "4982182", pos: "T30", score: -6, today: -6, thru: "F", round1: 66, projectedEarnings: 63020 },
+            { playerId: "3683", pos: "T30", score: -6, today: -6, thru: "F", round1: 66, projectedEarnings: 63020 },
+            { playerId: "10548", pos: "T30", score: -6, today: -6, thru: "F", round1: 66, projectedEarnings: 63020 },
+            { playerId: "10058", pos: "T30", score: -6, today: -6, thru: "F", round1: 66, projectedEarnings: 63020 },
+            { playerId: "10505", pos: "T30", score: -6, today: -6, thru: "F", round1: 66, projectedEarnings: 63020 },
+            { playerId: "4844", pos: "T30", score: -6, today: -6, thru: "F", round1: 66, projectedEarnings: 63020 },
+            { playerId: "5692", pos: "T30", score: -6, today: -6, thru: "F", round1: 66, projectedEarnings: 63020 },
+            { playerId: "3550", pos: "T30", score: -6, today: -6, thru: "F", round1: 66, projectedEarnings: 63020 },
+            { playerId: "11119", pos: "T30", score: -6, today: -6, thru: "F", round1: 66, projectedEarnings: 63020 },
+            { playerId: "4349547", pos: "T30", score: -6, today: -6, thru: "F", round1: 66, projectedEarnings: 63020 },
+            { playerId: "11056", pos: "T30", score: -6, today: -6, thru: "F", round1: 66, projectedEarnings: 63020 },
+            { playerId: "4423323", pos: "T30", score: -6, today: -6, thru: "F", round1: 66, projectedEarnings: 63020 },
+            { playerId: "257", pos: "T30", score: -6, today: -6, thru: "F", round1: 66, projectedEarnings: 63020 },
+            { playerId: "4425898", pos: "T30", score: -6, today: -6, thru: "F", round1: 66, projectedEarnings: 63020 },
+            { playerId: "5076025", pos: "T30", score: -6, today: -6, thru: "F", round1: 66, projectedEarnings: 63020 },
+            { playerId: "11383", pos: "T30", score: -6, today: -6, thru: "F", round1: 66, projectedEarnings: 63020 },
+            { playerId: "4587989", pos: "T30", score: -6, today: -6, thru: "F", round1: 66, projectedEarnings: 63020 },
+            { playerId: "8973", pos: "T30", score: -6, today: -6, thru: "F", round1: 66, projectedEarnings: 63020 },
+            // T51 (-5) - Projected 51st place: $23,092
+            { playerId: "5338", pos: "T51", score: -5, today: -5, thru: "F", round1: 67, projectedEarnings: 23092 },
+            { playerId: "4410612", pos: "T51", score: -5, today: -5, thru: "F", round1: 67, projectedEarnings: 23092 },
+            { playerId: "5882", pos: "T51", score: -5, today: -5, thru: "F", round1: 67, projectedEarnings: 23092 },
+            { playerId: "1077", pos: "T51", score: -5, today: -5, thru: "F", round1: 67, projectedEarnings: 23092 },
+            { playerId: "6001", pos: "T51", score: -5, today: -5, thru: "F", round1: 67, projectedEarnings: 23092 },
+            { playerId: "9364", pos: "T51", score: -5, today: -5, thru: "F", round1: 67, projectedEarnings: 23092 },
+            { playerId: "4566443", pos: "T51", score: -5, today: -5, thru: "F", round1: 67, projectedEarnings: 23092 },
+            { playerId: "4671", pos: "T51", score: -5, today: -5, thru: "F", round1: 67, projectedEarnings: 23092 },
+            { playerId: "11101", pos: "T51", score: -5, today: -5, thru: "F", round1: 67, projectedEarnings: 23092 },
+            { playerId: "3702", pos: "T51", score: -5, today: -5, thru: "F", round1: 67, projectedEarnings: 23092 },
+            { playerId: "10054", pos: "T51", score: -5, today: -5, thru: "F", round1: 67, projectedEarnings: 23092 },
+            { playerId: "10057", pos: "T51", score: -5, today: -5, thru: "F", round1: 67, projectedEarnings: 23092 },
+            { playerId: "4408316", pos: "T51", score: -5, today: -5, thru: "F", round1: 67, projectedEarnings: 23092 },
+            { playerId: "5147097", pos: "T51", score: -5, today: -5, thru: "F", round1: 67, projectedEarnings: 23092 },
+            { playerId: "5150294", pos: "T51", score: -5, today: -5, thru: "F", round1: 67, projectedEarnings: 23092 },
+            { playerId: "5211425", pos: "T51", score: -5, today: -5, thru: "F", round1: 67, projectedEarnings: 23092 },
+            { playerId: "686", pos: "T51", score: -5, today: -5, thru: "F", round1: 67, projectedEarnings: 23092 },
+            { playerId: "9484", pos: "T51", score: -5, today: -5, thru: "F", round1: 67, projectedEarnings: 23092 },
+            { playerId: "9658", pos: "T51", score: -5, today: -5, thru: "F", round1: 67, projectedEarnings: 23092 },
+            { playerId: "1407", pos: "T51", score: -5, today: -5, thru: "F", round1: 67, projectedEarnings: 23092 },
+            // T71 (-4) - Projected 71st place: $18,676
+            { playerId: "11456", pos: "T71", score: -4, today: -4, thru: "F", round1: 68, projectedEarnings: 18676 },
+            { playerId: "5217048", pos: "T71", score: -4, today: -4, thru: "F", round1: 68, projectedEarnings: 18676 },
+            { playerId: "9025", pos: "T71", score: -4, today: -4, thru: "F", round1: 68, projectedEarnings: 18676 },
+            { playerId: "4375972", pos: "T71", score: -4, today: -4, thru: "F", round1: 68, projectedEarnings: 18676 },
+            { playerId: "9221", pos: "T71", score: -4, today: -4, thru: "F", round1: 68, projectedEarnings: 18676 },
+            { playerId: "4358083", pos: "T71", score: -4, today: -4, thru: "F", round1: 68, projectedEarnings: 18676 },
+            { playerId: "6701", pos: "T71", score: -4, today: -4, thru: "F", round1: 68, projectedEarnings: 18676 },
+            { playerId: "4858572", pos: "T71", score: -4, today: -4, thru: "F", round1: 68, projectedEarnings: 18676 },
+            { playerId: "2230", pos: "T71", score: -4, today: -4, thru: "F", round1: 68, projectedEarnings: 18676 },
+            { playerId: "4589406", pos: "T71", score: -4, today: -4, thru: "F", round1: 68, projectedEarnings: 18676 },
+            { playerId: "5113335", pos: "T71", score: -4, today: -4, thru: "F", round1: 68, projectedEarnings: 18676 },
+            { playerId: "4419142", pos: "T71", score: -4, today: -4, thru: "F", round1: 68, projectedEarnings: 18676 },
+            { playerId: "6962", pos: "T71", score: -4, today: -4, thru: "F", round1: 68, projectedEarnings: 18676 },
+            { playerId: "7001", pos: "T71", score: -4, today: -4, thru: "F", round1: 68, projectedEarnings: 18676 },
+            { playerId: "11387", pos: "T71", score: -4, today: -4, thru: "F", round1: 68, projectedEarnings: 18676 },
+            { playerId: "3832", pos: "T71", score: -4, today: -4, thru: "F", round1: 68, projectedEarnings: 18676 },
+            { playerId: "8906", pos: "T71", score: -4, today: -4, thru: "F", round1: 68, projectedEarnings: 18676 },
+            { playerId: "9243", pos: "T71", score: -4, today: -4, thru: "F", round1: 68, projectedEarnings: 18676 },
+            { playerId: "11253", pos: "T71", score: -4, today: -4, thru: "F", round1: 68, projectedEarnings: 18676 },
+            { playerId: "4426182", pos: "T71", score: -4, today: -4, thru: "F", round1: 68, projectedEarnings: 18676 },
+            { playerId: "4691931", pos: "T71", score: -4, today: -4, thru: "F", round1: 68, projectedEarnings: 18676 },
+            { playerId: "4877953", pos: "T71", score: -4, today: -4, thru: "F", round1: 68, projectedEarnings: 18676 },
+            // T93 (-3) - Likely MC
+            { playerId: "5075548", pos: "T93", score: -3, today: -3, thru: "F", round1: 69, projectedEarnings: 0 },
+            { playerId: "4585548", pos: "T93", score: -3, today: -3, thru: "F", round1: 69, projectedEarnings: 0 },
+            { playerId: "4602218", pos: "T93", score: -3, today: -3, thru: "F", round1: 69, projectedEarnings: 0 },
+            { playerId: "5724", pos: "T93", score: -3, today: -3, thru: "F", round1: 69, projectedEarnings: 0 },
+            { playerId: "6196", pos: "T93", score: -3, today: -3, thru: "F", round1: 69, projectedEarnings: 0 },
+            { playerId: "3449", pos: "T93", score: -3, today: -3, thru: "F", round1: 69, projectedEarnings: 0 },
+            { playerId: "110", pos: "T93", score: -3, today: -3, thru: "F", round1: 69, projectedEarnings: 0 },
+            { playerId: "5139663", pos: "T93", score: -3, today: -3, thru: "F", round1: 69, projectedEarnings: 0 },
+            { playerId: "1264", pos: "T93", score: -3, today: -3, thru: "F", round1: 69, projectedEarnings: 0 },
+            { playerId: "9037", pos: "T93", score: -3, today: -3, thru: "F", round1: 69, projectedEarnings: 0 },
+            { playerId: "11143", pos: "T93", score: -3, today: -3, thru: "F", round1: 69, projectedEarnings: 0 },
+            { playerId: "3980", pos: "T93", score: -3, today: -3, thru: "F", round1: 69, projectedEarnings: 0 },
+            { playerId: "4618114", pos: "T93", score: -3, today: -3, thru: "F", round1: 69, projectedEarnings: 0 },
+            // T106 (-2) - MC projected
+            { playerId: "6825", pos: "T106", score: -2, today: -2, thru: "F", round1: 70, projectedEarnings: 0 },
+            { playerId: "4791222", pos: "T106", score: -2, today: -2, thru: "F", round1: 70, projectedEarnings: 0 },
+            { playerId: "4404991", pos: "T106", score: -2, today: -2, thru: "F", round1: 70, projectedEarnings: 0 },
+            { playerId: "4868733", pos: "T106", score: -2, today: -2, thru: "F", round1: 70, projectedEarnings: 0 },
+            { playerId: "10664", pos: "T106", score: -2, today: -2, thru: "F", round1: 70, projectedEarnings: 0 },
+            { playerId: "10863", pos: "T106", score: -2, today: -2, thru: "F", round1: 70, projectedEarnings: 0 },
+            { playerId: "5143175", pos: "T106", score: -2, today: -2, thru: "F", round1: 70, projectedEarnings: 0 },
+            { playerId: "2283", pos: "T106", score: -2, today: -2, thru: "F", round1: 70, projectedEarnings: 0 },
+            { playerId: "5076021", pos: "T106", score: -2, today: -2, thru: "F", round1: 70, projectedEarnings: 27600 },
+            { playerId: "1030", pos: "T106", score: -2, today: -2, thru: "F", round1: 70, projectedEarnings: 27600 },
+            { playerId: "5215039", pos: "T106", score: -2, today: -2, thru: "F", round1: 70, projectedEarnings: 27600 },
+            { playerId: "4351896", pos: "T106", score: -2, today: -2, thru: "F", round1: 70, projectedEarnings: 27600 },
+            // T118 (-1)
+            { playerId: "10980", pos: "T118", score: -1, today: -1, thru: "F", round1: 71, projectedEarnings: 24840 },
+            { playerId: "5962", pos: "T118", score: -1, today: -1, thru: "F", round1: 71, projectedEarnings: 24840 },
+            { playerId: "10364", pos: "T118", score: -1, today: -1, thru: "F", round1: 71, projectedEarnings: 24840 },
+            { playerId: "4921329", pos: "T118", score: -1, today: -1, thru: "F", round1: 71, projectedEarnings: 24840 },
+            { playerId: "7120", pos: "T118", score: -1, today: -1, thru: "F", round1: 71, projectedEarnings: 24840 },
+            { playerId: "10469", pos: "T118", score: -1, today: -1, thru: "F", round1: 71, projectedEarnings: 24840 },
+            { playerId: "8974", pos: "T118", score: -1, today: -1, thru: "F", round1: 71, projectedEarnings: 24840 },
+            { playerId: "9144", pos: "T118", score: -1, today: -1, thru: "F", round1: 71, projectedEarnings: 24840 },
+            { playerId: "1222", pos: "T118", score: -1, today: -1, thru: "F", round1: 71, projectedEarnings: 24840 },
+            { playerId: "4682", pos: "T118", score: -1, today: -1, thru: "F", round1: 71, projectedEarnings: 24840 },
+            { playerId: "6937", pos: "T118", score: -1, today: -1, thru: "F", round1: 71, projectedEarnings: 24840 },
+            // T130 (E)
+            { playerId: "4408320", pos: "T130", score: 0, today: 0, thru: "F", round1: 72, projectedEarnings: 23000 },
+            { playerId: "6931", pos: "T130", score: 0, today: 0, thru: "F", round1: 72, projectedEarnings: 23000 },
+            { playerId: "4602673", pos: "T130", score: 0, today: 0, thru: "F", round1: 72, projectedEarnings: 23000 },
+            { playerId: "4699329", pos: "T130", score: 0, today: 0, thru: "F", round1: 72, projectedEarnings: 23000 },
+            { playerId: "569", pos: "T130", score: 0, today: 0, thru: "F", round1: 72, projectedEarnings: 23000 },
+            { playerId: "4589438", pos: "T130", score: 0, today: 0, thru: "F", round1: 72, projectedEarnings: 23000 },
+            { playerId: "4408319", pos: "T130", score: 0, today: 0, thru: "F", round1: 72, projectedEarnings: 23000 },
+            { playerId: "5209442", pos: "T130", score: 0, today: 0, thru: "F", round1: 72, projectedEarnings: 23000 },
+            { playerId: "205", pos: "T130", score: 0, today: 0, thru: "F", round1: 72, projectedEarnings: 23000 },
+            { playerId: "5502", pos: "T130", score: 0, today: 0, thru: "F", round1: 72, projectedEarnings: 23000 },
+            { playerId: "8961", pos: "T130", score: 0, today: 0, thru: "F", round1: 72, projectedEarnings: 23000 },
+            // T142 (+1)
+            { playerId: "5080439", pos: "T142", score: 1, today: 1, thru: "F", round1: 73, projectedEarnings: 22080 },
+            { playerId: "4408318", pos: "T142", score: 1, today: 1, thru: "F", round1: 73, projectedEarnings: 22080 },
+            { playerId: "6015", pos: "T142", score: 1, today: 1, thru: "F", round1: 73, projectedEarnings: 22080 },
+            { playerId: "3312", pos: "T142", score: 1, today: 1, thru: "F", round1: 73, projectedEarnings: 22080 },
+            { playerId: "1225", pos: "T142", score: 1, today: 1, thru: "F", round1: 73, projectedEarnings: 22080 },
+            // T147 (+2)
+            { playerId: "4361934", pos: "T147", score: 2, today: 2, thru: "F", round1: 74, projectedEarnings: 21344 },
+            { playerId: "9127", pos: "T147", score: 2, today: 2, thru: "F", round1: 74, projectedEarnings: 21344 },
+            { playerId: "9525", pos: "T147", score: 2, today: 2, thru: "F", round1: 74, projectedEarnings: 21344 },
+            // 150 (+3)
+            { playerId: "10372", pos: "150", score: 3, today: 3, thru: "F", round1: 75, projectedEarnings: 20792 },
+            // T151 (+5)
+            { playerId: "11395", pos: "T151", score: 5, today: 5, thru: "F", round1: 77, projectedEarnings: 20424 },
+            { playerId: "11385", pos: "T151", score: 5, today: 5, thru: "F", round1: 77, projectedEarnings: 20424 },
+            { playerId: "4832046", pos: "T151", score: 5, today: 5, thru: "F", round1: 77, projectedEarnings: 20424 },
+            { playerId: "10990", pos: "T151", score: 5, today: 5, thru: "F", round1: 77, projectedEarnings: 20424 },
+            // T155 (+6)
+            { playerId: "4375977", pos: "T155", score: 6, today: 6, thru: "F", round1: 78, projectedEarnings: 20056 },
+            { playerId: "4358081", pos: "T155", score: 6, today: 6, thru: "F", round1: 78, projectedEarnings: 20056 }
+        ];
+
+        // Payout structure (approximate based on typical PGA purse distribution)
+        const payoutStructure = {
+            1: 0.18, 2: 0.109, 3: 0.069, 4: 0.049, 5: 0.041,
+            6: 0.0365, 7: 0.034, 8: 0.0315, 9: 0.029, 10: 0.027,
+            11: 0.025, 12: 0.023, 13: 0.021, 14: 0.019, 15: 0.017
+        };
+
+        // Historical players (from past tournaments this season, not in current field)
+        // This ensures we can look up players who were picked in previous weeks
+        const historicalPlayers = [
+            // Sony Open notables not in AmEx field
+            { id: "11515", name: "Chris Gotterup", country: "USA" }, // Sony Open Winner!
+            { id: "5076021", name: "Ryan Gerard", country: "USA" }, // 2nd at Sony
+        ];
+
+        // Combine all player sources for lookup
+        const allPlayers = [...tournamentField, ...pgaPlayers, ...historicalPlayers];
+
+        // Helper function to find player by ID and add photo URL
+        function getPlayerById(playerId) {
+            // Convert to string for consistent comparison
+            const pid = String(playerId);
+            const player = allPlayers.find(p => String(p.id) === pid);
+            if (player) {
+                return {
+                    ...player,
+                    photo: getPlayerPhoto(player.id)
+                };
+            }
+            console.warn('Player not found:', playerId);
+            return { id: playerId, name: 'Unknown Player', country: '', photo: '' };
+        }
+
+        // ==================== STATE ====================
+        let currentPoolId = null;
+        let selectedPlayerId = null;
+        let inviteEmails = [];
+
+        // ==================== UTILITY FUNCTIONS ====================
+        function generateId() {
+            return Math.random().toString(36).substr(2, 9);
+        }
+
+        function formatCurrency(amount) {
+            return new Intl.NumberFormat('en-US', {
+                style: 'currency',
+                currency: 'USD',
+                maximumFractionDigits: 0
+            }).format(amount);
+        }
+
+        function showToast(message, isError = false) {
+            const toast = document.getElementById('toast');
+            const toastMessage = document.getElementById('toast-message');
+            toastMessage.textContent = message;
+            toast.classList.toggle('error', isError);
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 3000);
+        }
+
+        // ==================== NAVIGATION ====================
+        function showScreen(screenId) {
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            document.getElementById(screenId).classList.add('active');
+
+            if (screenId === 'dashboard') {
+                renderDashboard();
+            }
+        }
+
+        function updateNavigation() {
+            const guestNav = document.getElementById('nav-guest');
+            const userNav = document.getElementById('nav-user');
+
+            if (store.currentUser) {
+                guestNav.style.display = 'none';
+                userNav.style.display = 'flex';
+                document.getElementById('user-display-name').textContent = store.currentUser.name;
+            } else {
+                guestNav.style.display = 'flex';
+                userNav.style.display = 'none';
+            }
+        }
+
+        // ==================== AUTH ====================
+        async function handleSignup(event) {
+            event.preventDefault();
+            const name = document.getElementById('signup-name').value;
+            const email = document.getElementById('signup-email').value.toLowerCase();
+            const password = document.getElementById('signup-password').value;
+            const confirm = document.getElementById('signup-confirm').value;
+
+            if (password !== confirm) {
+                showToast('Passwords do not match', true);
+                return;
+            }
+
+            if (password.length < 6) {
+                showToast('Password must be at least 6 characters', true);
+                return;
+            }
+
+            try {
+                if (supabaseClient) {
+                    // Use Supabase auth
+                    const { data, error } = await supabaseClient.auth.signUp({
+                        email,
+                        password,
+                        options: { data: { name } }
+                    });
+                    if (error) throw error;
+                    
+                    // Set current user
+                    store.currentUser = {
+                        id: data.user.id,
+                        name: name,
+                        email: email
+                    };
+                    
+                    // Also add to local users for compatibility
+                    if (!store.users.find(u => u.id === data.user.id)) {
+                        store.users.push(store.currentUser);
+                    }
+                    
+                    showToast('Account created! Check your email to confirm.');
+                } else {
+                    // Fallback to local storage
+                    if (store.users.find(u => u.email === email)) {
+                        showToast('An account with this email already exists', true);
+                        return;
+                    }
+                    const user = { id: generateId(), name, email, password };
+                    store.users.push(user);
+                    store.currentUser = user;
+                    showToast('Account created successfully!');
+                }
+
+                updateNavigation();
+                await loadUserData();
+                showScreen('dashboard');
+            } catch (error) {
+                showToast(error.message || 'Signup failed', true);
+            }
+        }
+
+        async function handleLogin(event) {
+            event.preventDefault();
+            const email = document.getElementById('login-email').value.toLowerCase();
+            const password = document.getElementById('login-password').value;
+
+            try {
+                if (supabaseClient) {
+                    // Use Supabase auth
+                    const { data, error } = await supabaseClient.auth.signInWithPassword({
+                        email,
+                        password
+                    });
+                    if (error) throw error;
+                    
+                    store.currentUser = {
+                        id: data.user.id,
+                        name: data.user.user_metadata?.name || email.split('@')[0],
+                        email: email
+                    };
+                    
+                    if (!store.users.find(u => u.id === data.user.id)) {
+                        store.users.push(store.currentUser);
+                    }
+                } else {
+                    // Fallback to local storage
+                    const user = store.users.find(u => u.email === email && u.password === password);
+                    if (!user) {
+                        showToast('Invalid email or password', true);
+                        return;
+                    }
+                    store.currentUser = user;
+                }
+
+                updateNavigation();
+                await loadUserData();
+                showToast('Welcome back!');
+                showScreen('dashboard');
+            } catch (error) {
+                showToast(error.message || 'Login failed', true);
+            }
+        }
+
+        async function logout() {
+            try {
+                if (supabaseClient) {
+                    await supabaseClient.auth.signOut();
+                }
+            } catch (e) {
+                console.log('Logout error:', e);
+            }
+            store.currentUser = null;
+            store.pools = [];
+            store.picks = [];
+            updateNavigation();
+            showScreen('landing');
+            showToast('Logged out successfully');
+        }
+
+        // Load user's pools and picks from Supabase
+        async function loadUserData() {
+            if (!supabaseClient || !store.currentUser) return;
+            
+            try {
+                // Load user's pools
+                const { data: poolMembers, error: poolError } = await supabaseClient
+                    .from('pool_members')
+                    .select(`
+                        pool_id,
+                        pools:pool_id (
+                            id,
+                            name,
+                            season,
+                            invite_code,
+                            created_by
+                        )
+                    `)
+                    .eq('user_id', store.currentUser.id);
+                
+                if (!poolError && poolMembers) {
+                    // Get all member IDs for each pool
+                    for (const pm of poolMembers) {
+                        if (pm.pools) {
+                            const { data: members } = await supabaseClient
+                                .from('pool_members')
+                                .select('user_id')
+                                .eq('pool_id', pm.pools.id);
+                            
+                            const pool = {
+                                id: pm.pools.id,
+                                name: pm.pools.name,
+                                season: pm.pools.season,
+                                inviteCode: pm.pools.invite_code,
+                                createdBy: pm.pools.created_by,
+                                members: members ? members.map(m => m.user_id) : [store.currentUser.id]
+                            };
+                            
+                            // Add or update pool in store
+                            const existingIndex = store.pools.findIndex(p => p.id === pool.id);
+                            if (existingIndex >= 0) {
+                                store.pools[existingIndex] = pool;
+                            } else {
+                                store.pools.push(pool);
+                            }
+                        }
+                    }
+                }
+                
+                // Load user's picks for all pools
+                const { data: picks, error: picksError } = await supabaseClient
+                    .from('picks')
+                    .select('*')
+                    .eq('user_id', store.currentUser.id);
+                
+                if (!picksError && picks) {
+                    picks.forEach(pick => {
+                        const pickData = {
+                            id: pick.id,
+                            poolId: pick.pool_id,
+                            userId: pick.user_id,
+                            tournamentId: pick.tournament_id,
+                            playerId: pick.player_id,
+                            playerName: pick.player_name,
+                            earnings: pick.final_earnings || 0
+                        };
+                        
+                        const existingIndex = store.picks.findIndex(
+                            p => p.poolId === pickData.poolId && 
+                                 p.userId === pickData.userId && 
+                                 p.tournamentId === pickData.tournamentId
+                        );
+                        if (existingIndex >= 0) {
+                            store.picks[existingIndex] = pickData;
+                        } else {
+                            store.picks.push(pickData);
+                        }
+                    });
+                }
+                
+                // Load all pool members' user info for display
+                const memberIds = [...new Set(store.pools.flatMap(p => p.members))];
+                for (const memberId of memberIds) {
+                    if (!store.users.find(u => u.id === memberId)) {
+                        // Try to get user info (will need profiles table in production)
+                        store.users.push({
+                            id: memberId,
+                            name: 'Pool Member',
+                            email: ''
+                        });
+                    }
+                }
+                
+                console.log('Loaded pools:', store.pools.length, 'picks:', store.picks.length);
+            } catch (error) {
+                console.error('Error loading user data:', error);
+            }
+        }
+
+        // ==================== DASHBOARD ====================
+        function renderDashboard() {
+            const container = document.getElementById('tournaments-container');
+            const userPools = store.pools.filter(p => p.members.includes(store.currentUser.id));
+
+            if (userPools.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state" style="grid-column: 1 / -1;">
+                        <h3>No Pools Yet</h3>
+                        <p>Create a new pool or join one using an invite link from a friend.</p>
+                        <button class="btn btn-primary" onclick="showScreen('create-tournament')">Create Your First Pool</button>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = userPools.map(pool => {
+                const members = pool.members.map(id => store.users.find(u => u.id === id)).filter(Boolean);
+                const userPicks = store.picks.filter(p => p.poolId === pool.id && p.userId === store.currentUser.id);
+                
+                // Calculate user's total earnings from COMPLETED tournaments only
+                const userCompletedEarnings = userPicks
+                    .filter(p => p.tournamentId !== currentTournament.id)
+                    .reduce((sum, p) => sum + (p.earnings || 0), 0);
+
+                // Calculate standings to determine user's rank
+                const standings = pool.members.map(memberId => {
+                    const memberPicks = store.picks.filter(p => p.poolId === pool.id && p.userId === memberId);
+                    const completedEarnings = memberPicks
+                        .filter(p => p.tournamentId !== currentTournament.id)
+                        .reduce((sum, p) => sum + (p.earnings || 0), 0);
+                    return { memberId, completedEarnings };
+                }).sort((a, b) => b.completedEarnings - a.completedEarnings);
+
+                // Find user's rank (1-indexed)
+                const userRank = standings.findIndex(s => s.memberId === store.currentUser.id) + 1;
+
+                return `
+                    <div class="tournament-card">
+                        <div class="tournament-header">
+                            <h3>${pool.name}</h3>
+                            <p>${pool.season}</p>
+                        </div>
+                        <div class="tournament-body">
+                            <div class="tournament-stat">
+                                <span>Your Rank</span>
+                                <span>${userRank} / ${members.length}</span>
+                            </div>
+                            <div class="tournament-stat">
+                                <span>Your Earnings</span>
+                                <span>${formatCurrency(userCompletedEarnings)}</span>
+                            </div>
+                            <div class="tournament-stat">
+                                <span>Picks Used</span>
+                                <span>${userPicks.length} / 30</span>
+                            </div>
+                            <div class="tournament-stat">
+                                <span>Current Week</span>
+                                <span>${currentTournament.name}</span>
+                            </div>
+                        </div>
+                        <div class="tournament-actions">
+                            <button class="btn btn-primary" onclick="openPool('${pool.id}')">View Pool</button>
+                            <button class="btn btn-secondary" onclick="showInviteModal('${pool.id}')">Invite</button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // ==================== CREATE TOURNAMENT ====================
+        function addInvite() {
+            const input = document.getElementById('invite-email');
+            const email = input.value.toLowerCase().trim();
+
+            if (!email || !email.includes('@')) {
+                showToast('Please enter a valid email', true);
+                return;
+            }
+
+            if (inviteEmails.includes(email)) {
+                showToast('This email is already in the invite list', true);
+                return;
+            }
+
+            inviteEmails.push(email);
+            renderInviteList();
+            input.value = '';
+        }
+
+        function removeInvite(email) {
+            inviteEmails = inviteEmails.filter(e => e !== email);
+            renderInviteList();
+        }
+
+        function renderInviteList() {
+            const container = document.getElementById('invite-list');
+            container.innerHTML = inviteEmails.map(email => `
+                <span class="invite-tag">
+                    ${email}
+                    <button onclick="removeInvite('${email}')">&times;</button>
+                </span>
+            `).join('');
+        }
+
+        async function handleCreateTournament(event) {
+            event.preventDefault();
+            const name = document.getElementById('pool-name').value;
+            const season = document.getElementById('pool-season').value;
+
+            try {
+                let pool;
+                
+                if (supabaseClient) {
+                    // Create pool in Supabase
+                    const inviteCode = Math.random().toString(36).substring(2, 8).toUpperCase();
+                    
+                    const { data: newPool, error: poolError } = await supabaseClient
+                        .from('pools')
+                        .insert({
+                            name,
+                            season,
+                            invite_code: inviteCode,
+                            created_by: store.currentUser.id
+                        })
+                        .select()
+                        .single();
+                    
+                    if (poolError) throw poolError;
+                    
+                    // Add creator as member
+                    const { error: memberError } = await supabaseClient
+                        .from('pool_members')
+                        .insert({ pool_id: newPool.id, user_id: store.currentUser.id });
+                    
+                    if (memberError) throw memberError;
+                    
+                    pool = {
+                        id: newPool.id,
+                        name: newPool.name,
+                        season: newPool.season,
+                        ownerId: store.currentUser.id,
+                        members: [store.currentUser.id],
+                        inviteCode: newPool.invite_code
+                    };
+                } else {
+                    // Fallback to local
+                    pool = {
+                        id: generateId(),
+                        name,
+                        season,
+                        ownerId: store.currentUser.id,
+                        members: [store.currentUser.id],
+                        inviteCode: generateId().toUpperCase()
+                    };
+                }
+
+                store.pools.push(pool);
+
+                // Process invites (local only for now)
+                inviteEmails.forEach(email => {
+                    const existingUser = store.users.find(u => u.email === email);
+                    if (existingUser) {
+                        pool.members.push(existingUser.id);
+                    } else {
+                        store.invites.push({
+                            id: generateId(),
+                            poolId: pool.id,
+                            email,
+                            status: 'pending'
+                        });
+                    }
+                });
+
+                inviteEmails = [];
+                renderInviteList();
+
+                showToast('Pool created successfully!');
+                showScreen('dashboard');
+            } catch (error) {
+                showToast(error.message || 'Failed to create pool', true);
+            }
+        }
+
+        // ==================== POOL VIEW ====================
+        function openPool(poolId) {
+            currentPoolId = poolId;
+            selectedPlayerId = null;
+            showScreen('pool-view');
+            switchPoolTab('standings');
+            renderPoolView();
+        }
+
+        function switchPoolTab(tabName) {
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.pool-tab').forEach(t => t.style.display = 'none');
+
+            event.target.classList.add('active');
+            document.getElementById(`tab-${tabName}`).style.display = 'block';
+
+            if (tabName === 'standings') renderStandings();
+            if (tabName === 'leaderboard') renderLeaderboard();
+            if (tabName === 'pick') renderPlayerSelection();
+            if (tabName === 'history') renderHistory();
+        }
+
+        function renderPoolView() {
+            const pool = store.pools.find(p => p.id === currentPoolId);
+            if (!pool) return;
+
+            document.getElementById('pool-title').textContent = pool.name;
+            document.getElementById('pool-season-display').textContent = pool.season;
+            renderStandings();
+        }
+
+        function renderStandings() {
+            const pool = store.pools.find(p => p.id === currentPoolId);
+            if (!pool) return;
+
+            // Use ESPN live data if available, otherwise mock data
+            const leaderboardData = espnDataLoaded && liveLeaderboard.length > 0 ? liveLeaderboard : mockLeaderboard;
+
+            const standings = pool.members.map(memberId => {
+                const user = store.users.find(u => u.id === memberId);
+                const userPicks = store.picks.filter(p => p.poolId === currentPoolId && p.userId === memberId);
+                
+                // Calculate total from COMPLETED tournaments only (excludes current week)
+                const completedEarnings = userPicks
+                    .filter(p => p.tournamentId !== currentTournament.id)
+                    .reduce((sum, p) => sum + (p.earnings || 0), 0);
+
+                // Get current week pick and projected earnings (for display only)
+                const currentPick = userPicks.find(p => p.tournamentId === currentTournament.id);
+                let currentWeekEarnings = 0;
+                let currentPlayer = null;
+
+                if (currentPick) {
+                    currentPlayer = getPlayerById(currentPick.playerId);
+                    // Look in live leaderboard by ID or name
+                    let leaderboardEntry = leaderboardData.find(l => String(l.playerId) === String(currentPick.playerId));
+                    if (!leaderboardEntry && currentPlayer) {
+                        leaderboardEntry = leaderboardData.find(l => 
+                            l.playerName && l.playerName.toLowerCase() === currentPlayer.name.toLowerCase()
+                        );
+                    }
+                    currentWeekEarnings = leaderboardEntry ? leaderboardEntry.projectedEarnings : 0;
+                }
+
+                return {
+                    user,
+                    picks: userPicks,
+                    completedEarnings,
+                    totalEarnings: completedEarnings + currentWeekEarnings,
+                    currentWeekEarnings,
+                    currentPlayer
+                };
+            }).sort((a, b) => b.completedEarnings - a.completedEarnings); // Sort by COMPLETED earnings only
+
+            const tbody = document.getElementById('standings-body');
+            tbody.innerHTML = standings.map((standing, index) => {
+                const isCurrentUser = standing.user.id === store.currentUser.id;
+                const rankClass = index === 0 ? 'gold' : index === 1 ? 'silver' : index === 2 ? 'bronze' : '';
+
+                return `
+                    <tr class="${isCurrentUser ? 'current-user' : ''}">
+                        <td>
+                            <span class="rank-badge ${rankClass}">${index + 1}</span>
+                        </td>
+                        <td>
+                            <strong>${standing.user.name}</strong>
+                            ${isCurrentUser ? ' (You)' : ''}
+                        </td>
+                        <td>
+                            ${standing.currentPlayer ? `
+                                <div class="weekly-pick">
+                                    <img src="${standing.currentPlayer.photo || getPlayerPhoto(standing.currentPlayer.id)}" alt="" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect fill=%22%23e5e7eb%22 width=%22100%22 height=%22100%22/></svg>'">
+                                    <span>${standing.currentPlayer.name}</span>
+                                    <span style="color: var(--gold); font-size: 0.8rem; margin-left: 0.25rem;">(${formatCurrency(standing.currentWeekEarnings)} proj)</span>
+                                </div>
+                            ` : '<span style="color: var(--gray);">No pick yet</span>'}
+                        </td>
+                        <td style="font-weight: 600; color: var(--green-fairway);">
+                            ${formatCurrency(standing.completedEarnings)}
+                        </td>
+                        <td>${standing.picks.length}</td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        async function renderLeaderboard() {
+            document.getElementById('current-tournament-name').textContent = currentTournament.name;
+            document.getElementById('tournament-dates').textContent = currentTournament.dates;
+            document.getElementById('tournament-course').textContent = currentTournament.course;
+            document.getElementById('tournament-round').textContent = `Round ${currentTournament.round}`;
+            document.getElementById('tournament-logo').src = currentTournament.logo;
+
+            // Try to fetch live ESPN data if not already loaded
+            if (!espnDataLoaded && liveLeaderboard.length === 0) {
+                await fetchESPNLeaderboard();
+            }
+
+            // Use ESPN data if available, otherwise fall back to mock data
+            const leaderboardData = espnDataLoaded && liveLeaderboard.length > 0 ? liveLeaderboard : mockLeaderboard;
+
+            // Update round display after ESPN fetch
+            document.getElementById('tournament-round').textContent = `Round ${currentTournament.round}`;
+
+            // Get the current pool
+            const pool = store.pools.find(p => p.id === currentPoolId);
+
+            // Check if user has a pick for this tournament
+            const userPick = store.picks.find(
+                p => p.poolId === currentPoolId && 
+                p.userId === store.currentUser.id && 
+                p.tournamentId === currentTournament.id
+            );
+
+            // Get all pool members' picks for this tournament (for friend tags)
+            const poolPicks = store.picks.filter(
+                p => p.poolId === currentPoolId && p.tournamentId === currentTournament.id
+            );
+
+            // Create a color index map for friends
+            const friendColorMap = {};
+            let colorIndex = 0;
+            pool.members.forEach(memberId => {
+                if (memberId !== store.currentUser.id) {
+                    friendColorMap[memberId] = colorIndex % 5;
+                    colorIndex++;
+                }
+            });
+
+            const myPickSection = document.getElementById('my-pick-section');
+
+            if (userPick) {
+                const player = getPlayerById(userPick.playerId);
+                // Look for player in leaderboard by ID or by name
+                let leaderboardEntry = leaderboardData.find(l => String(l.playerId) === String(userPick.playerId));
+                if (!leaderboardEntry && player) {
+                    leaderboardEntry = leaderboardData.find(l => 
+                        l.playerName && l.playerName.toLowerCase() === player.name.toLowerCase()
+                    );
+                }
+
+                myPickSection.style.display = 'flex';
+                const photoUrl = leaderboardEntry?.headshot || player?.photo || getPlayerPhoto(userPick.playerId);
+                document.getElementById('my-pick-photo').src = photoUrl;
+                document.getElementById('my-pick-photo').onerror = function() {
+                    this.src = 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect fill="%23e5e7eb" width="100" height="100"/></svg>';
+                };
+                document.getElementById('my-pick-name').textContent = player?.name || userPick.playerName || 'Unknown';
+                document.getElementById('my-pick-position').textContent = leaderboardEntry ? leaderboardEntry.pos : 'N/A';
+                document.getElementById('my-pick-earnings').textContent = leaderboardEntry 
+                    ? `Projected: ${formatCurrency(leaderboardEntry.projectedEarnings)}`
+                    : 'Projected: TBD';
+            } else {
+                // Show "No pick yet" message
+                myPickSection.style.display = 'flex';
+                document.getElementById('my-pick-photo').src = 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect fill="%23e5e7eb" width="100" height="100"/><text x="50" y="55" text-anchor="middle" fill="%239ca3af" font-size="12">?</text></svg>';
+                document.getElementById('my-pick-name').textContent = 'No Pick Made';
+                document.getElementById('my-pick-position').textContent = '-';
+                document.getElementById('my-pick-earnings').textContent = 'Make your pick!';
+            }
+
+            // Render leaderboard
+            const tbody = document.getElementById('leaderboard-body');
+            tbody.innerHTML = leaderboardData.map(entry => {
+                // Try to get player from our database, or use ESPN data
+                const player = getPlayerById(entry.playerId);
+                const playerName = player?.name || entry.playerName || 'Unknown';
+                const playerPhoto = entry.headshot || player?.photo || getPlayerPhoto(entry.playerId);
+
+                // Check if this is user's pick (by ID or name match)
+                const isMyPick = userPick && (
+                    String(userPick.playerId) === String(entry.playerId) ||
+                    (player && getPlayerById(userPick.playerId)?.name.toLowerCase() === playerName.toLowerCase())
+                );
+                
+                // Check if any pool members picked this player
+                const memberPicks = poolPicks.filter(p => {
+                    const pickPlayer = getPlayerById(p.playerId);
+                    return (String(p.playerId) === String(entry.playerId) ||
+                        (pickPlayer && pickPlayer.name.toLowerCase() === playerName.toLowerCase())) && 
+                        p.userId !== store.currentUser.id;
+                });
+
+                const scoreDisplay = entry.score === 0 ? 'E' : 
+                    (typeof entry.score === 'number' && entry.score < 0 ? entry.score : `+${entry.score}`);
+                const scoreClass = entry.score === 0 ? '' : 
+                    (typeof entry.score === 'number' && entry.score < 0 ? 'under' : 'over');
+
+                const todayDisplay = entry.today === 0 ? 'E' : 
+                    (typeof entry.today === 'number' && entry.today < 0 ? entry.today : `+${entry.today}`);
+
+                // Build pick tags
+                let pickTags = '';
+                if (isMyPick) {
+                    pickTags += '<span class="pick-tag your-pick">YOUR PICK</span>';
+                }
+                memberPicks.forEach(pick => {
+                    const friendUser = store.users.find(u => u.id === pick.userId);
+                    if (friendUser) {
+                        const firstName = friendUser.name.split(' ')[0];
+                        const colorClass = `friend-pick-${friendColorMap[pick.userId]}`;
+                        pickTags += `<span class="pick-tag ${colorClass}">${firstName}'s PICK</span>`;
+                    }
+                });
+
+                return `
+                    <tr class="${isMyPick ? 'my-pick' : ''}">
+                        <td class="pos-cell">${entry.pos}</td>
+                        <td>
+                            <div class="player-cell">
+                                <img src="${playerPhoto}" alt="" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect fill=%22%23e5e7eb%22 width=%22100%22 height=%22100%22/></svg>'">
+                                <span>${playerName}</span>
+                                ${pickTags}
+                            </div>
+                        </td>
+                        <td class="score-cell ${scoreClass}">${scoreDisplay}</td>
+                        <td class="score-cell ${scoreClass}">${todayDisplay}</td>
+                        <td class="thru-cell">${entry.thru}</td>
+                        <td class="earnings-cell">${formatCurrency(entry.projectedEarnings)}</td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        function renderPlayerSelection() {
+            document.getElementById('pick-tournament-info').textContent = 
+                `${currentTournament.name} • ${currentTournament.dates}`;
+            document.getElementById('pick-tournament-logo').src = currentTournament.logo;
+
+            // Get ALL players this user has picked in this pool (any tournament)
+            // But EXCLUDE the current tournament pick (so they can change it)
+            const usedPlayerIds = store.picks
+                .filter(p => p.poolId === currentPoolId && 
+                            p.userId === store.currentUser.id && 
+                            p.tournamentId !== currentTournament.id) // Exclude current tournament
+                .map(p => String(p.playerId));
+
+            // Check if user already has a pick for THIS tournament
+            const existingPick = store.picks.find(
+                p => p.poolId === currentPoolId && 
+                p.userId === store.currentUser.id && 
+                p.tournamentId === currentTournament.id
+            );
+
+            // Check if tournament has started (status is "In Progress" or later)
+            const tournamentStarted = currentTournament.status === 'In Progress' || 
+                                      currentTournament.status === 'Completed';
+
+            if (existingPick && tournamentStarted) {
+                // Tournament has started - pick is LOCKED
+                const player = getPlayerById(existingPick.playerId);
+                document.getElementById('players-list').innerHTML = `
+                    <div class="empty-state">
+                        <h3>🔒 Pick Locked</h3>
+                        <p>You've selected <strong>${player ? player.name : 'a player'}</strong> for this tournament.</p>
+                        <p style="color: var(--gray); margin-top: 0.5rem;">The tournament is in progress - picks can no longer be changed.</p>
+                        <p style="color: var(--gray); margin-top: 0.5rem;">View the leaderboard to track their progress.</p>
+                    </div>
+                `;
+                document.getElementById('confirm-pick-btn').style.display = 'none';
+                document.getElementById('current-pick-display').style.display = 'none';
+                return;
+            }
+
+            if (existingPick && !tournamentStarted) {
+                // Tournament hasn't started - allow changing pick
+                const player = getPlayerById(existingPick.playerId);
+                selectedPlayerId = existingPick.playerId; // Pre-select current pick
+                
+                // Show change pick UI
+                const currentPickDisplay = document.getElementById('current-pick-display');
+                currentPickDisplay.style.display = 'flex';
+                document.getElementById('selected-player-name').textContent = player.name;
+                
+                document.getElementById('confirm-pick-btn').style.display = 'block';
+                document.getElementById('confirm-pick-btn').textContent = 'UPDATE PICK';
+                document.getElementById('confirm-pick-btn').disabled = true; // Disabled until they select someone different
+                
+                document.getElementById('pick-warning').innerHTML = 
+                    `<strong>Current pick:</strong> ${player.name}. You can change your pick until the tournament starts.`;
+            } else {
+                document.getElementById('confirm-pick-btn').style.display = 'block';
+                document.getElementById('confirm-pick-btn').textContent = 'CONFIRM PICK';
+            }
+
+            renderPlayersListFiltered('', usedPlayerIds, existingPick);
+        }
+
+        function renderPlayersListFiltered(searchTerm, usedPlayerIds, existingPick = null) {
+            const container = document.getElementById('players-list');
+            
+            // Use tournament field (players in THIS WEEK'S tournament)
+            const filtered = tournamentField.filter(p => 
+                p.name.toLowerCase().includes(searchTerm.toLowerCase())
+            );
+
+            container.innerHTML = filtered.map(player => {
+                const isUsed = usedPlayerIds.includes(String(player.id));
+                const isSelected = String(selectedPlayerId) === String(player.id);
+                const isCurrentPick = existingPick && String(existingPick.playerId) === String(player.id);
+                
+                // Get current position from leaderboard if available
+                const leaderboardEntry = mockLeaderboard.find(l => String(l.playerId) === String(player.id));
+                const currentPos = leaderboardEntry ? leaderboardEntry.pos : '-';
+                const currentScore = leaderboardEntry ? 
+                    (leaderboardEntry.score < 0 ? leaderboardEntry.score : (leaderboardEntry.score === 0 ? 'E' : `+${leaderboardEntry.score}`)) : '-';
+
+                return `
+                    <div class="player-item ${isUsed ? 'disabled' : ''} ${isSelected ? 'selected' : ''} ${isCurrentPick ? 'current-pick' : ''}"
+                         onclick="${isUsed ? '' : `selectPlayer('${player.id}')`}">
+                        <img class="player-photo" src="${getPlayerPhoto(player.id)}" alt="${player.name}"
+                             onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect fill=%22%23e5e7eb%22 width=%22100%22 height=%22100%22/></svg>'">
+                        <div class="player-info">
+                            <h4>${player.name}</h4>
+                            <p>${player.country}</p>
+                        </div>
+                        ${isUsed ? '<span class="used-badge">Already Used</span>' : ''}
+                        ${isCurrentPick ? '<span class="current-badge">Current Pick</span>' : ''}
+                        <div class="player-rank">
+                            <strong>${currentPos}</strong>
+                            <span>${currentScore !== '-' ? currentScore : 'Not started'}</span>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            if (filtered.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <p>No players found matching "${searchTerm}"</p>
+                    </div>
+                `;
+            }
+        }
+
+        function filterPlayers() {
+            const searchTerm = document.getElementById('player-search').value;
+            const existingPick = store.picks.find(
+                p => p.poolId === currentPoolId && 
+                p.userId === store.currentUser.id && 
+                p.tournamentId === currentTournament.id
+            );
+            const usedPlayerIds = store.picks
+                .filter(p => p.poolId === currentPoolId && 
+                            p.userId === store.currentUser.id &&
+                            p.tournamentId !== currentTournament.id)
+                .map(p => String(p.playerId));
+            renderPlayersListFiltered(searchTerm, usedPlayerIds, existingPick);
+        }
+
+        function selectPlayer(playerId) {
+            selectedPlayerId = String(playerId);
+            const player = getPlayerById(playerId);
+
+            // Check if there's an existing pick for this tournament
+            const existingPick = store.picks.find(
+                p => p.poolId === currentPoolId && 
+                p.userId === store.currentUser.id && 
+                p.tournamentId === currentTournament.id
+            );
+
+            // Update UI
+            const usedPlayerIds = store.picks
+                .filter(p => p.poolId === currentPoolId && 
+                            p.userId === store.currentUser.id &&
+                            p.tournamentId !== currentTournament.id)
+                .map(p => String(p.playerId));
+            renderPlayersListFiltered(document.getElementById('player-search').value, usedPlayerIds, existingPick);
+
+            // Show current selection
+            const currentPickDisplay = document.getElementById('current-pick-display');
+            currentPickDisplay.style.display = 'flex';
+            document.getElementById('selected-player-name').textContent = player.name;
+
+            // Update button and warning based on whether this is a new pick or change
+            const confirmBtn = document.getElementById('confirm-pick-btn');
+            if (existingPick) {
+                const isSamePlayer = String(existingPick.playerId) === String(playerId);
+                confirmBtn.textContent = isSamePlayer ? 'CURRENT PICK' : 'UPDATE PICK';
+                confirmBtn.disabled = isSamePlayer;
+                document.getElementById('pick-warning').innerHTML = isSamePlayer
+                    ? `<strong>${player.name}</strong> is your current pick. Select a different player to change.`
+                    : `<strong>Change pick to ${player.name}?</strong> You can still change until the tournament starts.`;
+            } else {
+                confirmBtn.textContent = 'CONFIRM PICK';
+                confirmBtn.disabled = false;
+                document.getElementById('pick-warning').innerHTML = 
+                    `<strong>Warning:</strong> Once the tournament starts, you cannot change your pick. ${player.name} will be unavailable for the rest of the season.`;
+            }
+        }
+
+        async function confirmPick() {
+            if (!selectedPlayerId) return;
+
+            const player = getPlayerById(selectedPlayerId);
+
+            try {
+                if (supabaseClient) {
+                    // Save pick to Supabase
+                    const { data, error } = await supabaseClient
+                        .from('picks')
+                        .upsert({
+                            pool_id: currentPoolId,
+                            user_id: store.currentUser.id,
+                            tournament_id: currentTournament.id,
+                            player_id: String(selectedPlayerId),
+                            player_name: player.name
+                        }, {
+                            onConflict: 'pool_id,user_id,tournament_id'
+                        })
+                        .select()
+                        .single();
+                    
+                    if (error) throw error;
+                    
+                    // Update local store
+                    const existingPickIndex = store.picks.findIndex(
+                        p => p.poolId === currentPoolId && 
+                        p.userId === store.currentUser.id && 
+                        p.tournamentId === currentTournament.id
+                    );
+
+                    const pickData = {
+                        id: data.id,
+                        poolId: currentPoolId,
+                        userId: store.currentUser.id,
+                        playerId: String(selectedPlayerId),
+                        tournamentId: currentTournament.id,
+                        tournamentName: currentTournament.name,
+                        timestamp: new Date().toISOString(),
+                        earnings: 0
+                    };
+
+                    if (existingPickIndex !== -1) {
+                        store.picks[existingPickIndex] = pickData;
+                        showToast(`Pick updated to ${player.name}!`);
+                    } else {
+                        store.picks.push(pickData);
+                        showToast(`${player.name} locked in for ${currentTournament.name}!`);
+                    }
+                } else {
+                    // Fallback to local storage
+                    const existingPickIndex = store.picks.findIndex(
+                        p => p.poolId === currentPoolId && 
+                        p.userId === store.currentUser.id && 
+                        p.tournamentId === currentTournament.id
+                    );
+
+                    if (existingPickIndex !== -1) {
+                        store.picks[existingPickIndex].playerId = String(selectedPlayerId);
+                        store.picks[existingPickIndex].timestamp = new Date().toISOString();
+                        showToast(`Pick updated to ${player.name}!`);
+                    } else {
+                        const pick = {
+                            id: generateId(),
+                            poolId: currentPoolId,
+                            userId: store.currentUser.id,
+                            playerId: String(selectedPlayerId),
+                            tournamentId: currentTournament.id,
+                            tournamentName: currentTournament.name,
+                            timestamp: new Date().toISOString(),
+                            earnings: 0
+                        };
+                        store.picks.push(pick);
+                        showToast(`${player.name} locked in for ${currentTournament.name}!`);
+                    }
+                }
+
+                selectedPlayerId = null;
+                switchPoolTab('leaderboard');
+            } catch (error) {
+                showToast(error.message || 'Failed to save pick', true);
+            }
+        }
+
+        function renderHistory() {
+            const pool = store.pools.find(p => p.id === currentPoolId);
+            
+            // Get user's picks
+            const userPicks = store.picks
+                .filter(p => p.poolId === currentPoolId && p.userId === store.currentUser.id)
+                .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+
+            const tbody = document.getElementById('history-body');
+
+            if (userPicks.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="5" class="empty-state" style="padding: 3rem;">
+                            <h3>No Picks Yet</h3>
+                            <p>Make your first pick to start tracking your history.</p>
+                        </td>
+                    </tr>
+                `;
+            } else {
+                tbody.innerHTML = userPicks.map((pick, index) => {
+                    const player = getPlayerById(pick.playerId);
+                    const leaderboardEntry = mockLeaderboard.find(l => String(l.playerId) === String(pick.playerId));
+                    const isCurrentTournament = pick.tournamentId === currentTournament.id;
+                    const tournamentLogo = tournamentLogos[pick.tournamentId] || '';
+
+                    return `
+                        <tr>
+                            <td>${userPicks.length - index}</td>
+                            <td>
+                                <div class="player-cell">
+                                    ${tournamentLogo ? `<img src="${tournamentLogo}" class="tournament-logo-small" alt="" onerror="this.style.display='none'">` : ''}
+                                    <span>${pick.tournamentName}</span>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="player-cell">
+                                    <img src="${player ? (player.photo || getPlayerPhoto(pick.playerId)) : ''}" alt="" 
+                                         onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect fill=%22%23e5e7eb%22 width=%22100%22 height=%22100%22/></svg>'">
+                                    <span>${player ? player.name : 'Unknown'}</span>
+                                </div>
+                            </td>
+                            <td>
+                                ${isCurrentTournament ? 
+                                    `<span style="color: var(--gold); font-weight: 600;">In Progress (${leaderboardEntry ? leaderboardEntry.pos : 'TBD'})</span>` :
+                                    (pick.finish || '-')
+                                }
+                            </td>
+                            <td class="earnings-cell">
+                                ${isCurrentTournament && leaderboardEntry ? 
+                                    formatCurrency(leaderboardEntry.projectedEarnings) + ' (proj)' :
+                                    formatCurrency(pick.earnings || 0)
+                                }
+                            </td>
+                        </tr>
+                    `;
+                }).join('');
+            }
+
+            // Render friends' pick history
+            const friendsContainer = document.getElementById('friends-history');
+            const otherMembers = pool.members.filter(m => m !== store.currentUser.id);
+            
+            if (otherMembers.length === 0) {
+                friendsContainer.innerHTML = `<p style="padding: 1.5rem; color: var(--gray);">No other pool members yet.</p>`;
+            } else {
+                friendsContainer.innerHTML = otherMembers.map(memberId => {
+                    const user = store.users.find(u => u.id === memberId);
+                    const memberPicks = store.picks
+                        .filter(p => p.poolId === currentPoolId && p.userId === memberId)
+                        .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+
+                    return `
+                        <div style="border-bottom: 1px solid #e5e7eb; padding: 1rem 2rem;">
+                            <h4 style="margin-bottom: 0.75rem; font-family: 'Oswald', sans-serif; color: var(--green-deep);">${user.name}</h4>
+                            ${memberPicks.length === 0 ? 
+                                `<p style="color: var(--gray); font-size: 0.9rem;">No picks yet</p>` :
+                                `<div style="display: flex; flex-wrap: wrap; gap: 1rem;">
+                                    ${memberPicks.map(pick => {
+                                        const player = getPlayerById(pick.playerId);
+                                        const isCurrentTournament = pick.tournamentId === currentTournament.id;
+                                        const leaderboardEntry = isCurrentTournament ? mockLeaderboard.find(l => String(l.playerId) === String(pick.playerId)) : null;
+                                        const tournamentLogo = tournamentLogos[pick.tournamentId] || '';
+                                        
+                                        return `
+                                            <div style="background: #f9fafb; padding: 0.5rem 0.75rem; border-radius: 4px; display: flex; align-items: center; gap: 0.5rem; font-size: 0.85rem;">
+                                                ${tournamentLogo ? `<img src="${tournamentLogo}" style="width: 24px; height: 24px; object-fit: contain;" alt="">` : ''}
+                                                <span style="color: var(--gray);">${pick.tournamentName.split(' ').slice(0, 2).join(' ')}:</span>
+                                                <strong>${player ? player.name : 'Unknown'}</strong>
+                                                ${isCurrentTournament && leaderboardEntry ? 
+                                                    `<span style="color: var(--gold);">(${leaderboardEntry.pos})</span>` :
+                                                    (pick.finish ? `<span style="color: var(--gray);">(${pick.finish})</span>` : '')
+                                                }
+                                            </div>
+                                        `;
+                                    }).join('')}
+                                </div>`
+                            }
+                        </div>
+                    `;
+                }).join('');
+            }
+
+            // Render upcoming schedule
+            const scheduleBody = document.getElementById('schedule-body');
+            scheduleBody.innerHTML = upcomingSchedule.map(tournament => {
+                const logo = tournamentLogos[tournament.id] || '';
+                return `
+                    <tr>
+                        <td>${tournament.week}</td>
+                        <td>
+                            <div class="player-cell">
+                                ${logo ? `<img src="${logo}" class="tournament-logo-small" alt="" onerror="this.style.display='none'">` : ''}
+                                <strong>${tournament.name}</strong>
+                            </div>
+                        </td>
+                        <td>${tournament.dates}</td>
+                        <td>${tournament.course}</td>
+                        <td>
+                            <span style="color: var(--green-fairway);">${tournament.previousWinner}</span>
+                            <span style="color: var(--gray); font-size: 0.8rem;">(${formatCurrency(tournament.previousWinnings)})</span>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        // ==================== MODALS ====================
+        function showInviteModal(poolId) {
+            const pool = store.pools.find(p => p.id === poolId);
+            if (!pool) return;
+
+            document.getElementById('invite-link').textContent = 
+                `https://oneanddonegolf.com/join/${pool.inviteCode}`;
+            document.getElementById('invite-modal').classList.add('active');
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).classList.remove('active');
+        }
+
+        function copyInviteLink() {
+            const link = document.getElementById('invite-link').textContent;
+            navigator.clipboard.writeText(link).then(() => {
+                showToast('Invite link copied to clipboard!');
+            });
+        }
+
+        function sendModalInvite() {
+            const email = document.getElementById('modal-invite-email').value.toLowerCase().trim();
+            if (!email || !email.includes('@')) {
+                showToast('Please enter a valid email', true);
+                return;
+            }
+
+            const pool = store.pools.find(p => p.id === currentPoolId);
+            if (!pool) return;
+
+            const existingUser = store.users.find(u => u.email === email);
+            if (existingUser) {
+                if (!pool.members.includes(existingUser.id)) {
+                    pool.members.push(existingUser.id);
+                    showToast(`${existingUser.name} added to the pool!`);
+                } else {
+                    showToast('This user is already in the pool', true);
+                }
+            } else {
+                store.invites.push({
+                    id: generateId(),
+                    poolId: pool.id,
+                    email,
+                    status: 'pending'
+                });
+                showToast(`Invitation sent to ${email}`);
+            }
+
+            document.getElementById('modal-invite-email').value = '';
+        }
+
+        // Close modal when clicking outside
+        document.querySelectorAll('.modal-overlay').forEach(overlay => {
+            overlay.addEventListener('click', (e) => {
+                if (e.target === overlay) {
+                    overlay.classList.remove('active');
+                }
+            });
+        });
+
+        // ==================== INIT ====================
+        // Add some demo data for testing
+        function initDemoData() {
+            // Demo users
+            store.users.push({
+                id: 'demo1',
+                name: 'Demo User',
+                email: 'demo@example.com',
+                password: 'password123'
+            });
+
+            store.users.push({
+                id: 'friend1',
+                name: 'Tiger Woods Fan',
+                email: 'tiger@example.com',
+                password: 'password123'
+            });
+
+            store.users.push({
+                id: 'friend2',
+                name: 'Golf Buddy',
+                email: 'buddy@example.com',
+                password: 'password123'
+            });
+
+            // Demo pool
+            store.pools.push({
+                id: 'demo-pool',
+                name: 'Office Golf League 2026',
+                season: '2025-2026 PGA Tour Season',
+                ownerId: 'demo1',
+                members: ['demo1', 'friend1', 'friend2'],
+                inviteCode: 'DEMO2026'
+            });
+
+            // 2026 Season: The Sentry was CANCELLED due to drought at Kapalua
+            // Sony Open in Hawaii (Jan 15-18) was the FIRST tournament - Chris Gotterup won
+            // The American Express (Jan 22-25) is currently in progress
+
+            // Sony Open picks (Week 1 - the only completed tournament so far)
+            store.picks.push({
+                id: 'pick1',
+                poolId: 'demo-pool',
+                userId: 'demo1',
+                playerId: '11378', // Robert MacIntyre - T4 at Sony Open ($409,500)
+                tournamentId: 'sony2026',
+                tournamentName: 'Sony Open in Hawaii',
+                timestamp: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString(),
+                earnings: 409500,
+                finish: 'T4'
+            });
+
+            store.picks.push({
+                id: 'pick2',
+                poolId: 'demo-pool',
+                userId: 'friend1',
+                playerId: '9025', // Daniel Berger - T6 at Sony Open ($287,105)
+                tournamentId: 'sony2026',
+                tournamentName: 'Sony Open in Hawaii',
+                timestamp: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString(),
+                earnings: 287105,
+                finish: 'T6'
+            });
+
+            store.picks.push({
+                id: 'pick3',
+                poolId: 'demo-pool',
+                userId: 'friend2',
+                playerId: '7081', // Si Woo Kim - T11 at Sony Open ($220,675)
+                tournamentId: 'sony2026',
+                tournamentName: 'Sony Open in Hawaii',
+                timestamp: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString(),
+                earnings: 220675,
+                finish: 'T11'
+            });
+
+            // Current week picks (The American Express - in progress)
+            // Friend1 picked Scottie Scheffler (currently T3 at -9)
+            store.picks.push({
+                id: 'pick4',
+                poolId: 'demo-pool',
+                userId: 'friend1',
+                playerId: '9478', // Scottie Scheffler
+                tournamentId: 'amex2026',
+                tournamentName: 'The American Express',
+                timestamp: new Date().toISOString(),
+                earnings: 0
+            });
+
+            // Friend2 picked Min Woo Lee (currently T1 at -10!)
+            store.picks.push({
+                id: 'pick5',
+                poolId: 'demo-pool',
+                userId: 'friend2',
+                playerId: '4410932', // Min Woo Lee
+                tournamentId: 'amex2026',
+                tournamentName: 'The American Express',
+                timestamp: new Date().toISOString(),
+                earnings: 0
+            });
+
+            // Demo user hasn't made their pick yet for The American Express!
+        }
+
+        initDemoData();
+
+        // Check for existing Supabase session on page load
+        async function checkExistingSession() {
+            if (!supabaseClient) return;
+            
+            try {
+                const { data: { session } } = await supabaseClient.auth.getSession();
+                if (session && session.user) {
+                    await setUserFromSession(session);
+                }
+            } catch (error) {
+                console.log('No existing session:', error);
+            }
+        }
+
+        // Helper to set user from session
+        async function setUserFromSession(session) {
+            if (!session || !session.user) return;
+            
+            store.currentUser = {
+                id: session.user.id,
+                name: session.user.user_metadata?.name || session.user.email.split('@')[0],
+                email: session.user.email
+            };
+            
+            if (!store.users.find(u => u.id === session.user.id)) {
+                store.users.push(store.currentUser);
+            }
+            
+            await loadUserData();
+            updateNavigation();
+            showScreen('dashboard');
+            console.log('Session active for:', store.currentUser.email);
+        }
+
+        // Listen for auth state changes (login, logout, token refresh)
+        if (supabaseClient) {
+            supabaseClient.auth.onAuthStateChange(async (event, session) => {
+                console.log('Auth state changed:', event);
+                
+                if (event === 'SIGNED_IN' && session) {
+                    await setUserFromSession(session);
+                } else if (event === 'SIGNED_OUT') {
+                    store.currentUser = null;
+                    store.pools = [];
+                    store.picks = [];
+                    updateNavigation();
+                    showScreen('landing');
+                } else if (event === 'TOKEN_REFRESHED' && session) {
+                    // Session was refreshed, update user
+                    await setUserFromSession(session);
+                }
+            });
+        }
+
+        // Run session check on page load
+        checkExistingSession();
+    </script>
+</body>
+</html>
