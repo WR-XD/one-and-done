@@ -1158,15 +1158,6 @@
                 font-size: 0.8rem;
             }
 
-            /* Show scroll indicator on mobile */
-            .scroll-indicator {
-                display: flex;
-            }
-
-            .scroll-indicator.hidden {
-                display: none;
-            }
-
             .leaderboard {
                 padding: 1rem;
                 margin: 0.5rem;
@@ -1393,7 +1384,7 @@
             overflow: visible;
         }
 
-        /* Scroll indicator for mobile */
+        /* Scroll indicator - shows when tabs overflow */
         .scroll-indicator {
             display: none;
             position: absolute;
@@ -1407,6 +1398,10 @@
             justify-content: flex-end;
             padding-right: 12px;
             z-index: 10;
+        }
+
+        .scroll-indicator.visible {
+            display: flex;
         }
 
         .scroll-indicator::after {
@@ -3982,10 +3977,10 @@ See you on the course!`
                 
                 if (hasOverflow) {
                     container.classList.add('has-overflow');
-                    if (indicator) indicator.classList.remove('hidden');
+                    if (indicator) indicator.classList.add('visible');
                 } else {
                     container.classList.remove('has-overflow');
-                    if (indicator) indicator.classList.add('hidden');
+                    if (indicator) indicator.classList.remove('visible');
                 }
                 
                 // Update on scroll
@@ -3993,10 +3988,10 @@ See you on the course!`
                     const isAtEnd = tabs.scrollLeft + tabs.clientWidth >= tabs.scrollWidth - 10;
                     if (isAtEnd) {
                         container.classList.remove('has-overflow');
-                        if (indicator) indicator.classList.add('hidden');
+                        if (indicator) indicator.classList.remove('visible');
                     } else if (tabs.scrollWidth > tabs.clientWidth) {
                         container.classList.add('has-overflow');
-                        if (indicator) indicator.classList.remove('hidden');
+                        if (indicator) indicator.classList.add('visible');
                     }
                 });
             }
