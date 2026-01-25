@@ -1400,24 +1400,29 @@
             right: 0;
             top: 0;
             bottom: 2px;
-            width: 50px;
-            background: linear-gradient(to right, transparent, rgba(255,255,255,0.9) 50%, white);
+            width: 60px;
+            background: linear-gradient(to right, transparent, white 70%);
             pointer-events: none;
             align-items: center;
             justify-content: flex-end;
-            padding-right: 8px;
+            padding-right: 12px;
+            z-index: 10;
         }
 
         .scroll-indicator::after {
-            content: '›';
-            font-size: 1.5rem;
+            content: '→';
+            font-size: 1.2rem;
+            font-weight: bold;
             color: var(--green-deep);
-            animation: pulse-right 1.5s ease-in-out infinite;
+            background: var(--gold);
+            padding: 4px 8px;
+            border-radius: 12px;
+            animation: pulse-right 1.2s ease-in-out infinite;
         }
 
         @keyframes pulse-right {
-            0%, 100% { opacity: 0.4; transform: translateX(0); }
-            50% { opacity: 1; transform: translateX(3px); }
+            0%, 100% { opacity: 0.7; transform: translateX(0); }
+            50% { opacity: 1; transform: translateX(4px); }
         }
 
         .pool-options-menu {
