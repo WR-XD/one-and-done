@@ -2286,6 +2286,7 @@
         // Upcoming tournament (pick window opens Monday)
         const upcomingTournament = {
             id: "farmers-2026",
+            fieldId: "R2026004", // PGA Tour tournament ID for Supabase field lookup
             name: "Farmers Insurance Open",
             dates: "Jan 29 - Feb 1, 2026",
             course: "Torrey Pines GC (South)",
@@ -2950,8 +2951,8 @@
                     
                     console.log('Login successful, loading user data...');
                     await loadUserData();
-                    // Fetch tournament field from Supabase
-                    await fetchTournamentField(currentTournament.id);
+                    // Fetch tournament field from Supabase using PGA Tour ID
+                    await fetchTournamentField(currentTournament.fieldId || currentTournament.id);
                     console.log('User data loaded, updating nav...');
                     updateNavigation();
                     console.log('Showing dashboard...');
