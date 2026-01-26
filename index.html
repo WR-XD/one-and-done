@@ -2269,19 +2269,49 @@
             }
         ];
 
-        const currentTournament = {
+        // Tournament that just finished (show until Tuesday)
+        const justFinishedTournament = {
+            id: "amex2026",
+            name: "The American Express",
+            dates: "Jan 22 - 26, 2026",
+            course: "Pete Dye Stadium Course, PGA West",
+            location: "La Quinta, CA",
+            purse: 9200000,
+            round: 4,
+            status: "Complete",
+            logo: "https://res.cloudinary.com/pgatour-prod/d_tournaments:logos:R000.png/tournaments/logos/R002.png",
+            endDate: new Date("2026-01-26T23:59:59-08:00"),
+            showUntil: new Date("2026-01-27T07:00:00Z") // Show until Tuesday 7am UK
+        };
+
+        // Upcoming tournament (pick window opens Monday)
+        const upcomingTournament = {
             id: "farmers-2026",
             name: "Farmers Insurance Open",
             dates: "Jan 29 - Feb 1, 2026",
             course: "Torrey Pines GC (South)",
             location: "San Diego, CA",
-            purse: 9300000,
+            purse: 9600000,
             round: 0,
             status: "Upcoming",
             logo: "https://res.cloudinary.com/pgatour-prod/d_tournaments:logos:R000.png/tournaments/logos/R004.png",
-            startTime: new Date("2026-01-29T07:00:00-08:00"), // First tee time (PST)
+            startTime: new Date("2026-01-29T07:00:00-08:00"),
             pickWindowOpen: new Date("2026-01-26T07:00:00Z") // Monday 7am UK time
         };
+
+        // Determine which tournament to show on leaderboard
+        // If tournament just finished (within last 24 hours), show it
+        // Otherwise show upcoming/current
+        function getCurrentDisplayTournament() {
+            const now = new Date();
+            if (justFinishedTournament && now < justFinishedTournament.showUntil) {
+                return justFinishedTournament;
+            }
+            return upcomingTournament;
+        }
+
+        // For picks, we use the upcoming tournament
+        const currentTournament = upcomingTournament;
 
         // Next tournament (for when current is in progress)
         const nextTournament = {
@@ -2292,8 +2322,8 @@
             location: "Scottsdale, AZ",
             purse: 9200000,
             logo: "https://res.cloudinary.com/pgatour-prod/d_tournaments:logos:R000.png/tournaments/logos/R003.png",
-            startTime: new Date("2026-02-05T07:00:00-07:00"), // First tee time (MST)
-            pickWindowOpen: new Date("2026-02-02T07:00:00Z") // Monday 7am UK time
+            startTime: new Date("2026-02-05T07:00:00-07:00"),
+            pickWindowOpen: new Date("2026-02-02T07:00:00Z")
         };
 
         // TESTING MODE: Set to true to allow picks even after tournament starts
@@ -4069,11 +4099,14 @@ See you on the course!`
         }
 
         async function renderLeaderboard() {
-            document.getElementById('current-tournament-name').textContent = currentTournament.name;
-            document.getElementById('tournament-dates').textContent = currentTournament.dates;
-            document.getElementById('tournament-course').textContent = currentTournament.course;
-            document.getElementById('tournament-round').textContent = `Round ${currentTournament.round}`;
-            document.getElementById('tournament-logo').src = currentTournament.logo;
+            // Use the display tournament (might be just-finished or upcoming)
+            const displayTournament = getCurrentDisplayTournament();
+            
+            document.getElementById('current-tournament-name').textContent = displayTournament.name;
+            document.getElementById('tournament-dates').textContent = displayTournament.dates;
+            document.getElementById('tournament-course').textContent = displayTournament.course;
+            document.getElementById('tournament-round').textContent = displayTournament.status === 'Complete' ? 'Final' : `Round ${displayTournament.round}`;
+            document.getElementById('tournament-logo').src = displayTournament.logo;
 
             // Try to fetch live ESPN data if not already loaded
             if (!espnDataLoaded && liveLeaderboard.length === 0) {
@@ -4084,21 +4117,21 @@ See you on the course!`
             const leaderboardData = espnDataLoaded && liveLeaderboard.length > 0 ? liveLeaderboard : mockLeaderboard;
 
             // Update round display after ESPN fetch
-            document.getElementById('tournament-round').textContent = `Round ${currentTournament.round}`;
+            document.getElementById('tournament-round').textContent = displayTournament.status === 'Complete' ? 'Final' : `Round ${displayTournament.round}`;
 
             // Get the current pool
             const pool = store.pools.find(p => p.id === currentPoolId);
 
-            // Check if user has a pick for this tournament
+            // Check if user has a pick for this tournament (use display tournament for leaderboard view)
             const userPick = store.picks.find(
                 p => p.poolId === currentPoolId && 
                 p.userId === store.currentUser.id && 
-                p.tournamentId === currentTournament.id
+                p.tournamentId === displayTournament.id
             );
 
             // Get all pool members' picks for this tournament (for friend tags)
             const poolPicks = store.picks.filter(
-                p => p.poolId === currentPoolId && p.tournamentId === currentTournament.id
+                p => p.poolId === currentPoolId && p.tournamentId === displayTournament.id
             );
 
             // Create a color index map for friends
