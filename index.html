@@ -4029,9 +4029,10 @@ See you on the course!`
             // Render leaderboard
             const tbody = document.getElementById('leaderboard-body');
             tbody.innerHTML = leaderboardData.map(entry => {
-                // Try to get player from our database, or use ESPN data
+                // Prefer ESPN data (playerName, headshot) over our database lookup
+                // Only fall back to database if ESPN data is missing
                 const player = getPlayerById(entry.playerId);
-                const playerName = player?.name || entry.playerName || 'Unknown';
+                const playerName = entry.playerName || player?.name || 'Unknown';
                 const playerPhoto = entry.headshot || player?.photo || getPlayerPhoto(entry.playerId);
 
                 // Check if this is user's pick (by ID or name match)
