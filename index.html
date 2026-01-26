@@ -2534,177 +2534,111 @@
             return `https://a.espncdn.com/i/headshots/golf/players/full/${espnId}.png`;
         }
 
-        // Complete tournament field - Farmers Insurance Open 2026 (147 players)
-        // Field from pgatour.com - includes Brooks Koepka's return to PGA Tour
-        const tournamentField = [
-            // Top players and notable entries
-            { id: "9478", name: "Scottie Scheffler", country: "USA" },
-            { id: "10230", name: "Xander Schauffele", country: "USA" },
-            { id: "9780", name: "Ludvig Åberg", country: "SWE" },
-            { id: "6007", name: "Patrick Cantlay", country: "USA" },
-            { id: "9973", name: "Keegan Bradley", country: "USA" },
-            { id: "5162", name: "Chris Gotterup", country: "USA" },
-            { id: "1680", name: "Jason Day", country: "AUS" },
-            { id: "5408", name: "Harris English", country: "USA" },
-            { id: "10596", name: "Matthieu Pavon", country: "FRA" },
-            { id: "8973", name: "Max Homa", country: "USA" },
-            { id: "10980", name: "Sahith Theegala", country: "USA" },
-            { id: "11119", name: "Wyndham Clark", country: "USA" },
-            { id: "3702", name: "Justin Rose", country: "ENG" },
-            { id: "5430", name: "Brooks Koepka", country: "USA" },
-            { id: "388", name: "Adam Scott", country: "AUS" },
-            { id: "10030", name: "Zach Bauchou", country: "USA" },
-            { id: "10139", name: "Christiaan Bezuidenhout", country: "RSA" },
-            { id: "10424", name: "Akshay Bhatia", country: "USA" },
-            { id: "4602673", name: "Tom Kim", country: "KOR" },
-            { id: "9938", name: "Sam Burns", country: "USA" },
-            { id: "11378", name: "Robert MacIntyre", country: "SCO" },
-            { id: "4837368", name: "Pierceson Coody", country: "USA" },
-            { id: "10522", name: "Eric Cole", country: "USA" },
-            { id: "5409", name: "Russell Henley", country: "USA" },
-            { id: "6086", name: "Tom Hoge", country: "USA" },
-            { id: "4410932", name: "Min Woo Lee", country: "AUS" },
-            { id: "9427", name: "Sungjae Im", country: "KOR" },
-            { id: "2230", name: "Tony Finau", country: "USA" },
-            { id: "9877", name: "Will Zalatoris", country: "USA" },
-            { id: "10505", name: "J.T. Poston", country: "USA" },
-            { id: "9221", name: "Haotong Li", country: "CHN" },
-            { id: "4901368", name: "Matt McCarty", country: "USA" },
-            { id: "1651", name: "Billy Horschel", country: "USA" },
-            { id: "5860", name: "Rickie Fowler", country: "USA" },
-            { id: "3550", name: "Gary Woodland", country: "USA" },
-            { id: "7081", name: "Si Woo Kim", country: "KOR" },
-            { id: "4375304", name: "Davis Thompson", country: "USA" },
-            { id: "10548", name: "Matt Wallace", country: "ENG" },
-            { id: "9506", name: "Jordan Smith", country: "ENG" },
-            { id: "4698579", name: "S.H. Kim", country: "KOR" },
-            { id: "5054388", name: "Jacob Bridgeman", country: "USA" },
-            { id: "4585", name: "Hideki Matsuyama", country: "JPN" },
-            { id: "4404992", name: "Ben Griffin", country: "USA" },
-            { id: "4426181", name: "Sam Stevens", country: "USA" },
-            { id: "6011", name: "Beau Hossler", country: "USA" },
-            { id: "3792", name: "Nick Taylor", country: "CAN" },
-            { id: "11332", name: "Andrew Novak", country: "USA" },
-            { id: "9349", name: "Sepp Straka", country: "AUT" },
-            { id: "10863", name: "Cam Davis", country: "AUS" },
-            { id: "3470", name: "Chez Reavie", country: "USA" },
-            { id: "4361187", name: "Lee Hodges", country: "USA" },
-            { id: "10664", name: "Taylor Moore", country: "USA" },
-            { id: "9037", name: "Luke List", country: "USA" },
-            { id: "7631", name: "Brandt Snedeker", country: "USA" },
-            { id: "2296", name: "Charley Hoffman", country: "USA" },
-            { id: "10372", name: "Adam Schenk", country: "USA" },
-            { id: "4848122", name: "Michael Kim", country: "USA" },
-            { id: "4589", name: "J.J. Spaun", country: "USA" },
-            { id: "3944", name: "Cameron Tringale", country: "USA" },
-            { id: "4854714", name: "Blades Brown", country: "USA" },
-            { id: "11084", name: "Ryan Gerard", country: "USA" },
-            { id: "9611", name: "Andrew Putnam", country: "USA" },
-            { id: "4567047", name: "Karl Vilips", country: "USA" },
-            { id: "4608030", name: "David Ford", country: "USA" },
-            { id: "11205", name: "Austin Smotherman", country: "USA" },
-            { id: "4686087", name: "Rico Hoey", country: "PHI" },
-            { id: "4832046", name: "Nick Dunlap", country: "USA" },
-            { id: "10478", name: "Harry Hall", country: "ENG" },
-            { id: "10890", name: "Max Greyserman", country: "USA" },
-            { id: "4701789", name: "Sam Ryder", country: "USA" },
-            { id: "9997", name: "Ben Silverman", country: "CAN" },
-            { id: "10323", name: "Doug Ghim", country: "USA" },
-            { id: "4383042", name: "Zac Blair", country: "USA" },
-            { id: "3565", name: "Brendon Todd", country: "USA" },
-            { id: "4466442", name: "Justin Lower", country: "USA" },
-            { id: "4369123", name: "Greyson Sigg", country: "USA" },
-            { id: "10093", name: "Kevin Yu", country: "TPE" },
-            { id: "4420979", name: "Hayden Springer", country: "USA" },
-            { id: "4590141", name: "Patrick Fishburn", country: "USA" },
-            { id: "3988", name: "Kevin Streelman", country: "USA" },
-            { id: "9179", name: "Mackenzie Hughes", country: "CAN" },
-            { id: "4847213", name: "Luke Clanton", country: "USA" },
-            { id: "3832", name: "Webb Simpson", country: "USA" },
-            { id: "2250", name: "Kevin Chappell", country: "USA" },
-            { id: "9424", name: "Stephan Jaeger", country: "GER" },
-            { id: "6009", name: "Bud Cauley", country: "USA" },
-            { id: "4686086", name: "Joe Highsmith", country: "USA" },
-            { id: "4374132", name: "Carson Young", country: "USA" },
-            { id: "4364873", name: "Justin Suh", country: "USA" },
-            { id: "10216", name: "Vince Whaley", country: "USA" },
-            { id: "4410985", name: "Brandon Wu", country: "USA" },
-            { id: "9155", name: "Kevin Kisner", country: "USA" },
-            { id: "4593911", name: "Chandler Phillips", country: "USA" },
-            { id: "10603", name: "Ryan Fox", country: "NZL" },
-            { id: "4361914", name: "Chandler Blanchet", country: "USA" },
-            { id: "9191", name: "Denny McCarthy", country: "USA" },
-            { id: "10425", name: "Davis Riley", country: "USA" },
-            { id: "6004", name: "Brendan Steele", country: "USA" },
-            { id: "5548", name: "Francesco Molinari", country: "ITA" },
-            { id: "3669", name: "Daniel Berger", country: "USA" },
-            { id: "10577", name: "Ricky Castillo", country: "USA" },
-            { id: "9567", name: "Emiliano Grillo", country: "ARG" },
-            { id: "3676", name: "Martin Laird", country: "SCO" },
-            { id: "10092", name: "Rafael Campos", country: "PUR" },
-            { id: "4364876", name: "Michael Thorbjornsen", country: "USA" },
-            { id: "5113338", name: "Davis Chatfield", country: "USA" },
-            { id: "11125", name: "Adrien Dumont de Chassart", country: "BEL" },
-            { id: "4848080", name: "A.J. Ewart", country: "CAN" },
-            { id: "10591", name: "Dan Brown", country: "ENG" },
-            { id: "4563229", name: "Austin Eckroat", country: "USA" },
-            { id: "4848423", name: "Zecheng Dou", country: "CHN" },
-            { id: "9766", name: "Cam Young", country: "USA" },
-            { id: "4375117", name: "Parker Coody", country: "USA" },
-            { id: "4362403", name: "Johnny Keefer", country: "USA" },
-            { id: "4374304", name: "Noah Goodwin", country: "USA" },
-            { id: "9028", name: "Martin Trainer", country: "USA" },
-            { id: "4361934", name: "John VanDerLaan", country: "USA" },
-            { id: "5118", name: "Patton Kizzire", country: "USA" },
-            { id: "4848077", name: "Max McGreevy", country: "USA" },
-            { id: "6979", name: "Joel Dahmen", country: "USA" },
-            { id: "9127", name: "Adam Svensson", country: "CAN" },
-            { id: "10592", name: "Thomas Detry", country: "BEL" },
-            { id: "9417", name: "Scott Stallings", country: "USA" },
-            { id: "4364892", name: "Mac Meissner", country: "USA" },
-            { id: "4610892", name: "Trace Crowe", country: "USA" },
-            { id: "4592633", name: "Ben Kohles", country: "USA" },
-            { id: "11099", name: "Lanto Griffin", country: "USA" },
-            { id: "3625", name: "Matt Kuchar", country: "USA" },
-            { id: "4375254", name: "Kevin Dougherty", country: "USA" },
-            { id: "4848244", name: "Marcus Byrd", country: "USA" }
+        // Tournament field - fetched from Supabase or fallback to hardcoded
+        // Run scrape_field.py to update the field in Supabase
+        let tournamentField = [];
+        let fieldLoaded = false;
+
+        // Fallback field data (used if Supabase fetch fails)
+        const fallbackField = [
+            { id: "9780", name: "Ludvig Åberg", country: "SWE", rank: 18 },
+            { id: "10230", name: "Xander Schauffele", country: "USA", rank: 4 },
+            { id: "6007", name: "Patrick Cantlay", country: "USA", rank: 7 },
+            { id: "9973", name: "Keegan Bradley", country: "USA", rank: 16 },
+            { id: "5430", name: "Brooks Koepka", country: "USA", rank: 33 },
+            { id: "1680", name: "Jason Day", country: "AUS", rank: 26 },
+            { id: "5408", name: "Harris English", country: "USA", rank: 11 },
+            { id: "8973", name: "Max Homa", country: "USA", rank: 13 },
+            { id: "10980", name: "Sahith Theegala", country: "USA", rank: 14 },
+            { id: "11119", name: "Wyndham Clark", country: "USA", rank: 8 },
+            { id: "3702", name: "Justin Rose", country: "ENG", rank: 10 },
+            { id: "388", name: "Adam Scott", country: "AUS", rank: 28 },
+            { id: "4585", name: "Hideki Matsuyama", country: "JPN", rank: 5 },
+            { id: "2230", name: "Tony Finau", country: "USA", rank: 17 },
+            { id: "9877", name: "Will Zalatoris", country: "USA", rank: 24 }
         ];
 
-        // Enrich tournament field with world rankings from pgaPlayers
-        // OWGR data from pgatour.com/tournaments/2026/farmers-insurance-open field page
+        // Fetch tournament field from Supabase
+        async function fetchTournamentField(tournamentId) {
+            if (!supabaseClient) {
+                console.log('No Supabase client, using fallback field');
+                tournamentField = fallbackField;
+                fieldLoaded = true;
+                return;
+            }
+
+            try {
+                console.log(`Fetching field for tournament: ${tournamentId}`);
+                const { data, error } = await supabaseClient
+                    .from('tournament_field')
+                    .select('*')
+                    .eq('tournament_id', tournamentId)
+                    .order('owgr', { ascending: true, nullsFirst: false });
+
+                if (error) {
+                    console.error('Error fetching field:', error);
+                    tournamentField = fallbackField;
+                } else if (data && data.length > 0) {
+                    console.log(`Loaded ${data.length} players from Supabase`);
+                    tournamentField = data.map(p => ({
+                        id: p.player_id,
+                        name: p.player_name,
+                        country: p.country || '',
+                        rank: p.owgr || 999,
+                        headshot: p.headshot_url || null
+                    }));
+                } else {
+                    console.log('No field data in Supabase, using fallback');
+                    tournamentField = fallbackField;
+                }
+            } catch (err) {
+                console.error('Error fetching field:', err);
+                tournamentField = fallbackField;
+            }
+            
+            fieldLoaded = true;
+        }
+
+        // Get player headshot URL - use Supabase data if available, else PGA Tour CDN
+        function getPlayerHeadshot(player) {
+            if (player.headshot) {
+                return player.headshot;
+            }
+            // Fallback to PGA Tour CDN format
+            return `https://pga-tour-res.cloudinary.com/image/upload/c_thumb,g_face,z_0.7,q_auto,f_auto,dpr_2.0,w_80,h_80,b_rgb:F2F2F2/headshots_${player.id}`;
+        }
+
+        // Enrich tournament field with world rankings (fallback if Supabase data doesn't have ranks)
+        // OWGR data - Xander Schauffele is highest ranked at #4
+        // Scottie Scheffler (#1), Rory (#2), Rahm (#3) are NOT playing
         const additionalRankings = {
-            // Top 20
-            "9478": 1,      // Scottie Scheffler
-            "10230": 2,     // Xander Schauffele
-            "4585": 3,      // Hideki Matsuyama
-            "9780": 18,     // Ludvig Åberg
-            "6007": 9,      // Patrick Cantlay
-            "9973": 16,     // Keegan Bradley
+            // Top 10 in field
+            "10230": 4,     // Xander Schauffele
+            "4585": 5,      // Hideki Matsuyama
+            "6007": 7,      // Patrick Cantlay
             "11119": 8,     // Wyndham Clark
-            "10980": 14,    // Sahith Theegala
-            "9427": 19,     // Sungjae Im
-            "2230": 17,     // Tony Finau
-            "8973": 13,     // Max Homa
             "3702": 10,     // Justin Rose
+            "5408": 11,     // Harris English
+            "8973": 13,     // Max Homa
+            "10980": 14,    // Sahith Theegala
+            "9973": 16,     // Keegan Bradley
+            "2230": 17,     // Tony Finau
+            "9780": 18,     // Ludvig Åberg
             // 20-50
-            "9349": 21,     // Sepp Straka
+            "9349": 21,     // Sepp Straka (not in field actually)
             "9877": 24,     // Will Zalatoris
             "1680": 26,     // Jason Day
             "388": 28,      // Adam Scott
             "4602673": 29,  // Tom Kim
-            "9938": 31,     // Sam Burns
             "5430": 33,     // Brooks Koepka
-            "10592": 35,    // Thomas Detry
-            "5408": 37,     // Harris English
-            "11378": 39,    // Robert MacIntyre
+            "10592": 35,    // Thomas Detry (not in field)
             "10596": 41,    // Matthieu Pavon
+            "9766": 43,     // Cameron Young
             "10424": 52,    // Akshay Bhatia
-            "5860": 54,     // Rickie Fowler
+            "4698579": 55,  // S.H. Kim
             // 50-100
             "10522": 56,    // Eric Cole
-            "5409": 58,     // Russell Henley
-            "10505": 60,    // J.T. Poston
-            "4410932": 61,  // Min Woo Lee
+            "4410932": 61,  // Min Woo Lee (not in field)
             "10863": 63,    // Cam Davis
             "4375304": 65,  // Davis Thompson
             "10591": 67,    // Dan Brown
@@ -2712,32 +2646,26 @@
             "6086": 71,     // Tom Hoge
             "9037": 73,     // Luke List
             "7081": 75,     // Si Woo Kim
+            "9506": 78,     // Jordan Smith
             "10139": 82,    // Christiaan Bezuidenhout
             "4837368": 89,  // Pierceson Coody
+            "4361187": 90,  // Lee Hodges
             "4901368": 91,  // Matt McCarty
             "10548": 93,    // Matt Wallace
             "1651": 95,     // Billy Horschel
-            // 100+
-            "10030": 202,   // Zach Bauchou
-            "4361914": 119, // Chandler Blanchet
-            "5162": 105,    // Chris Gotterup
-            "4686087": 150, // Rico Hoey
-            "4832046": 125, // Nick Dunlap
-            "9766": 45,     // Cam Young
-            "3792": 78,     // Nick Taylor
-            "4404992": 85,  // Ben Griffin
-            "4426181": 110, // Sam Stevens
-            "9506": 88,     // Jordan Smith
-            "4698579": 55,  // S.H. Kim
-            "3550": 130,    // Gary Woodland
-            "5054388": 145, // Jacob Bridgeman
-            "6011": 100,    // Beau Hossler
-            "11332": 115,   // Andrew Novak
-            "4361187": 90,  // Lee Hodges
-            "3470": 120,    // Chez Reavie
             "10664": 95,    // Taylor Moore
+            "6011": 100,    // Beau Hossler
+            "5162": 105,    // Chris Gotterup
+            // 100+
+            "4426181": 110, // Sam Stevens
+            "11332": 115,   // Andrew Novak
+            "4361914": 119, // Chandler Blanchet
+            "4832046": 125, // Nick Dunlap (not in field)
+            "3550": 130,    // Gary Woodland
+            "4686087": 150, // Rico Hoey
             "2296": 180,    // Charley Hoffman
             "7631": 200,    // Brandt Snedeker
+            "10030": 202,   // Zach Bauchou
         };
 
         // Add rank to each player in tournamentField
@@ -3098,6 +3026,8 @@
                     
                     console.log('Login successful, loading user data...');
                     await loadUserData();
+                    // Fetch tournament field from Supabase
+                    await fetchTournamentField(currentTournament.id);
                     console.log('User data loaded, updating nav...');
                     updateNavigation();
                     console.log('Showing dashboard...');
@@ -4387,11 +4317,14 @@ See you on the course!`
 
                 // Show world ranking
                 const worldRank = player.rank ? `#${player.rank}` : '-';
+                
+                // Get headshot - prefer Supabase data, fallback to PGA Tour CDN
+                const headshotUrl = player.headshot || getPlayerHeadshot(player);
 
                 return `
                     <div class="player-item ${isUsed ? 'disabled' : ''} ${isSelected ? 'selected' : ''} ${isCurrentPick ? 'current-pick' : ''}"
                          onclick="${isUsed ? '' : `selectPlayer('${player.id}')`}">
-                        <img class="player-photo" src="${getPlayerPhoto(player.id)}" alt="${player.name}"
+                        <img class="player-photo" src="${headshotUrl}" alt="${player.name}"
                              onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect fill=%22%23e5e7eb%22 width=%22100%22 height=%22100%22/></svg>'">
                         <div class="player-info">
                             <h4>${player.name}</h4>
