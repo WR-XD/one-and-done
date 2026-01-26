@@ -2210,24 +2210,23 @@
         // PGA Players with ESPN IDs (master list from pgatour.com/players for pre-tournament picks)
         const pgaPlayers = [
             { id: "9478", name: "Scottie Scheffler", country: "USA", rank: 1 },
-            { id: "4686087", name: "Xander Schauffele", country: "USA", rank: 2 },
+            { id: "10230", name: "Xander Schauffele", country: "USA", rank: 2 },
             { id: "401", name: "Rory McIlroy", country: "NIR", rank: 3 },
-            { id: "9780", name: "Jon Rahm", country: "ESP", rank: 4 },
+            { id: "9780", name: "Ludvig Åberg", country: "SWE", rank: 18 },
             { id: "10592", name: "Collin Morikawa", country: "USA", rank: 5 },
             { id: "10046", name: "Viktor Hovland", country: "NOR", rank: 6 },
             { id: "6007", name: "Patrick Cantlay", country: "USA", rank: 7 },
             { id: "11119", name: "Wyndham Clark", country: "USA", rank: 8 },
-            { id: "4375972", name: "Ludvig Åberg", country: "SWE", rank: 9 },
-            { id: "4148", name: "Hideki Matsuyama", country: "JPN", rank: 10 },
+            { id: "4585", name: "Hideki Matsuyama", country: "JPN", rank: 5 },
             { id: "6798", name: "Tommy Fleetwood", country: "ENG", rank: 11 },
             { id: "8973", name: "Max Homa", country: "USA", rank: 12 },
             { id: "1225", name: "Brian Harman", country: "USA", rank: 13 },
             { id: "10980", name: "Sahith Theegala", country: "USA", rank: 14 },
             { id: "5409", name: "Russell Henley", country: "USA", rank: 15 },
             { id: "2230", name: "Tony Finau", country: "USA", rank: 16 },
-            { id: "9037", name: "Matt Fitzpatrick", country: "ENG", rank: 17 },
+            { id: "9037", name: "Luke List", country: "USA", rank: 73 },
             { id: "9427", name: "Sungjae Im", country: "KOR", rank: 18 },
-            { id: "4612", name: "Keegan Bradley", country: "USA", rank: 19 },
+            { id: "9973", name: "Keegan Bradley", country: "USA", rank: 16 },
             { id: "5321", name: "Justin Thomas", country: "USA", rank: 20 },
             { id: "5467", name: "Jordan Spieth", country: "USA", rank: 21 },
             { id: "6798", name: "Cameron Smith", country: "AUS", rank: 22 },
@@ -2602,12 +2601,7 @@
             { id: "4423323", name: "Dylan Wu", country: "USA", rank: 100 },
             { id: "9766", name: "Cameron Young", country: "USA", rank: 43 },
             { id: "10093", name: "Kevin Yu", country: "TPE", rank: 85 },
-            { id: "9877", name: "Will Zalatoris", country: "USA", rank: 24 },
-            // American Express players (for leaderboard display)
-            { id: "9478", name: "Scottie Scheffler", country: "USA", rank: 1 },
-            { id: "11084", name: "Ryan Gerard", country: "USA", rank: 120 },
-            { id: "5409", name: "Russell Henley", country: "USA", rank: 58 },
-            { id: "4854714", name: "Blades Brown", country: "USA", rank: 125 }
+            { id: "9877", name: "Will Zalatoris", country: "USA", rank: 24 }
         ];
         
         // Start with fallback field (will be replaced by Supabase data if available)
@@ -2788,9 +2782,13 @@
         // Historical players (from past tournaments this season, not in current field)
         // This ensures we can look up players who were picked in previous weeks
         const historicalPlayers = [
-            // Sony Open notables not in AmEx field
-            { id: "11515", name: "Chris Gotterup", country: "USA" }, // Sony Open Winner!
-            { id: "11084", name: "Ryan Gerard", country: "USA" }, // 2nd at Sony
+            // American Express 2026 players (for leaderboard display)
+            { id: "9478", name: "Scottie Scheffler", country: "USA", rank: 1 },
+            { id: "11084", name: "Ryan Gerard", country: "USA", rank: 120 },
+            { id: "4854714", name: "Blades Brown", country: "USA", rank: 125 },
+            { id: "4901368", name: "Matt McCarty", country: "USA", rank: 91 },
+            // Sony Open notables 
+            { id: "11515", name: "Chris Gotterup", country: "USA" },
         ];
 
         // Combine all player sources for lookup - use function to get latest data
