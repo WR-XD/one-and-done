@@ -1802,6 +1802,9 @@
                 <button onclick="confirmLeaveCurrentPool()">
                     <span style="color: var(--red);">🚪 Leave Pool</span>
                 </button>
+                <button id="delete-pool-btn" onclick="confirmDeletePool()" style="display: none;">
+                    <span style="color: var(--red);">🗑️ Delete Pool</span>
+                </button>
             </div>
 
             <!-- Standings Tab -->
@@ -2059,6 +2062,37 @@
                 <div style="display: flex; gap: 1rem;">
                     <button class="btn btn-secondary" onclick="closeModal('leave-pool-modal')" style="flex: 1;">Cancel</button>
                     <button class="btn btn-danger-outline" onclick="leavePool()" style="flex: 1; background: var(--red); color: white; border-color: var(--red);">Leave Pool</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Delete Pool Confirmation Modal -->
+    <div id="delete-pool-modal" class="modal-overlay">
+        <div class="modal">
+            <div class="modal-header">
+                <h3>Delete Pool</h3>
+                <button class="modal-close" onclick="closeModal('delete-pool-modal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div style="text-align: center; margin-bottom: 1.5rem;">
+                    <div style="font-size: 3rem; margin-bottom: 1rem;">🗑️</div>
+                    <p style="font-size: 1.1rem; margin-bottom: 0.5rem;">Are you sure you want to delete</p>
+                    <p style="font-size: 1.3rem; font-weight: bold; color: var(--green-deep);" id="delete-pool-name"></p>
+                </div>
+                
+                <div style="background: #fef2f2; border: 1px solid #fecaca; border-radius: 8px; padding: 1rem; margin-bottom: 1.5rem;">
+                    <p style="color: var(--red); font-weight: 600; margin-bottom: 0.5rem;">⚠️ This will permanently delete the pool!</p>
+                    <ul style="color: #7f1d1d; font-size: 0.9rem; margin-left: 1rem;">
+                        <li>All members will be removed</li>
+                        <li>All picks and history will be deleted</li>
+                        <li>This cannot be undone</li>
+                    </ul>
+                </div>
+                
+                <div style="display: flex; gap: 1rem;">
+                    <button class="btn btn-secondary" onclick="closeModal('delete-pool-modal')" style="flex: 1;">Cancel</button>
+                    <button class="btn btn-danger-outline" onclick="deletePool()" style="flex: 1; background: var(--red); color: white; border-color: var(--red);">Delete Pool</button>
                 </div>
             </div>
         </div>
@@ -4267,6 +4301,82 @@ See you on the course!`
             }
         }
 
+        let poolToDelete = null;
+
+        function confirmDeletePool() {
+            // Close the dropdown
+            document.getElementById('pool-options-dropdown').classList.remove('active');
+            
+            // Get current pool
+            const pool = store.pools.find(p => p.id === currentPoolId);
+            if (pool) {
+                poolToDelete = currentPoolId;
+                document.getElementById('delete-pool-name').textContent = `"${pool.name}"?`;
+                document.getElementById('delete-pool-modal').classList.add('active');
+            }
+        }
+
+        async function deletePool() {
+            if (!poolToDelete) return;
+
+            try {
+                if (supabaseClient) {
+                    // Delete all picks for this pool
+                    const { error: picksError } = await supabaseRetry(() =>
+                        supabaseClient
+                            .from('picks')
+                            .delete()
+                            .eq('pool_id', poolToDelete)
+                    );
+                    
+                    if (picksError) {
+                        console.error('Error deleting picks:', picksError);
+                    }
+
+                    // Delete all pool members
+                    const { error: membersError } = await supabaseRetry(() =>
+                        supabaseClient
+                            .from('pool_members')
+                            .delete()
+                            .eq('pool_id', poolToDelete)
+                    );
+                    
+                    if (membersError) {
+                        console.error('Error deleting members:', membersError);
+                    }
+
+                    // Delete the pool itself
+                    const { error: poolError } = await supabaseRetry(() =>
+                        supabaseClient
+                            .from('pools')
+                            .delete()
+                            .eq('id', poolToDelete)
+                    );
+                    
+                    if (poolError) {
+                        console.error('Error deleting pool:', poolError);
+                        throw poolError;
+                    }
+                }
+
+                // Remove from local store
+                store.picks = store.picks.filter(p => p.poolId !== poolToDelete);
+                store.pools = store.pools.filter(p => p.id !== poolToDelete);
+
+                closeModal('delete-pool-modal');
+                poolToDelete = null;
+                currentPoolId = null;
+                localStorage.removeItem('currentPoolId');
+                showToast('Pool deleted successfully');
+                showScreen('dashboard');
+                renderDashboard();
+
+            } catch (error) {
+                console.error('Delete pool error:', error);
+                showToast('Failed to delete pool', true);
+            }
+        }
+
         // ==================== POOL VIEW ====================
         function openPool(poolId) {
             currentPoolId = poolId;
@@ -4277,6 +4387,14 @@ See you on the course!`
             switchPoolTab('standings');
             renderPoolView();
             checkTabsOverflow();
+            
+            // Show delete button only for pool creator
+            const pool = store.pools.find(p => p.id === poolId);
+            const deleteBtn = document.getElementById('delete-pool-btn');
+            if (deleteBtn && pool) {
+                const isCreator = pool.createdBy === store.currentUser.id;
+                deleteBtn.style.display = isCreator ? 'block' : 'none';
+            }
             
             // Hide scroll indicator when user scrolls tabs
             const poolTabs = document.getElementById('pool-tabs');
