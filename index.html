@@ -2631,13 +2631,32 @@
                     tournamentField = fallbackField;
                 } else if (data && data.length > 0) {
                     console.log(`Loaded ${data.length} players from Supabase`);
-                    tournamentField = data.map(p => ({
-                        id: p.player_id,
-                        name: p.player_name,
-                        country: p.country || '',
-                        rank: p.owgr || 999,
-                        headshot: p.headshot_url || null
-                    }));
+                    tournamentField = data.map(p => {
+                        // Fix player name - convert "Last, First" to "First Last"
+                        let name = p.player_name || '';
+                        if (name.includes(',')) {
+                            const parts = name.split(',').map(s => s.trim());
+                            name = `${parts[1]} ${parts[0]}`;
+                        }
+                        
+                        // Fix headshot URL - replace placeholders with actual sizes
+                        let headshot = p.headshot_url || null;
+                        if (headshot) {
+                            headshot = headshot
+                                .replace('${HEIGHT}', '160')
+                                .replace('${WIDTH}', '160')
+                                .replace(/\$\{HEIGHT\}/g, '160')
+                                .replace(/\$\{WIDTH\}/g, '160');
+                        }
+                        
+                        return {
+                            id: p.player_id,
+                            name: name,
+                            country: p.country || '',
+                            rank: p.owgr || 999,
+                            headshot: headshot
+                        };
+                    });
                 } else {
                     console.log('No field data in Supabase, using fallback');
                     tournamentField = fallbackField;
