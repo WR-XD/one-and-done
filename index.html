@@ -2252,31 +2252,48 @@
         ];
 
         // Current tournament (from live data)
-        const currentTournament = {
-            id: "amex2026",
-            name: "The American Express",
-            dates: "Jan 22 - 25, 2026",
-            course: "La Quinta CC / PGA West (Nicklaus) / Pete Dye Stadium",
-            location: "La Quinta, CA",
-            purse: 9200000,
-            round: 2,
-            status: "In Progress",
-            logo: "https://res.cloudinary.com/pgatour-prod/d_tournaments:logos:R000.png/tournaments/logos/R002.png",
-            startTime: new Date("2026-01-22T07:00:00-08:00"), // First tee time (PST)
-            pickWindowOpen: new Date("2026-01-19T07:00:00Z") // Monday 7am UK time
-        };
+        // COMPLETED: The American Express (Jan 22-26, 2026)
+        // Winner: Scottie Scheffler
+        const completedTournaments = [
+            {
+                id: "sony2026",
+                name: "Sony Open in Hawaii",
+                dates: "Jan 15 - 18, 2026",
+                status: "Complete"
+            },
+            {
+                id: "amex2026",
+                name: "The American Express",
+                dates: "Jan 22 - 26, 2026",
+                status: "Complete"
+            }
+        ];
 
-        // Next tournament (for when current is in progress)
-        const nextTournament = {
-            id: 'farmers-2026',
+        const currentTournament = {
+            id: "farmers-2026",
             name: "Farmers Insurance Open",
             dates: "Jan 29 - Feb 1, 2026",
             course: "Torrey Pines GC (South)",
             location: "San Diego, CA",
             purse: 9300000,
+            round: 0,
+            status: "Upcoming",
             logo: "https://res.cloudinary.com/pgatour-prod/d_tournaments:logos:R000.png/tournaments/logos/R004.png",
             startTime: new Date("2026-01-29T07:00:00-08:00"), // First tee time (PST)
             pickWindowOpen: new Date("2026-01-26T07:00:00Z") // Monday 7am UK time
+        };
+
+        // Next tournament (for when current is in progress)
+        const nextTournament = {
+            id: 'phoenix-2026',
+            name: "WM Phoenix Open",
+            dates: "Feb 5 - 8, 2026",
+            course: "TPC Scottsdale",
+            location: "Scottsdale, AZ",
+            purse: 9200000,
+            logo: "https://res.cloudinary.com/pgatour-prod/d_tournaments:logos:R000.png/tournaments/logos/R003.png",
+            startTime: new Date("2026-02-05T07:00:00-07:00"), // First tee time (MST)
+            pickWindowOpen: new Date("2026-02-02T07:00:00Z") // Monday 7am UK time
         };
 
         // TESTING MODE: Set to true to allow picks even after tournament starts
