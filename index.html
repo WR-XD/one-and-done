@@ -4862,6 +4862,10 @@ See you on the course!`
                 }
                 
                 await loadUserData();
+                // Fetch tournament field from Supabase
+                console.log('Fetching tournament field for:', currentTournament.fieldId || currentTournament.id);
+                await fetchTournamentField(currentTournament.fieldId || currentTournament.id);
+                console.log('Tournament field loaded, count:', tournamentField.length);
                 updateNavigation();
                 
                 // Check if we were viewing a pool before refresh
@@ -5018,6 +5022,10 @@ See you on the course!`
         // Check URL for join code on page load
         // This handles the case where user clicks invite link
         checkJoinCodeFromURL();
+
+        // Fetch tournament field on page load (regardless of auth state)
+        // This ensures the field data is ready before user makes picks
+        fetchTournamentField(currentTournament.fieldId || currentTournament.id);
 
         // Check tabs overflow on resize
         window.addEventListener('resize', () => {
