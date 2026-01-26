@@ -2366,6 +2366,7 @@
         // COMPLETED: The American Express (Jan 22-26, 2026)
         // ==================== 2026 PGA TOUR SCHEDULE ====================
         // Full season schedule - tournaments auto-rotate based on current date
+        // Excludes opposite-field events (Puerto Rico, Myrtle Beach, ISCO, Corales, etc.)
         const pga2026Schedule = [
             {
                 id: "sentry-2026",
@@ -2412,26 +2413,26 @@
                 logoCode: "R004"
             },
             {
+                id: "phoenix-2026",
+                fieldId: "R2026003",
+                name: "WM Phoenix Open",
+                startDate: "2026-02-05",
+                endDate: "2026-02-08",
+                course: "TPC Scottsdale (Stadium)",
+                location: "Scottsdale, AZ",
+                purse: 9600000,
+                logoCode: "R003"
+            },
+            {
                 id: "pebble-2026",
                 fieldId: "R2026005",
                 name: "AT&T Pebble Beach Pro-Am",
-                startDate: "2026-02-05",
-                endDate: "2026-02-08",
+                startDate: "2026-02-12",
+                endDate: "2026-02-15",
                 course: "Pebble Beach Golf Links",
                 location: "Pebble Beach, CA",
                 purse: 20000000,
                 logoCode: "R005"
-            },
-            {
-                id: "phoenix-2026",
-                fieldId: "R2026003",
-                name: "WM Phoenix Open",
-                startDate: "2026-02-12",
-                endDate: "2026-02-15",
-                course: "TPC Scottsdale",
-                location: "Scottsdale, AZ",
-                purse: 20000000,
-                logoCode: "R003"
             },
             {
                 id: "genesis-2026",
@@ -2439,31 +2440,20 @@
                 name: "The Genesis Invitational",
                 startDate: "2026-02-19",
                 endDate: "2026-02-22",
-                course: "Riviera Country Club",
+                course: "The Riviera Country Club",
                 location: "Pacific Palisades, CA",
                 purse: 20000000,
                 logoCode: "R011"
             },
             {
-                id: "mexico-2026",
-                fieldId: "R2026540",
-                name: "Mexico Open at Vidanta",
-                startDate: "2026-02-26",
-                endDate: "2026-03-01",
-                course: "Vidanta Vallarta",
-                location: "Vallarta, Mexico",
-                purse: 9200000,
-                logoCode: "R540"
-            },
-            {
                 id: "cognizant-2026",
                 fieldId: "R2026473",
-                name: "Cognizant Classic",
+                name: "Cognizant Classic in The Palm Beaches",
                 startDate: "2026-02-26",
                 endDate: "2026-03-01",
-                course: "PGA National Resort",
+                course: "PGA National Resort (Champion)",
                 location: "Palm Beach Gardens, FL",
-                purse: 9000000,
+                purse: 9600000,
                 logoCode: "R473"
             },
             {
@@ -2472,21 +2462,21 @@
                 name: "Arnold Palmer Invitational",
                 startDate: "2026-03-05",
                 endDate: "2026-03-08",
-                course: "Bay Hill Club & Lodge",
+                course: "Arnold Palmer's Bay Hill Club & Lodge",
                 location: "Orlando, FL",
                 purse: 20000000,
                 logoCode: "R009"
             },
             {
                 id: "players-2026",
-                fieldId: "R2026011",
+                fieldId: "R2026028",
                 name: "THE PLAYERS Championship",
                 startDate: "2026-03-12",
                 endDate: "2026-03-15",
                 course: "TPC Sawgrass (Stadium)",
                 location: "Ponte Vedra Beach, FL",
                 purse: 25000000,
-                logoCode: "R011"
+                logoCode: "R028"
             },
             {
                 id: "valspar-2026",
@@ -2496,18 +2486,18 @@
                 endDate: "2026-03-22",
                 course: "Innisbrook Resort (Copperhead)",
                 location: "Palm Harbor, FL",
-                purse: 8800000,
+                purse: 9100000,
                 logoCode: "R535"
             },
             {
-                id: "texas-2026",
+                id: "houston-2026",
                 fieldId: "R2026054",
                 name: "Texas Children's Houston Open",
                 startDate: "2026-03-26",
                 endDate: "2026-03-29",
                 course: "Memorial Park Golf Course",
                 location: "Houston, TX",
-                purse: 9300000,
+                purse: 9900000,
                 logoCode: "R054"
             },
             {
@@ -2518,7 +2508,7 @@
                 endDate: "2026-04-05",
                 course: "TPC San Antonio (Oaks)",
                 location: "San Antonio, TX",
-                purse: 9000000,
+                purse: 9800000,
                 logoCode: "R021"
             },
             {
@@ -2545,14 +2535,36 @@
             },
             {
                 id: "zurich-2026",
-                fieldId: "R2026473",
+                fieldId: "R2026476",
                 name: "Zurich Classic of New Orleans",
                 startDate: "2026-04-23",
                 endDate: "2026-04-26",
                 course: "TPC Louisiana",
                 location: "Avondale, LA",
-                purse: 17500000,
-                logoCode: "R473"
+                purse: 9500000,
+                logoCode: "R476"
+            },
+            {
+                id: "cadillac-2026",
+                fieldId: "R2026523",
+                name: "Cadillac Championship",
+                startDate: "2026-04-30",
+                endDate: "2026-05-03",
+                course: "Trump National Doral (Blue Monster)",
+                location: "Miami, FL",
+                purse: 20000000,
+                logoCode: "R523"
+            },
+            {
+                id: "truist-2026",
+                fieldId: "R2026533",
+                name: "Truist Championship",
+                startDate: "2026-05-07",
+                endDate: "2026-05-10",
+                course: "Quail Hollow Club",
+                location: "Charlotte, NC",
+                purse: 20000000,
+                logoCode: "R533"
             },
             {
                 id: "pga-championship-2026",
@@ -2566,26 +2578,48 @@
                 logoCode: "R033"
             },
             {
+                id: "byron-nelson-2026",
+                fieldId: "R2026019",
+                name: "THE CJ CUP Byron Nelson",
+                startDate: "2026-05-21",
+                endDate: "2026-05-24",
+                course: "TPC Craig Ranch",
+                location: "McKinney, TX",
+                purse: 10300000,
+                logoCode: "R019"
+            },
+            {
                 id: "charles-schwab-2026",
                 fieldId: "R2026464",
                 name: "Charles Schwab Challenge",
-                startDate: "2026-05-21",
-                endDate: "2026-05-24",
+                startDate: "2026-05-28",
+                endDate: "2026-05-31",
                 course: "Colonial Country Club",
                 location: "Fort Worth, TX",
-                purse: 9300000,
+                purse: 9900000,
                 logoCode: "R464"
             },
             {
                 id: "memorial-2026",
                 fieldId: "R2026023",
-                name: "The Memorial Tournament",
+                name: "the Memorial Tournament",
                 startDate: "2026-06-04",
                 endDate: "2026-06-07",
                 course: "Muirfield Village Golf Club",
                 location: "Dublin, OH",
                 purse: 20000000,
                 logoCode: "R023"
+            },
+            {
+                id: "canadian-open-2026",
+                fieldId: "R2026032",
+                name: "RBC Canadian Open",
+                startDate: "2026-06-11",
+                endDate: "2026-06-14",
+                course: "TPC Toronto at Osprey Valley",
+                location: "Caledon, Ontario, Canada",
+                purse: 9800000,
+                logoCode: "R032"
             },
             {
                 id: "us-open-2026",
@@ -2610,15 +2644,15 @@
                 logoCode: "R034"
             },
             {
-                id: "rocket-mortgage-2026",
-                fieldId: "R2026506",
-                name: "Rocket Mortgage Classic",
+                id: "john-deere-2026",
+                fieldId: "R2026015",
+                name: "John Deere Classic",
                 startDate: "2026-07-02",
                 endDate: "2026-07-05",
-                course: "Detroit Golf Club",
-                location: "Detroit, MI",
-                purse: 9000000,
-                logoCode: "R506"
+                course: "TPC Deere Run",
+                location: "Silvis, IL",
+                purse: 8800000,
+                logoCode: "R015"
             },
             {
                 id: "scottish-open-2026",
@@ -2637,8 +2671,8 @@
                 name: "The Open Championship",
                 startDate: "2026-07-16",
                 endDate: "2026-07-19",
-                course: "Royal Portrush Golf Club",
-                location: "Portrush, Northern Ireland",
+                course: "Royal Birkdale Golf Club",
+                location: "Southport, England",
                 purse: 17000000,
                 logoCode: "R100"
             },
@@ -2650,8 +2684,19 @@
                 endDate: "2026-07-26",
                 course: "TPC Twin Cities",
                 location: "Blaine, MN",
-                purse: 8500000,
+                purse: 8800000,
                 logoCode: "R528"
+            },
+            {
+                id: "rocket-classic-2026",
+                fieldId: "R2026506",
+                name: "Rocket Classic",
+                startDate: "2026-07-30",
+                endDate: "2026-08-02",
+                course: "Detroit Golf Club",
+                location: "Detroit, MI",
+                purse: 10000000,
+                logoCode: "R506"
             },
             {
                 id: "wyndham-2026",
@@ -2661,7 +2706,7 @@
                 endDate: "2026-08-09",
                 course: "Sedgefield Country Club",
                 location: "Greensboro, NC",
-                purse: 8400000,
+                purse: 8500000,
                 logoCode: "R480"
             },
             {
@@ -2681,13 +2726,14 @@
                 name: "BMW Championship",
                 startDate: "2026-08-20",
                 endDate: "2026-08-23",
-                course: "Caves Valley Golf Club",
-                location: "Owings Mills, MD",
+                course: "Bellerive Country Club",
+                location: "St. Louis, MO",
                 purse: 20000000,
                 logoCode: "R028",
                 isSeasonFinale: true // One and Done season ends here
             }
             // Note: Tour Championship excluded - limited field invitational
+            // Opposite-field events excluded: Puerto Rico, Myrtle Beach, ISCO, Corales, Puntacana
         ];
 
         // ==================== DYNAMIC TOURNAMENT DETECTION ====================
@@ -3710,7 +3756,7 @@
                             </div>
                             <div class="tournament-stat">
                                 <span>Picks Used</span>
-                                <span>${userPicks.length} / 30</span>
+                                <span>${userPicks.length} / ${pga2026Schedule.length}</span>
                             </div>
                             <div class="tournament-stat">
                                 <span>Current Week</span>
