@@ -3581,47 +3581,27 @@
                     if (poolsError) {
                         console.error('Error loading pools:', poolsError);
                     } else if (pools) {
-                        for (const dbPool of pools) {
-                            // Get members for this pool
-                            const { data: members } = await supabaseRetry(() =>
-                                supabaseClient
-                                    .from('pool_members')
-                                    .select('user_id')
-                                    .eq('pool_id', dbPool.id)
-                            );
+                        // OPTIMIZED: Batch load all members for all pools in parallel
+                        const memberPromises = pools.map(dbPool => 
+                            loadPoolMembersOptimized(dbPool.id)
+                        );
+                        const allMembersResults = await Promise.all(memberPromises);
+                        
+                        pools.forEach((dbPool, index) => {
+                            const members = allMembersResults[index] || [];
+                            const memberIds = members.map(m => m.user_id);
                             
-                            const memberIds = members ? members.map(m => m.user_id) : [store.currentUser.id];
-                            
-                            // Load user info for all pool members
-                            for (const memberId of memberIds) {
-                                if (!store.users.find(u => u.id === memberId)) {
-                                    // Try to get user metadata from auth.users (via profiles or just store basic info)
-                                    const { data: profile } = await supabaseRetry(() =>
-                                        supabaseClient
-                                            .from('profiles')
-                                            .select('*')
-                                            .eq('id', memberId)
-                                            .maybeSingle()
-                                    );
-                                    
-                                    if (profile) {
-                                        store.users.push({
-                                            id: memberId,
-                                            name: profile.name || profile.username || 'User',
-                                            email: profile.email || '',
-                                            profilePicture: profile.profile_picture || null
-                                        });
-                                    } else {
-                                        // Fallback - just use ID as placeholder
-                                        store.users.push({
-                                            id: memberId,
-                                            name: `Player ${memberIds.indexOf(memberId) + 1}`,
-                                            email: '',
-                                            profilePicture: null
-                                        });
-                                    }
+                            // Add members to store.users (already have profiles from batch query)
+                            members.forEach(member => {
+                                if (!store.users.find(u => u.id === member.user_id)) {
+                                    store.users.push({
+                                        id: member.user_id,
+                                        name: member.user_name || 'Player',
+                                        email: member.user_email || '',
+                                        profilePicture: member.profile_picture || null
+                                    });
                                 }
-                            }
+                            });
                             
                             const pool = {
                                 id: dbPool.id,
@@ -3639,32 +3619,33 @@
                             } else {
                                 store.pools.push(pool);
                             }
-                        }
+                        });
                         console.log('Loaded pools:', store.pools.length);
                     }
                 } else {
                     console.log('No pool memberships found');
                 }
                 
-                // Load ALL picks for the user's pools (needed for standings)
-                // Filter out demo/local pool IDs that aren't valid UUIDs
+                // OPTIMIZED: Only load current user's picks initially
+                // Other users' picks loaded on-demand when viewing standings
                 const poolIds = store.pools
                     .map(p => p.id)
                     .filter(id => id && id.length > 20 && !id.startsWith('demo'));
                     
                 if (poolIds.length > 0) {
-                    console.log('Loading picks for pools:', poolIds);
-                    const { data: allPicks, error: allPicksError } = await supabaseRetry(() =>
+                    console.log('Loading picks for current user');
+                    const { data: userPicks, error: picksError } = await supabaseRetry(() =>
                         supabaseClient
                             .from('picks')
                             .select('*')
                             .in('pool_id', poolIds)
+                            .eq('user_id', store.currentUser.id)
                     );
                     
-                    if (allPicksError) {
-                        console.error('Error loading all picks:', allPicksError);
-                    } else if (allPicks) {
-                        allPicks.forEach(pick => {
+                    if (picksError) {
+                        console.error('Error loading picks:', picksError);
+                    } else if (userPicks) {
+                        userPicks.forEach(pick => {
                             const pickData = {
                                 id: pick.id,
                                 poolId: pick.pool_id,
@@ -3687,7 +3668,7 @@
                                 store.picks.push(pickData);
                             }
                         });
-                        console.log('Loaded all picks:', allPicks.length);
+                        console.log('Loaded user picks:', userPicks.length);
                     }
                 }
                 
@@ -3696,6 +3677,94 @@
                 console.error('Error in loadUserData:', error);
             } finally {
                 isLoadingUserData = false;
+            }
+        }
+        
+        // OPTIMIZED: Batch load pool members with profiles
+        async function loadPoolMembersOptimized(poolId) {
+            try {
+                // Try using the optimized SQL function first
+                const { data, error } = await supabaseClient
+                    .rpc('get_pool_members_with_profiles', { p_pool_id: poolId });
+                
+                if (!error && data) {
+                    return data;
+                }
+                
+                // Fallback: manual query if function doesn't exist
+                const { data: members } = await supabaseClient
+                    .from('pool_members')
+                    .select('user_id')
+                    .eq('pool_id', poolId);
+                
+                if (!members || members.length === 0) return [];
+                
+                const memberIds = members.map(m => m.user_id);
+                const { data: profiles } = await supabaseClient
+                    .from('profiles')
+                    .select('*')
+                    .in('id', memberIds);
+                
+                return members.map(m => {
+                    const profile = profiles?.find(p => p.id === m.user_id);
+                    return {
+                        user_id: m.user_id,
+                        user_name: profile?.name || profile?.username || 'Player',
+                        user_email: profile?.email || '',
+                        profile_picture: profile?.profile_picture || null
+                    };
+                });
+            } catch (err) {
+                console.error('Error loading pool members:', err);
+                return [];
+            }
+        }
+        
+        // OPTIMIZED: Get standings using server-side calculation
+        async function getPoolStandingsOptimized(poolId) {
+            try {
+                // Try using the optimized SQL function first
+                const { data, error } = await supabaseClient
+                    .rpc('get_pool_standings', { p_pool_id: poolId });
+                
+                if (!error && data) {
+                    return data;
+                }
+                
+                // Fallback: load all picks for this pool and calculate client-side
+                console.log('Falling back to client-side standings calculation');
+                return null; // Will use existing client-side logic
+            } catch (err) {
+                console.error('Error getting standings:', err);
+                return null;
+            }
+        }
+        
+        // OPTIMIZED: Get tournament picks for unique picks check
+        async function getTournamentPicksOptimized(poolId, tournamentId) {
+            try {
+                // Try using the optimized SQL function first
+                const { data, error } = await supabaseClient
+                    .rpc('get_tournament_picks', { 
+                        p_pool_id: poolId, 
+                        p_tournament_id: tournamentId 
+                    });
+                
+                if (!error && data) {
+                    return data;
+                }
+                
+                // Fallback: manual query
+                const { data: picks } = await supabaseClient
+                    .from('picks')
+                    .select('user_id, player_id, player_name')
+                    .eq('pool_id', poolId)
+                    .eq('tournament_id', tournamentId);
+                
+                return picks || [];
+            } catch (err) {
+                console.error('Error getting tournament picks:', err);
+                return [];
             }
         }
 
@@ -4484,59 +4553,133 @@ See you on the course!`
             renderStandings();
         }
 
-        function renderStandings() {
+        async function renderStandings() {
             const pool = store.pools.find(p => p.id === currentPoolId);
             if (!pool) return;
 
             // Use ESPN live data if available, otherwise mock data
             const leaderboardData = espnDataLoaded && liveLeaderboard.length > 0 ? liveLeaderboard : mockLeaderboard;
 
-            const standings = pool.members.map(memberId => {
-                const user = store.users.find(u => u.id === memberId) || { id: memberId, name: 'Unknown User' };
-                const userPicks = store.picks.filter(p => p.poolId === currentPoolId && p.userId === memberId);
-                
-                // Calculate total from COMPLETED tournaments only (excludes current week)
-                const completedEarnings = userPicks
-                    .filter(p => p.tournamentId !== currentTournament.id)
-                    .reduce((sum, p) => sum + (p.earnings || 0), 0);
-
-                // Get current week pick and projected earnings (for display only)
-                const currentPick = userPicks.find(p => p.tournamentId === currentTournament.id);
-                let currentWeekEarnings = 0;
-                let currentPlayer = null;
-
-                if (currentPick) {
-                    currentPlayer = getPlayerById(currentPick.playerId);
-                    // Look in live leaderboard by ID or name
-                    let leaderboardEntry = leaderboardData.find(l => String(l.playerId) === String(currentPick.playerId));
-                    if (!leaderboardEntry && currentPlayer) {
-                        leaderboardEntry = leaderboardData.find(l => 
-                            l.playerName && l.playerName.toLowerCase() === currentPlayer.name.toLowerCase()
-                        );
+            // OPTIMIZED: Try server-side standings first
+            let standings = [];
+            const serverStandings = await getPoolStandingsOptimized(currentPoolId);
+            
+            if (serverStandings && serverStandings.length > 0) {
+                // Use server-side calculated standings
+                standings = serverStandings.map(s => {
+                    // Ensure user is in store
+                    if (!store.users.find(u => u.id === s.user_id)) {
+                        store.users.push({
+                            id: s.user_id,
+                            name: s.user_name || 'Player',
+                            email: s.user_email || '',
+                            profilePicture: s.profile_picture || null
+                        });
                     }
-                    // Also try matching by the stored player name from the pick
-                    if (!leaderboardEntry && currentPick.playerName) {
-                        leaderboardEntry = leaderboardData.find(l => 
-                            l.playerName && l.playerName.toLowerCase() === currentPick.playerName.toLowerCase()
-                        );
-                    }
-                    currentWeekEarnings = leaderboardEntry ? leaderboardEntry.projectedEarnings : 0;
                     
-                    // Debug logging
-                    if (!leaderboardEntry) {
-                        console.warn('No leaderboard entry found for pick:', currentPick.playerId, currentPlayer?.name, 'in', leaderboardData.length, 'entries');
+                    const user = store.users.find(u => u.id === s.user_id) || { 
+                        id: s.user_id, 
+                        name: s.user_name || 'Unknown User' 
+                    };
+                    
+                    // Get current week pick info
+                    let currentWeekEarnings = 0;
+                    let currentPlayer = null;
+                    
+                    if (s.current_week_pick && s.current_week_pick.player_id) {
+                        currentPlayer = getPlayerById(s.current_week_pick.player_id) || {
+                            id: s.current_week_pick.player_id,
+                            name: s.current_week_pick.player_name
+                        };
+                        
+                        // Look in live leaderboard
+                        let leaderboardEntry = leaderboardData.find(l => 
+                            String(l.playerId) === String(s.current_week_pick.player_id)
+                        );
+                        if (!leaderboardEntry && s.current_week_pick.player_name) {
+                            leaderboardEntry = leaderboardData.find(l => 
+                                l.playerName && l.playerName.toLowerCase() === s.current_week_pick.player_name.toLowerCase()
+                            );
+                        }
+                        currentWeekEarnings = leaderboardEntry ? leaderboardEntry.projectedEarnings : 0;
+                    }
+                    
+                    return {
+                        user,
+                        picks: { length: s.picks_count },
+                        completedEarnings: Number(s.total_earnings) || 0,
+                        totalEarnings: (Number(s.total_earnings) || 0) + currentWeekEarnings,
+                        currentWeekEarnings,
+                        currentPlayer
+                    };
+                }).sort((a, b) => b.completedEarnings - a.completedEarnings);
+            } else {
+                // FALLBACK: Client-side calculation (original logic)
+                // Load all picks for this pool if not already loaded
+                const poolPicks = store.picks.filter(p => p.poolId === currentPoolId);
+                if (poolPicks.length === 0 || poolPicks.every(p => p.userId === store.currentUser.id)) {
+                    // Need to load other users' picks
+                    const { data: allPicks } = await supabaseClient
+                        .from('picks')
+                        .select('*')
+                        .eq('pool_id', currentPoolId);
+                    
+                    if (allPicks) {
+                        allPicks.forEach(pick => {
+                            if (!store.picks.find(p => p.id === pick.id)) {
+                                store.picks.push({
+                                    id: pick.id,
+                                    poolId: pick.pool_id,
+                                    userId: pick.user_id,
+                                    tournamentId: pick.tournament_id,
+                                    playerId: pick.player_id,
+                                    playerName: pick.player_name,
+                                    tournamentName: pick.tournament_name,
+                                    earnings: pick.final_earnings || 0
+                                });
+                            }
+                        });
                     }
                 }
+                
+                standings = pool.members.map(memberId => {
+                    const user = store.users.find(u => u.id === memberId) || { id: memberId, name: 'Unknown User' };
+                    const userPicks = store.picks.filter(p => p.poolId === currentPoolId && p.userId === memberId);
+                    
+                    const completedEarnings = userPicks
+                        .filter(p => p.tournamentId !== currentTournament.id)
+                        .reduce((sum, p) => sum + (p.earnings || 0), 0);
 
-                return {
-                    user,
-                    picks: userPicks,
-                    completedEarnings,
-                    totalEarnings: completedEarnings + currentWeekEarnings,
-                    currentWeekEarnings,
-                    currentPlayer
-                };
-            }).filter(s => s.user).sort((a, b) => b.completedEarnings - a.completedEarnings); // Sort by COMPLETED earnings only
+                    const currentPick = userPicks.find(p => p.tournamentId === currentTournament.id);
+                    let currentWeekEarnings = 0;
+                    let currentPlayer = null;
+
+                    if (currentPick) {
+                        currentPlayer = getPlayerById(currentPick.playerId);
+                        let leaderboardEntry = leaderboardData.find(l => String(l.playerId) === String(currentPick.playerId));
+                        if (!leaderboardEntry && currentPlayer) {
+                            leaderboardEntry = leaderboardData.find(l => 
+                                l.playerName && l.playerName.toLowerCase() === currentPlayer.name.toLowerCase()
+                            );
+                        }
+                        if (!leaderboardEntry && currentPick.playerName) {
+                            leaderboardEntry = leaderboardData.find(l => 
+                                l.playerName && l.playerName.toLowerCase() === currentPick.playerName.toLowerCase()
+                            );
+                        }
+                        currentWeekEarnings = leaderboardEntry ? leaderboardEntry.projectedEarnings : 0;
+                    }
+
+                    return {
+                        user,
+                        picks: userPicks,
+                        completedEarnings,
+                        totalEarnings: completedEarnings + currentWeekEarnings,
+                        currentWeekEarnings,
+                        currentPlayer
+                    };
+                }).filter(s => s.user).sort((a, b) => b.completedEarnings - a.completedEarnings);
+            }
 
             const tbody = document.getElementById('standings-body');
             
@@ -4556,6 +4699,7 @@ See you on the course!`
                 const rankClass = index === 0 ? 'gold' : index === 1 ? 'silver' : index === 2 ? 'bronze' : '';
                 const profilePic = getUserProfilePicture(standing.user.id);
                 const userName = standing.user.name || 'Unknown';
+                const picksCount = standing.picks.length !== undefined ? standing.picks.length : standing.picks;
 
                 return `
                     <tr class="${isCurrentUser ? 'current-user' : ''}">
@@ -4584,7 +4728,7 @@ See you on the course!`
                         <td style="font-weight: 600; color: var(--green-fairway);">
                             ${formatCurrency(standing.completedEarnings)}
                         </td>
-                        <td>${standing.picks.length}</td>
+                        <td>${picksCount}</td>
                     </tr>
                 `;
             }).join('');
@@ -4732,7 +4876,7 @@ See you on the course!`
             }).join('');
         }
 
-        function renderPlayerSelection() {
+        async function renderPlayerSelection() {
             // Determine which tournament we're picking for
             const activeTournament = getActiveTournamentForPicks();
             const tournamentStarted = hasTournamentStarted();
@@ -4851,10 +4995,15 @@ See you on the course!`
                 document.getElementById('confirm-pick-btn').textContent = 'CONFIRM PICK';
             }
 
-            renderPlayersListFiltered('', usedPlayerIds, existingPick);
+            await renderPlayersListFiltered('', usedPlayerIds, existingPick);
         }
 
-        function renderPlayersListFiltered(searchTerm, usedPlayerIds, existingPick = null) {
+        // Cache for tournament picks (for unique picks feature)
+        let cachedTournamentPicks = null;
+        let cachedTournamentPicksPoolId = null;
+        let cachedTournamentPicksTournamentId = null;
+        
+        async function renderPlayersListFiltered(searchTerm, usedPlayerIds, existingPick = null) {
             const container = document.getElementById('players-list');
             const pool = store.pools.find(p => p.id === currentPoolId);
             
@@ -4867,14 +5016,41 @@ See you on the course!`
             // Check if tournament has started - only show leaderboard data if it has
             const tournamentStarted = new Date() >= currentTournament.startTime;
             
-            // Get players already picked by others this week (for unique picks pools)
-            const pickedThisWeekByOthers = pool?.uniquePicks 
-                ? store.picks
-                    .filter(p => p.poolId === currentPoolId && 
-                                p.tournamentId === currentTournament.id &&
-                                p.userId !== store.currentUser.id)
-                    .map(p => String(p.playerId))
-                : [];
+            // OPTIMIZED: Get players already picked by others this week (for unique picks pools)
+            let pickedThisWeekByOthers = [];
+            let pickedByMap = {}; // Map playerId -> picker name
+            
+            if (pool?.uniquePicks) {
+                // Check cache first
+                if (cachedTournamentPicks && 
+                    cachedTournamentPicksPoolId === currentPoolId && 
+                    cachedTournamentPicksTournamentId === currentTournament.id) {
+                    // Use cached data
+                    pickedThisWeekByOthers = cachedTournamentPicks
+                        .filter(p => p.user_id !== store.currentUser.id)
+                        .map(p => String(p.player_id));
+                    cachedTournamentPicks.forEach(p => {
+                        if (p.user_id !== store.currentUser.id) {
+                            pickedByMap[String(p.player_id)] = p.user_name?.split(' ')[0] || 'Someone';
+                        }
+                    });
+                } else {
+                    // Fetch from server
+                    const tournamentPicks = await getTournamentPicksOptimized(currentPoolId, currentTournament.id);
+                    cachedTournamentPicks = tournamentPicks;
+                    cachedTournamentPicksPoolId = currentPoolId;
+                    cachedTournamentPicksTournamentId = currentTournament.id;
+                    
+                    pickedThisWeekByOthers = tournamentPicks
+                        .filter(p => p.user_id !== store.currentUser.id)
+                        .map(p => String(p.player_id));
+                    tournamentPicks.forEach(p => {
+                        if (p.user_id !== store.currentUser.id) {
+                            pickedByMap[String(p.player_id)] = p.user_name?.split(' ')[0] || 'Someone';
+                        }
+                    });
+                }
+            }
 
             container.innerHTML = filtered.map(player => {
                 const isUsed = usedPlayerIds.includes(String(player.id));
@@ -4902,18 +5078,7 @@ See you on the course!`
                 const headshotUrl = player.headshot || getPlayerHeadshot(player);
                 
                 // Find who picked this player (for unique picks pools)
-                let takenByName = '';
-                if (isTakenByOther) {
-                    const pickerPick = store.picks.find(p => 
-                        p.poolId === currentPoolId && 
-                        p.tournamentId === currentTournament.id &&
-                        String(p.playerId) === String(player.id)
-                    );
-                    if (pickerPick) {
-                        const picker = store.users.find(u => u.id === pickerPick.userId);
-                        takenByName = picker ? picker.name.split(' ')[0] : 'Someone';
-                    }
-                }
+                const takenByName = pickedByMap[String(player.id)] || '';
 
                 return `
                     <div class="player-item ${isDisabled ? 'disabled' : ''} ${isSelected ? 'selected' : ''} ${isCurrentPick ? 'current-pick' : ''}"
@@ -4948,7 +5113,7 @@ See you on the course!`
             }
         }
 
-        function filterPlayers() {
+        async function filterPlayers() {
             const searchTerm = document.getElementById('player-search').value;
             const existingPick = store.picks.find(
                 p => p.poolId === currentPoolId && 
@@ -4960,10 +5125,10 @@ See you on the course!`
                             p.userId === store.currentUser.id &&
                             p.tournamentId !== currentTournament.id)
                 .map(p => String(p.playerId));
-            renderPlayersListFiltered(searchTerm, usedPlayerIds, existingPick);
+            await renderPlayersListFiltered(searchTerm, usedPlayerIds, existingPick);
         }
 
-        function selectPlayer(playerId) {
+        async function selectPlayer(playerId) {
             selectedPlayerId = String(playerId);
             const player = getPlayerById(playerId);
 
@@ -4980,7 +5145,7 @@ See you on the course!`
                             p.userId === store.currentUser.id &&
                             p.tournamentId !== currentTournament.id)
                 .map(p => String(p.playerId));
-            renderPlayersListFiltered(document.getElementById('player-search').value, usedPlayerIds, existingPick);
+            await renderPlayersListFiltered(document.getElementById('player-search').value, usedPlayerIds, existingPick);
 
             // Show current selection
             const currentPickDisplay = document.getElementById('current-pick-display');
