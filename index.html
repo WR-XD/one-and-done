@@ -1662,6 +1662,21 @@
                     </div>
 
                     <div class="form-group">
+                        <label>Pool Rules</label>
+                        <div style="background: #f9fafb; border: 2px solid #e5e7eb; border-radius: 8px; padding: 1rem;">
+                            <label style="display: flex; align-items: flex-start; gap: 0.75rem; cursor: pointer; font-weight: normal;">
+                                <input type="checkbox" id="unique-picks" style="margin-top: 0.25rem; width: 18px; height: 18px; cursor: pointer;">
+                                <div>
+                                    <span style="font-weight: 600;">Unique Picks Each Week</span>
+                                    <p style="color: var(--gray); font-size: 0.85rem; margin-top: 0.25rem;">
+                                        No two players can pick the same golfer in a given week. First come, first served!
+                                    </p>
+                                </div>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
                         <label>Your Profile Picture (optional)</label>
                         <p style="color: var(--gray); font-size: 0.85rem; margin-bottom: 0.5rem;">This will be shown in pool standings</p>
                         <div style="display: flex; align-items: center; gap: 1rem;">
@@ -3471,7 +3486,8 @@
                                 season: dbPool.season,
                                 inviteCode: dbPool.invite_code,
                                 createdBy: dbPool.created_by,
-                                members: memberIds
+                                members: memberIds,
+                                uniquePicks: dbPool.unique_picks || false
                             };
                             
                             const existingIndex = store.pools.findIndex(p => p.id === pool.id);
@@ -3939,13 +3955,14 @@
             event.preventDefault();
             const name = document.getElementById('pool-name').value;
             const season = document.getElementById('pool-season').value;
+            const uniquePicks = document.getElementById('unique-picks').checked;
 
             if (!name || !season) {
                 showToast('Please fill in all fields', true);
                 return;
             }
 
-            console.log('Creating pool:', name, season);
+            console.log('Creating pool:', name, season, 'uniquePicks:', uniquePicks);
 
             try {
                 let pool;
@@ -3962,7 +3979,8 @@
                                 name: name,
                                 season: season,
                                 invite_code: inviteCode,
-                                created_by: store.currentUser.id
+                                created_by: store.currentUser.id,
+                                unique_picks: uniquePicks
                             })
                             .select()
                             .single()
@@ -3996,7 +4014,8 @@
                         season: newPool.season,
                         ownerId: store.currentUser.id,
                         members: [store.currentUser.id],
-                        inviteCode: newPool.invite_code
+                        inviteCode: newPool.invite_code,
+                        uniquePicks: newPool.unique_picks
                     };
                 } else {
                     // Fallback to local
@@ -4006,7 +4025,8 @@
                         season,
                         ownerId: store.currentUser.id,
                         members: [store.currentUser.id],
-                        inviteCode: generateId().toUpperCase()
+                        inviteCode: generateId().toUpperCase(),
+                        uniquePicks: uniquePicks
                     };
                 }
 
@@ -4598,6 +4618,7 @@ See you on the course!`
 
         function renderPlayersListFiltered(searchTerm, usedPlayerIds, existingPick = null) {
             const container = document.getElementById('players-list');
+            const pool = store.pools.find(p => p.id === currentPoolId);
             
             // Use tournament field (players in THIS WEEK'S tournament)
             // Filter by search term, then sort by world ranking
@@ -4607,11 +4628,22 @@ See you on the course!`
 
             // Check if tournament has started - only show leaderboard data if it has
             const tournamentStarted = new Date() >= currentTournament.startTime;
+            
+            // Get players already picked by others this week (for unique picks pools)
+            const pickedThisWeekByOthers = pool?.uniquePicks 
+                ? store.picks
+                    .filter(p => p.poolId === currentPoolId && 
+                                p.tournamentId === currentTournament.id &&
+                                p.userId !== store.currentUser.id)
+                    .map(p => String(p.playerId))
+                : [];
 
             container.innerHTML = filtered.map(player => {
                 const isUsed = usedPlayerIds.includes(String(player.id));
                 const isSelected = String(selectedPlayerId) === String(player.id);
                 const isCurrentPick = existingPick && String(existingPick.playerId) === String(player.id);
+                const isTakenByOther = pickedThisWeekByOthers.includes(String(player.id));
+                const isDisabled = isUsed || isTakenByOther;
                 
                 // Only get leaderboard data if tournament has started
                 let currentPos = '-';
@@ -4630,10 +4662,24 @@ See you on the course!`
                 
                 // Get headshot - prefer Supabase data, fallback to PGA Tour CDN
                 const headshotUrl = player.headshot || getPlayerHeadshot(player);
+                
+                // Find who picked this player (for unique picks pools)
+                let takenByName = '';
+                if (isTakenByOther) {
+                    const pickerPick = store.picks.find(p => 
+                        p.poolId === currentPoolId && 
+                        p.tournamentId === currentTournament.id &&
+                        String(p.playerId) === String(player.id)
+                    );
+                    if (pickerPick) {
+                        const picker = store.users.find(u => u.id === pickerPick.userId);
+                        takenByName = picker ? picker.name.split(' ')[0] : 'Someone';
+                    }
+                }
 
                 return `
-                    <div class="player-item ${isUsed ? 'disabled' : ''} ${isSelected ? 'selected' : ''} ${isCurrentPick ? 'current-pick' : ''}"
-                         onclick="${isUsed ? '' : `selectPlayer('${player.id}')`}">
+                    <div class="player-item ${isDisabled ? 'disabled' : ''} ${isSelected ? 'selected' : ''} ${isCurrentPick ? 'current-pick' : ''}"
+                         onclick="${isDisabled ? '' : `selectPlayer('${player.id}')`}">
                         <img class="player-photo" src="${headshotUrl}" alt="${player.name}"
                              onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect fill=%22%23e5e7eb%22 width=%22100%22 height=%22100%22/></svg>'">
                         <div class="player-info">
@@ -4641,6 +4687,7 @@ See you on the course!`
                             <p>${player.country} • OWGR ${worldRank}</p>
                         </div>
                         ${isUsed ? '<span class="used-badge">Already Used</span>' : ''}
+                        ${isTakenByOther ? `<span class="used-badge" style="background: #ef4444;">Picked by ${takenByName}</span>` : ''}
                         ${isCurrentPick ? '<span class="current-badge">Current Pick</span>' : ''}
                         <div class="player-rank">
                             ${tournamentStarted ? `
