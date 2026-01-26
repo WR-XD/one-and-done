@@ -1410,6 +1410,41 @@
             border-bottom: 2px solid #e5e7eb;
             overflow: visible;
         }
+        
+        .scroll-indicator {
+            display: none;
+            position: absolute;
+            right: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            background: linear-gradient(to right, transparent, var(--white) 30%);
+            padding: 0.5rem 0.5rem 0.5rem 1.5rem;
+            pointer-events: none;
+            z-index: 10;
+        }
+        
+        .scroll-indicator span {
+            display: inline-block;
+            color: var(--gold);
+            font-size: 1.2rem;
+            font-weight: bold;
+            animation: pulse-arrow 1.5s ease-in-out infinite;
+        }
+        
+        @keyframes pulse-arrow {
+            0%, 100% { opacity: 0.4; transform: translateX(0); }
+            50% { opacity: 1; transform: translateX(3px); }
+        }
+        
+        @media (max-width: 600px) {
+            .scroll-indicator {
+                display: block;
+            }
+            
+            .scroll-indicator.hidden {
+                display: none;
+            }
+        }
 
         .pool-options-menu {
             position: relative;
@@ -1759,9 +1794,10 @@
                         </button>
                     </div>
                 </div>
+                <div class="scroll-indicator" id="scroll-indicator">
+                    <span>›</span>
+                </div>
             </div>
-
-            <!-- Pool Options Dropdown (outside tabs for proper z-index) -->
             <div class="pool-options-dropdown" id="pool-options-dropdown">
                 <button onclick="confirmLeaveCurrentPool()">
                     <span style="color: var(--red);">🚪 Leave Pool</span>
@@ -4241,10 +4277,21 @@ See you on the course!`
             switchPoolTab('standings');
             renderPoolView();
             checkTabsOverflow();
+            
+            // Hide scroll indicator when user scrolls tabs
+            const poolTabs = document.getElementById('pool-tabs');
+            const scrollIndicator = document.getElementById('scroll-indicator');
+            if (poolTabs && scrollIndicator) {
+                poolTabs.addEventListener('scroll', function() {
+                    if (this.scrollLeft > 5) {
+                        scrollIndicator.classList.add('hidden');
+                    }
+                }, { passive: true });
+            }
         }
 
         function checkTabsOverflow() {
-            // No longer needed - tabs naturally show they're scrollable by being cut off
+            // No longer needed - using scroll indicator instead
         }
 
         function switchPoolTab(tabName) {
