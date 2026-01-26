@@ -4603,7 +4603,7 @@ See you on the course!`
 
                     return `
                         <div style="border-bottom: 1px solid #e5e7eb; padding: 1rem 2rem;">
-                            <h4 style="margin-bottom: 0.75rem; font-family: 'Oswald', sans-serif; color: var(--green-deep);">${user.name}</h4>
+                            <h4 style="margin-bottom: 0.75rem; font-family: 'Oswald', sans-serif; color: var(--green-deep);">${user ? user.name : 'Unknown'}</h4>
                             ${memberPicks.length === 0 ? 
                                 `<p style="color: var(--gray); font-size: 0.9rem;">No picks yet</p>` :
                                 `<div style="display: flex; flex-wrap: wrap; gap: 1rem;">
@@ -4616,6 +4616,12 @@ See you on the course!`
                                             (isCurrentTournament ? currentTournament.name : pick.tournamentId);
                                         const shortName = tournamentName.split(' ').slice(0, 2).join(' ');
                                         
+                                        // Get earnings - either projected (current) or final (completed)
+                                        const earnings = isCurrentTournament && leaderboardEntry ? 
+                                            leaderboardEntry.projectedEarnings : 
+                                            (pick.earnings || 0);
+                                        const earningsLabel = isCurrentTournament && leaderboardEntry ? 'proj' : '';
+                                        
                                         return `
                                             <div style="background: #f9fafb; padding: 0.5rem 0.75rem; border-radius: 4px; display: flex; align-items: center; gap: 0.5rem; font-size: 0.85rem;">
                                                 ${tournamentLogo ? `<img src="${tournamentLogo}" style="width: 24px; height: 24px; object-fit: contain;" alt="">` : ''}
@@ -4625,6 +4631,7 @@ See you on the course!`
                                                     `<span style="color: var(--gold);">(${leaderboardEntry.pos})</span>` :
                                                     (pick.finish ? `<span style="color: var(--gray);">(${pick.finish})</span>` : '')
                                                 }
+                                                <span style="color: var(--green-fairway); font-weight: 600;">${formatCurrency(earnings)}${earningsLabel ? ' (' + earningsLabel + ')' : ''}</span>
                                             </div>
                                         `;
                                     }).join('')}
