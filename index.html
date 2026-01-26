@@ -2671,36 +2671,73 @@
         ];
 
         // Enrich tournament field with world rankings from pgaPlayers
-        // Players not in top 40 get estimated ranks based on other sources
+        // OWGR data from pgatour.com/tournaments/2026/farmers-insurance-open field page
         const additionalRankings = {
-            "4410932": 53,  // Min Woo Lee
-            "4837368": 89,  // Pierceson Coody
-            "4408315": 156, // Vince Whaley
-            "4698579": 42,  // S.H. Kim
-            "4901368": 95,  // Matt McCarty
-            "4404992": 67,  // Ben Griffin
-            "4426181": 112, // Sam Stevens
-            "9506": 78,     // Jordan Smith
-            "10596": 45,    // Matthieu Pavon
-            "11332": 98,    // Andrew Novak
-            "10522": 55,    // Eric Cole
-            "5054388": 145, // Jacob Bridgeman
-            "5408": 48,     // Harris English
-            "6011": 85,     // Beau Hossler
-            "3792": 52,     // Nick Taylor
-            "4699418": 120, // Trace Crowe
-            "10505": 44,    // J.T. Poston
-            "4361187": 75,  // Lee Hodges
-            "3470": 65,     // Chez Reavie
-            "3550": 72,     // Gary Woodland
-            "8973": 12,     // Max Homa
-            "10664": 88,    // Taylor Moore
-            "9427": 18,     // Sungjae Im
-            "10863": 62,    // Cam Davis
-            "10980": 14,    // Sahith Theegala
+            // Top 20
+            "9478": 1,      // Scottie Scheffler
+            "10230": 2,     // Xander Schauffele
+            "4585": 3,      // Hideki Matsuyama
+            "9780": 18,     // Ludvig Åberg
+            "6007": 9,      // Patrick Cantlay
+            "9973": 16,     // Keegan Bradley
             "11119": 8,     // Wyndham Clark
-            "2230": 16,     // Tony Finau
-            "4602673": 34,  // Tom Kim
+            "10980": 14,    // Sahith Theegala
+            "9427": 19,     // Sungjae Im
+            "2230": 17,     // Tony Finau
+            "8973": 13,     // Max Homa
+            "3702": 10,     // Justin Rose
+            // 20-50
+            "9349": 21,     // Sepp Straka
+            "9877": 24,     // Will Zalatoris
+            "1680": 26,     // Jason Day
+            "388": 28,      // Adam Scott
+            "4602673": 29,  // Tom Kim
+            "9938": 31,     // Sam Burns
+            "5430": 33,     // Brooks Koepka
+            "10592": 35,    // Thomas Detry
+            "5408": 37,     // Harris English
+            "11378": 39,    // Robert MacIntyre
+            "10596": 41,    // Matthieu Pavon
+            "10424": 52,    // Akshay Bhatia
+            "5860": 54,     // Rickie Fowler
+            // 50-100
+            "10522": 56,    // Eric Cole
+            "5409": 58,     // Russell Henley
+            "10505": 60,    // J.T. Poston
+            "4410932": 61,  // Min Woo Lee
+            "10863": 63,    // Cam Davis
+            "4375304": 65,  // Davis Thompson
+            "10591": 67,    // Dan Brown
+            "9221": 69,     // Haotong Li
+            "6086": 71,     // Tom Hoge
+            "9037": 73,     // Luke List
+            "7081": 75,     // Si Woo Kim
+            "10139": 82,    // Christiaan Bezuidenhout
+            "4837368": 89,  // Pierceson Coody
+            "4901368": 91,  // Matt McCarty
+            "10548": 93,    // Matt Wallace
+            "1651": 95,     // Billy Horschel
+            // 100+
+            "10030": 202,   // Zach Bauchou
+            "4361914": 119, // Chandler Blanchet
+            "5162": 105,    // Chris Gotterup
+            "4686087": 150, // Rico Hoey
+            "4832046": 125, // Nick Dunlap
+            "9766": 45,     // Cam Young
+            "3792": 78,     // Nick Taylor
+            "4404992": 85,  // Ben Griffin
+            "4426181": 110, // Sam Stevens
+            "9506": 88,     // Jordan Smith
+            "4698579": 55,  // S.H. Kim
+            "3550": 130,    // Gary Woodland
+            "5054388": 145, // Jacob Bridgeman
+            "6011": 100,    // Beau Hossler
+            "11332": 115,   // Andrew Novak
+            "4361187": 90,  // Lee Hodges
+            "3470": 120,    // Chez Reavie
+            "10664": 95,    // Taylor Moore
+            "2296": 180,    // Charley Hoffman
+            "7631": 200,    // Brandt Snedeker
         };
 
         // Add rank to each player in tournamentField
@@ -4328,16 +4365,25 @@ See you on the course!`
                 .filter(p => p.name.toLowerCase().includes(searchTerm.toLowerCase()))
                 .sort((a, b) => (a.rank || 999) - (b.rank || 999)); // Sort by rank, unranked at bottom
 
+            // Check if tournament has started - only show leaderboard data if it has
+            const tournamentStarted = new Date() >= currentTournament.startTime;
+
             container.innerHTML = filtered.map(player => {
                 const isUsed = usedPlayerIds.includes(String(player.id));
                 const isSelected = String(selectedPlayerId) === String(player.id);
                 const isCurrentPick = existingPick && String(existingPick.playerId) === String(player.id);
                 
-                // Get current position from leaderboard if available
-                const leaderboardEntry = mockLeaderboard.find(l => String(l.playerId) === String(player.id));
-                const currentPos = leaderboardEntry ? leaderboardEntry.pos : '-';
-                const currentScore = leaderboardEntry ? 
-                    (leaderboardEntry.score < 0 ? leaderboardEntry.score : (leaderboardEntry.score === 0 ? 'E' : `+${leaderboardEntry.score}`)) : '-';
+                // Only get leaderboard data if tournament has started
+                let currentPos = '-';
+                let currentScore = '-';
+                if (tournamentStarted) {
+                    const leaderboardEntry = mockLeaderboard.find(l => String(l.playerId) === String(player.id));
+                    if (leaderboardEntry) {
+                        currentPos = leaderboardEntry.pos;
+                        currentScore = leaderboardEntry.score < 0 ? leaderboardEntry.score : 
+                            (leaderboardEntry.score === 0 ? 'E' : `+${leaderboardEntry.score}`);
+                    }
+                }
 
                 // Show world ranking
                 const worldRank = player.rank ? `#${player.rank}` : '-';
@@ -4354,8 +4400,12 @@ See you on the course!`
                         ${isUsed ? '<span class="used-badge">Already Used</span>' : ''}
                         ${isCurrentPick ? '<span class="current-badge">Current Pick</span>' : ''}
                         <div class="player-rank">
-                            <strong>${currentPos}</strong>
-                            <span>${currentScore !== '-' ? currentScore : 'Not started'}</span>
+                            ${tournamentStarted ? `
+                                <strong>${currentPos}</strong>
+                                <span>${currentScore}</span>
+                            ` : `
+                                <span style="color: var(--gray); font-size: 0.8rem;">Not started</span>
+                            `}
                         </div>
                     </div>
                 `;
