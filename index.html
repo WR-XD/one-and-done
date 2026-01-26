@@ -2252,56 +2252,437 @@
 
         // Current tournament (from live data)
         // COMPLETED: The American Express (Jan 22-26, 2026)
-        // Winner: Scottie Scheffler
-        const completedTournaments = [
+        // ==================== 2026 PGA TOUR SCHEDULE ====================
+        // Full season schedule - tournaments auto-rotate based on current date
+        const pga2026Schedule = [
             {
-                id: "sony2026",
-                name: "Sony Open in Hawaii",
-                dates: "Jan 15 - 18, 2026",
-                status: "Complete"
+                id: "sentry-2026",
+                fieldId: "R2026001",
+                name: "The Sentry",
+                startDate: "2026-01-02",
+                endDate: "2026-01-05",
+                course: "Kapalua Resort (Plantation Course)",
+                location: "Kapalua, Maui, HI",
+                purse: 20000000,
+                logoCode: "R016"
             },
             {
-                id: "amex2026",
+                id: "sony-2026",
+                fieldId: "R2026006",
+                name: "Sony Open in Hawaii",
+                startDate: "2026-01-09",
+                endDate: "2026-01-12",
+                course: "Waialae Country Club",
+                location: "Honolulu, HI",
+                purse: 8900000,
+                logoCode: "R006"
+            },
+            {
+                id: "amex-2026",
+                fieldId: "R2026002",
                 name: "The American Express",
-                dates: "Jan 22 - 26, 2026",
-                status: "Complete"
+                startDate: "2026-01-22",
+                endDate: "2026-01-25",
+                course: "Pete Dye Stadium Course, PGA West",
+                location: "La Quinta, CA",
+                purse: 9200000,
+                logoCode: "R002"
+            },
+            {
+                id: "farmers-2026",
+                fieldId: "R2026004",
+                name: "Farmers Insurance Open",
+                startDate: "2026-01-29",
+                endDate: "2026-02-01",
+                course: "Torrey Pines GC (South)",
+                location: "San Diego, CA",
+                purse: 9600000,
+                logoCode: "R004"
+            },
+            {
+                id: "pebble-2026",
+                fieldId: "R2026005",
+                name: "AT&T Pebble Beach Pro-Am",
+                startDate: "2026-02-05",
+                endDate: "2026-02-08",
+                course: "Pebble Beach Golf Links",
+                location: "Pebble Beach, CA",
+                purse: 20000000,
+                logoCode: "R005"
+            },
+            {
+                id: "phoenix-2026",
+                fieldId: "R2026003",
+                name: "WM Phoenix Open",
+                startDate: "2026-02-12",
+                endDate: "2026-02-15",
+                course: "TPC Scottsdale",
+                location: "Scottsdale, AZ",
+                purse: 20000000,
+                logoCode: "R003"
+            },
+            {
+                id: "genesis-2026",
+                fieldId: "R2026011",
+                name: "The Genesis Invitational",
+                startDate: "2026-02-19",
+                endDate: "2026-02-22",
+                course: "Riviera Country Club",
+                location: "Pacific Palisades, CA",
+                purse: 20000000,
+                logoCode: "R011"
+            },
+            {
+                id: "mexico-2026",
+                fieldId: "R2026540",
+                name: "Mexico Open at Vidanta",
+                startDate: "2026-02-26",
+                endDate: "2026-03-01",
+                course: "Vidanta Vallarta",
+                location: "Vallarta, Mexico",
+                purse: 9200000,
+                logoCode: "R540"
+            },
+            {
+                id: "cognizant-2026",
+                fieldId: "R2026473",
+                name: "Cognizant Classic",
+                startDate: "2026-02-26",
+                endDate: "2026-03-01",
+                course: "PGA National Resort",
+                location: "Palm Beach Gardens, FL",
+                purse: 9000000,
+                logoCode: "R473"
+            },
+            {
+                id: "arnold-palmer-2026",
+                fieldId: "R2026009",
+                name: "Arnold Palmer Invitational",
+                startDate: "2026-03-05",
+                endDate: "2026-03-08",
+                course: "Bay Hill Club & Lodge",
+                location: "Orlando, FL",
+                purse: 20000000,
+                logoCode: "R009"
+            },
+            {
+                id: "players-2026",
+                fieldId: "R2026011",
+                name: "THE PLAYERS Championship",
+                startDate: "2026-03-12",
+                endDate: "2026-03-15",
+                course: "TPC Sawgrass (Stadium)",
+                location: "Ponte Vedra Beach, FL",
+                purse: 25000000,
+                logoCode: "R011"
+            },
+            {
+                id: "valspar-2026",
+                fieldId: "R2026535",
+                name: "Valspar Championship",
+                startDate: "2026-03-19",
+                endDate: "2026-03-22",
+                course: "Innisbrook Resort (Copperhead)",
+                location: "Palm Harbor, FL",
+                purse: 8800000,
+                logoCode: "R535"
+            },
+            {
+                id: "texas-2026",
+                fieldId: "R2026054",
+                name: "Texas Children's Houston Open",
+                startDate: "2026-03-26",
+                endDate: "2026-03-29",
+                course: "Memorial Park Golf Course",
+                location: "Houston, TX",
+                purse: 9300000,
+                logoCode: "R054"
+            },
+            {
+                id: "valero-2026",
+                fieldId: "R2026021",
+                name: "Valero Texas Open",
+                startDate: "2026-04-02",
+                endDate: "2026-04-05",
+                course: "TPC San Antonio (Oaks)",
+                location: "San Antonio, TX",
+                purse: 9000000,
+                logoCode: "R021"
+            },
+            {
+                id: "masters-2026",
+                fieldId: "R2026014",
+                name: "Masters Tournament",
+                startDate: "2026-04-09",
+                endDate: "2026-04-12",
+                course: "Augusta National Golf Club",
+                location: "Augusta, GA",
+                purse: 20000000,
+                logoCode: "R014"
+            },
+            {
+                id: "rbc-heritage-2026",
+                fieldId: "R2026012",
+                name: "RBC Heritage",
+                startDate: "2026-04-16",
+                endDate: "2026-04-19",
+                course: "Harbour Town Golf Links",
+                location: "Hilton Head Island, SC",
+                purse: 20000000,
+                logoCode: "R012"
+            },
+            {
+                id: "zurich-2026",
+                fieldId: "R2026473",
+                name: "Zurich Classic of New Orleans",
+                startDate: "2026-04-23",
+                endDate: "2026-04-26",
+                course: "TPC Louisiana",
+                location: "Avondale, LA",
+                purse: 17500000,
+                logoCode: "R473"
+            },
+            {
+                id: "pga-championship-2026",
+                fieldId: "R2026033",
+                name: "PGA Championship",
+                startDate: "2026-05-14",
+                endDate: "2026-05-17",
+                course: "Aronimink Golf Club",
+                location: "Newtown Square, PA",
+                purse: 17500000,
+                logoCode: "R033"
+            },
+            {
+                id: "charles-schwab-2026",
+                fieldId: "R2026464",
+                name: "Charles Schwab Challenge",
+                startDate: "2026-05-21",
+                endDate: "2026-05-24",
+                course: "Colonial Country Club",
+                location: "Fort Worth, TX",
+                purse: 9300000,
+                logoCode: "R464"
+            },
+            {
+                id: "memorial-2026",
+                fieldId: "R2026023",
+                name: "The Memorial Tournament",
+                startDate: "2026-06-04",
+                endDate: "2026-06-07",
+                course: "Muirfield Village Golf Club",
+                location: "Dublin, OH",
+                purse: 20000000,
+                logoCode: "R023"
+            },
+            {
+                id: "us-open-2026",
+                fieldId: "R2026026",
+                name: "U.S. Open",
+                startDate: "2026-06-18",
+                endDate: "2026-06-21",
+                course: "Shinnecock Hills Golf Club",
+                location: "Southampton, NY",
+                purse: 21500000,
+                logoCode: "R026"
+            },
+            {
+                id: "travelers-2026",
+                fieldId: "R2026034",
+                name: "Travelers Championship",
+                startDate: "2026-06-25",
+                endDate: "2026-06-28",
+                course: "TPC River Highlands",
+                location: "Cromwell, CT",
+                purse: 20000000,
+                logoCode: "R034"
+            },
+            {
+                id: "rocket-mortgage-2026",
+                fieldId: "R2026506",
+                name: "Rocket Mortgage Classic",
+                startDate: "2026-07-02",
+                endDate: "2026-07-05",
+                course: "Detroit Golf Club",
+                location: "Detroit, MI",
+                purse: 9000000,
+                logoCode: "R506"
+            },
+            {
+                id: "scottish-open-2026",
+                fieldId: "R2026541",
+                name: "Genesis Scottish Open",
+                startDate: "2026-07-09",
+                endDate: "2026-07-12",
+                course: "The Renaissance Club",
+                location: "North Berwick, Scotland",
+                purse: 9000000,
+                logoCode: "R541"
+            },
+            {
+                id: "open-championship-2026",
+                fieldId: "R2026100",
+                name: "The Open Championship",
+                startDate: "2026-07-16",
+                endDate: "2026-07-19",
+                course: "Royal Portrush Golf Club",
+                location: "Portrush, Northern Ireland",
+                purse: 17000000,
+                logoCode: "R100"
+            },
+            {
+                id: "3m-open-2026",
+                fieldId: "R2026528",
+                name: "3M Open",
+                startDate: "2026-07-23",
+                endDate: "2026-07-26",
+                course: "TPC Twin Cities",
+                location: "Blaine, MN",
+                purse: 8500000,
+                logoCode: "R528"
+            },
+            {
+                id: "wyndham-2026",
+                fieldId: "R2026480",
+                name: "Wyndham Championship",
+                startDate: "2026-08-06",
+                endDate: "2026-08-09",
+                course: "Sedgefield Country Club",
+                location: "Greensboro, NC",
+                purse: 8400000,
+                logoCode: "R480"
+            },
+            {
+                id: "fedex-st-jude-2026",
+                fieldId: "R2026490",
+                name: "FedEx St. Jude Championship",
+                startDate: "2026-08-13",
+                endDate: "2026-08-16",
+                course: "TPC Southwind",
+                location: "Memphis, TN",
+                purse: 20000000,
+                logoCode: "R490"
+            },
+            {
+                id: "bmw-2026",
+                fieldId: "R2026028",
+                name: "BMW Championship",
+                startDate: "2026-08-20",
+                endDate: "2026-08-23",
+                course: "Caves Valley Golf Club",
+                location: "Owings Mills, MD",
+                purse: 20000000,
+                logoCode: "R028",
+                isSeasonFinale: true // One and Done season ends here
             }
+            // Note: Tour Championship excluded - limited field invitational
         ];
 
-        // Tournament that just finished (show until Tuesday)
-        const justFinishedTournament = {
-            id: "amex2026",
-            name: "The American Express",
-            dates: "Jan 22 - 26, 2026",
-            course: "Pete Dye Stadium Course, PGA West",
-            location: "La Quinta, CA",
-            purse: 9200000,
-            round: 4,
-            status: "Complete",
-            logo: "https://res.cloudinary.com/pgatour-prod/d_tournaments:logos:R000.png/tournaments/logos/R002.png",
-            endDate: new Date("2026-01-26T23:59:59-08:00"),
-            showUntil: new Date("2026-01-27T07:00:00Z") // Show until Tuesday 7am UK
-        };
+        // ==================== DYNAMIC TOURNAMENT DETECTION ====================
+        function getTournamentDates(tournament) {
+            // Parse dates and set proper times
+            const start = new Date(tournament.startDate + 'T07:00:00-08:00'); // Thursday 7am PT
+            const end = new Date(tournament.endDate + 'T23:59:59-08:00'); // Sunday end
+            const pickWindowOpen = new Date(start);
+            pickWindowOpen.setDate(pickWindowOpen.getDate() - 3); // Monday before
+            pickWindowOpen.setUTCHours(7, 0, 0, 0); // 7am UK time
+            const showUntil = new Date(end);
+            showUntil.setDate(showUntil.getDate() + 1); // Tuesday after
+            showUntil.setUTCHours(7, 0, 0, 0); // Until Tuesday 7am UK
+            
+            return { start, end, pickWindowOpen, showUntil };
+        }
 
-        // Upcoming tournament (pick window opens Monday)
-        const upcomingTournament = {
-            id: "farmers-2026",
-            fieldId: "R2026004", // PGA Tour tournament ID for Supabase field lookup
-            name: "Farmers Insurance Open",
-            dates: "Jan 29 - Feb 1, 2026",
-            course: "Torrey Pines GC (South)",
-            location: "San Diego, CA",
-            purse: 9600000,
-            round: 0,
-            status: "Upcoming",
-            logo: "https://res.cloudinary.com/pgatour-prod/d_tournaments:logos:R000.png/tournaments/logos/R004.png",
-            startTime: new Date("2026-01-29T07:00:00-08:00"),
-            pickWindowOpen: new Date("2026-01-26T07:00:00Z") // Monday 7am UK time
-        };
+        function formatTournament(t) {
+            const dates = getTournamentDates(t);
+            const startMonth = new Date(t.startDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+            const endDay = new Date(t.endDate).toLocaleDateString('en-US', { day: 'numeric' });
+            const endMonth = new Date(t.endDate).toLocaleDateString('en-US', { month: 'short' });
+            const startMonthName = new Date(t.startDate).toLocaleDateString('en-US', { month: 'short' });
+            
+            const dateStr = startMonthName === endMonth 
+                ? `${startMonth} - ${endDay}, 2026`
+                : `${startMonth} - ${endMonth} ${endDay}, 2026`;
+            
+            return {
+                ...t,
+                dates: dateStr,
+                logo: `https://res.cloudinary.com/pgatour-prod/d_tournaments:logos:R000.png/tournaments/logos/${t.logoCode}.png`,
+                startTime: dates.start,
+                endTime: dates.end,
+                pickWindowOpen: dates.pickWindowOpen,
+                showUntil: dates.showUntil,
+                round: 0,
+                status: "Upcoming"
+            };
+        }
+
+        function getCurrentTournaments() {
+            const now = new Date();
+            
+            let justFinished = null;
+            let current = null;
+            let upcoming = null;
+            let next = null;
+            
+            for (let i = 0; i < pga2026Schedule.length; i++) {
+                const t = formatTournament(pga2026Schedule[i]);
+                const dates = getTournamentDates(pga2026Schedule[i]);
+                
+                // Just finished: ended but still within show window
+                if (now > dates.end && now < dates.showUntil) {
+                    justFinished = { ...t, status: "Complete", round: 4 };
+                }
+                
+                // Current/Upcoming: tournament is happening or about to start
+                if (now >= dates.pickWindowOpen && now <= dates.end) {
+                    if (now >= dates.start) {
+                        // Tournament in progress
+                        current = { ...t, status: "In Progress" };
+                    } else {
+                        // Pick window open, tournament not started
+                        upcoming = t;
+                    }
+                }
+                
+                // Next: first tournament after current/upcoming
+                if (now < dates.pickWindowOpen && !next) {
+                    next = t;
+                }
+                
+                // Upcoming fallback: if no current tournament, find the next one
+                if (!current && !upcoming && now < dates.start) {
+                    upcoming = t;
+                    if (i + 1 < pga2026Schedule.length) {
+                        next = formatTournament(pga2026Schedule[i + 1]);
+                    }
+                    break;
+                }
+            }
+            
+            // If tournament is in progress, that's also the "upcoming" for picks
+            if (current && !upcoming) {
+                upcoming = current;
+            }
+            
+            return { justFinished, current, upcoming, next };
+        }
+
+        // Get current tournament state
+        const tournamentState = getCurrentTournaments();
+        const justFinishedTournament = tournamentState.justFinished;
+        const upcomingTournament = tournamentState.upcoming || tournamentState.current;
+        const nextTournament = tournamentState.next;
+        const currentTournament = upcomingTournament;
+
+        // Log current tournament state for debugging
+        console.log('Tournament State:', {
+            justFinished: justFinishedTournament?.name,
+            upcoming: upcomingTournament?.name,
+            next: nextTournament?.name
+        });
 
         // Determine which tournament to show on leaderboard
-        // If tournament just finished (within last 24 hours), show it
-        // Otherwise show upcoming/current
         function getCurrentDisplayTournament() {
             const now = new Date();
             if (justFinishedTournament && now < justFinishedTournament.showUntil) {
@@ -2310,24 +2691,8 @@
             return upcomingTournament;
         }
 
-        // For picks, we use the upcoming tournament
-        const currentTournament = upcomingTournament;
-
-        // Next tournament (for when current is in progress)
-        const nextTournament = {
-            id: 'phoenix-2026',
-            name: "WM Phoenix Open",
-            dates: "Feb 5 - 8, 2026",
-            course: "TPC Scottsdale",
-            location: "Scottsdale, AZ",
-            purse: 9200000,
-            logo: "https://res.cloudinary.com/pgatour-prod/d_tournaments:logos:R000.png/tournaments/logos/R003.png",
-            startTime: new Date("2026-02-05T07:00:00-07:00"),
-            pickWindowOpen: new Date("2026-02-02T07:00:00Z")
-        };
-
         // TESTING MODE: Set to true to allow picks even after tournament starts
-        const ALLOW_LATE_PICKS = true; // Change to false for production
+        const ALLOW_LATE_PICKS = false; // Production mode - picks lock at tournament start
 
         // Check if tournament has started (picks should be locked)
         function hasTournamentStarted() {
