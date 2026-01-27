@@ -1847,7 +1847,7 @@
                             <h2 id="pool-title">Pool Name</h2>
                             <p id="pool-season-display">2025-2026 Season</p>
                         </div>
-                        <div class="pool-image-container" id="pool-image-container" onclick="openPoolImageModal()">
+                        <div class="pool-image-container" id="pool-image-container" onclick="handlePoolImageClick()">
                             <img id="pool-image-display" src="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='50' fill='%23C4A747'/><text x='50' y='62' text-anchor='middle' font-size='45'>⛳</text></svg>" alt="Pool Image">
                             <span id="edit-pool-image-text" class="edit-pool-image-text">EDIT</span>
                         </div>
@@ -4194,6 +4194,22 @@
         // ==================== POOL IMAGE ====================
         let pendingPoolImage = null;
         
+        function handlePoolImageClick() {
+            const pool = store.pools.find(p => p.id === currentPoolId);
+            if (!pool) return;
+            
+            const isCreator = pool.createdBy === store.currentUser.id;
+            
+            if (isCreator) {
+                // Creator can edit
+                openPoolImageModal();
+            } else {
+                // Non-creator can view expanded
+                const imgSrc = pool.poolImage || DEFAULT_POOL_LOGO;
+                showProfileModal(imgSrc, pool.name);
+            }
+        }
+        
         function openPoolImageModal() {
             const pool = store.pools.find(p => p.id === currentPoolId);
             if (!pool) return;
@@ -4336,10 +4352,10 @@
                 imgDisplay.src = DEFAULT_POOL_LOGO;
             }
             
-            // Show EDIT text and make clickable only for creator
+            // Show EDIT text only for creator, but clickable for everyone
             editText.style.display = isCreator ? 'block' : 'none';
-            container.style.cursor = isCreator ? 'pointer' : 'default';
-            container.onclick = isCreator ? openPoolImageModal : null;
+            container.style.cursor = 'pointer';
+            container.onclick = handlePoolImageClick;
         }
 
         // Close modal on Escape key
