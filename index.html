@@ -402,6 +402,9 @@
             background: linear-gradient(135deg, var(--green-deep) 0%, var(--green-fairway) 100%);
             padding: 1rem;
             color: var(--white);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
 
         .tournament-header h3 {
@@ -921,6 +924,35 @@
         .standings-header h2 {
             font-family: 'Oswald', sans-serif;
             font-size: 1.75rem;
+        }
+        
+        .pool-image-container {
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            cursor: pointer;
+        }
+        
+        .pool-image-container img {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid var(--gold);
+        }
+        
+        .edit-pool-image-text {
+            display: none;
+            font-size: 0.65rem;
+            color: var(--gold);
+            margin-top: 0.25rem;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+        }
+        
+        .pool-image-container:hover .edit-pool-image-text {
+            text-decoration: underline;
         }
 
         .pool-total {
@@ -1815,6 +1847,10 @@
                             <h2 id="pool-title">Pool Name</h2>
                             <p id="pool-season-display">2025-2026 Season</p>
                         </div>
+                        <div class="pool-image-container" id="pool-image-container" onclick="openPoolImageModal()">
+                            <img id="pool-image-display" src="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect fill='%23e5e7eb' width='100' height='100'/><text x='50' y='55' text-anchor='middle' fill='%239ca3af' font-size='40'>🏌️</text></svg>" alt="Pool Image">
+                            <span id="edit-pool-image-text" class="edit-pool-image-text">EDIT</span>
+                        </div>
                     </div>
 
                     <table class="standings-table">
@@ -2098,7 +2134,35 @@
         </div>
     </div>
 
-    <!-- Toast -->
+    <!-- Pool Image Modal -->
+    <div id="pool-image-modal" class="modal-overlay">
+        <div class="modal">
+            <div class="modal-header">
+                <h3>Pool Image</h3>
+                <button class="modal-close" onclick="closeModal('pool-image-modal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div style="text-align: center; margin-bottom: 1.5rem;">
+                    <img id="pool-image-preview" src="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect fill='%23e5e7eb' width='100' height='100'/><text x='50' y='55' text-anchor='middle' fill='%239ca3af' font-size='40'>🏌️</text></svg>" 
+                         style="width: 120px; height: 120px; border-radius: 50%; object-fit: cover; border: 3px solid var(--gold); margin-bottom: 1rem;">
+                    <p style="color: var(--gray); font-size: 0.9rem;">This image will appear on your pool card and standings</p>
+                </div>
+                
+                <div style="display: flex; gap: 1rem; justify-content: center; margin-bottom: 1.5rem;">
+                    <label class="btn btn-primary" style="cursor: pointer;">
+                        📷 Upload Photo
+                        <input type="file" accept="image/*" onchange="previewPoolImage(event)" style="display: none;">
+                    </label>
+                    <button class="btn btn-secondary" onclick="removePoolImage()" id="remove-pool-image-btn" style="display: none;">Remove</button>
+                </div>
+                
+                <div style="display: flex; gap: 1rem;">
+                    <button class="btn btn-secondary" onclick="closeModal('pool-image-modal')" style="flex: 1;">Cancel</button>
+                    <button class="btn btn-primary" onclick="savePoolImage()" style="flex: 1;">Save Image</button>
+                </div>
+            </div>
+        </div>
+    </div>
     <div id="toast" class="toast">
         <span id="toast-message"></span>
     </div>
@@ -3610,7 +3674,8 @@
                                 inviteCode: dbPool.invite_code,
                                 createdBy: dbPool.created_by,
                                 members: memberIds,
-                                uniquePicks: dbPool.unique_picks || false
+                                uniquePicks: dbPool.unique_picks || false,
+                                poolImage: dbPool.pool_image || null
                             };
                             
                             const existingIndex = store.pools.findIndex(p => p.id === pool.id);
@@ -3811,8 +3876,13 @@
                 return `
                     <div class="tournament-card">
                         <div class="tournament-header">
-                            <h3>${pool.name}</h3>
-                            <p>${pool.season}</p>
+                            <div>
+                                <h3>${pool.name}</h3>
+                                <p>${pool.season}</p>
+                            </div>
+                            ${pool.poolImage ? `
+                                <img src="${pool.poolImage}" alt="Pool Image" style="width: 50px; height: 50px; border-radius: 50%; object-fit: cover; border: 2px solid var(--gold);">
+                            ` : ''}
                         </div>
                         <div class="tournament-body">
                             <div class="tournament-stat">
@@ -4118,6 +4188,119 @@
             const modal = document.getElementById('profile-modal');
             modal.classList.remove('active');
             document.body.style.overflow = '';
+        }
+
+        // ==================== POOL IMAGE ====================
+        let pendingPoolImage = null;
+        
+        function openPoolImageModal() {
+            const pool = store.pools.find(p => p.id === currentPoolId);
+            if (!pool) return;
+            
+            // Check if user is the creator
+            if (pool.createdBy !== store.currentUser.id) {
+                showToast('Only the pool creator can change the image', true);
+                return;
+            }
+            
+            // Set current image in preview
+            const preview = document.getElementById('pool-image-preview');
+            const removeBtn = document.getElementById('remove-pool-image-btn');
+            
+            if (pool.poolImage) {
+                preview.src = pool.poolImage;
+                removeBtn.style.display = 'inline-block';
+            } else {
+                preview.src = "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect fill='%23e5e7eb' width='100' height='100'/><text x='50' y='55' text-anchor='middle' fill='%239ca3af' font-size='40'>🏌️</text></svg>";
+                removeBtn.style.display = 'none';
+            }
+            
+            pendingPoolImage = pool.poolImage || null;
+            document.getElementById('pool-image-modal').classList.add('active');
+        }
+        
+        function previewPoolImage(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            
+            // Check file size (max 2MB)
+            if (file.size > 2 * 1024 * 1024) {
+                showToast('Image must be smaller than 2MB', true);
+                return;
+            }
+            
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                pendingPoolImage = e.target.result;
+                document.getElementById('pool-image-preview').src = pendingPoolImage;
+                document.getElementById('remove-pool-image-btn').style.display = 'inline-block';
+            };
+            reader.readAsDataURL(file);
+        }
+        
+        function removePoolImage() {
+            pendingPoolImage = null;
+            document.getElementById('pool-image-preview').src = "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect fill='%23e5e7eb' width='100' height='100'/><text x='50' y='55' text-anchor='middle' fill='%239ca3af' font-size='40'>🏌️</text></svg>";
+            document.getElementById('remove-pool-image-btn').style.display = 'none';
+        }
+        
+        async function savePoolImage() {
+            const pool = store.pools.find(p => p.id === currentPoolId);
+            if (!pool) return;
+            
+            try {
+                // Save to Supabase
+                if (supabaseClient) {
+                    const { error } = await supabaseClient
+                        .from('pools')
+                        .update({ pool_image: pendingPoolImage })
+                        .eq('id', currentPoolId);
+                    
+                    if (error) {
+                        console.error('Error saving pool image:', error);
+                        showToast('Failed to save pool image', true);
+                        return;
+                    }
+                }
+                
+                // Update local store
+                pool.poolImage = pendingPoolImage;
+                
+                // Update UI
+                updatePoolImageDisplay();
+                
+                closeModal('pool-image-modal');
+                showToast(pendingPoolImage ? 'Pool image saved!' : 'Pool image removed');
+                
+                // Refresh dashboard if visible
+                renderDashboard();
+            } catch (err) {
+                console.error('Error saving pool image:', err);
+                showToast('Failed to save pool image', true);
+            }
+        }
+        
+        function updatePoolImageDisplay() {
+            const pool = store.pools.find(p => p.id === currentPoolId);
+            if (!pool) return;
+            
+            const imgDisplay = document.getElementById('pool-image-display');
+            const editText = document.getElementById('edit-pool-image-text');
+            const container = document.getElementById('pool-image-container');
+            
+            const isCreator = pool.createdBy === store.currentUser.id;
+            
+            // Set the image
+            if (pool.poolImage) {
+                imgDisplay.src = pool.poolImage;
+            } else {
+                imgDisplay.src = "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect fill='%23e5e7eb' width='100' height='100'/><text x='50' y='55' text-anchor='middle' fill='%239ca3af' font-size='40'>🏌️</text></svg>";
+            }
+            
+            // Show EDIT text and make clickable only for creator
+            editText.style.display = isCreator ? 'block' : 'none';
+            container.style.cursor = isCreator ? 'pointer' : 'default';
+            container.onclick = isCreator ? openPoolImageModal : null;
         }
 
         // Close modal on Escape key
@@ -4510,6 +4693,9 @@ See you on the course!`
                 const isCreator = pool.createdBy === store.currentUser.id;
                 deleteBtn.style.display = isCreator ? 'block' : 'none';
             }
+            
+            // Update pool image display
+            updatePoolImageDisplay();
             
             // Hide scroll indicator when user scrolls tabs
             const poolTabs = document.getElementById('pool-tabs');
