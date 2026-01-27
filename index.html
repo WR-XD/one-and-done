@@ -912,7 +912,7 @@
         /* Pool Standings */
         .standings-header {
             background: linear-gradient(135deg, var(--green-deep) 0%, var(--green-fairway) 100%);
-            padding: 1.5rem 2rem;
+            padding: 0.75rem 2rem;
             color: var(--white);
             display: flex;
             justify-content: space-between;
@@ -935,8 +935,8 @@
         }
         
         .pool-image-container img {
-            width: 80px;
-            height: 80px;
+            width: 55px;
+            height: 55px;
             border-radius: 50%;
             object-fit: cover;
             border: 2px solid var(--gold);
@@ -944,9 +944,9 @@
         
         .edit-pool-image-text {
             display: none;
-            font-size: 0.65rem;
+            font-size: 0.6rem;
             color: var(--gold);
-            margin-top: 0.25rem;
+            margin-top: 0.15rem;
             font-weight: 600;
             letter-spacing: 0.5px;
         }
@@ -1771,17 +1771,17 @@
                     </div>
 
                     <div class="form-group">
-                        <label>Your Profile Picture (optional)</label>
-                        <p style="color: var(--gray); font-size: 0.85rem; margin-bottom: 0.5rem;">This will be shown in pool standings</p>
+                        <label>Pool Image (optional)</label>
+                        <p style="color: var(--gray); font-size: 0.85rem; margin-bottom: 0.5rem;">This will be shown on your pool card</p>
                         <div style="display: flex; align-items: center; gap: 1rem;">
-                            <img id="profile-preview" src="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect fill='%23e5e7eb' width='100' height='100'/><text x='50' y='55' text-anchor='middle' fill='%239ca3af' font-size='12'>No Photo</text></svg>" 
+                            <img id="create-pool-image-preview" src="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect fill='%23e5e7eb' width='100' height='100'/><text x='50' y='55' text-anchor='middle' fill='%239ca3af' font-size='40'>🏌️</text></svg>" 
                                  style="width: 60px; height: 60px; border-radius: 50%; object-fit: cover; border: 2px solid #e5e7eb;">
                             <div style="flex: 1;">
-                                <input type="file" id="profile-picture-input" accept="image/*" onchange="previewProfilePicture(event)" style="display: none;">
-                                <button type="button" class="btn btn-secondary" onclick="document.getElementById('profile-picture-input').click()" style="padding: 0.5rem 1rem; font-size: 0.9rem;">
+                                <input type="file" id="create-pool-image-input" accept="image/*" onchange="previewCreatePoolImage(event)" style="display: none;">
+                                <button type="button" class="btn btn-secondary" onclick="document.getElementById('create-pool-image-input').click()" style="padding: 0.5rem 1rem; font-size: 0.9rem;">
                                     Upload Photo
                                 </button>
-                                <button type="button" id="remove-photo-btn" class="btn" onclick="removeProfilePicture()" style="padding: 0.5rem 1rem; font-size: 0.9rem; display: none; margin-left: 0.5rem; color: var(--gray);">
+                                <button type="button" id="remove-create-pool-image-btn" class="btn" onclick="removeCreatePoolImage()" style="padding: 0.5rem 1rem; font-size: 0.9rem; display: none; margin-left: 0.5rem; color: var(--gray);">
                                     Remove
                                 </button>
                             </div>
@@ -4217,6 +4217,44 @@
             document.getElementById('pool-image-modal').classList.add('active');
         }
         
+        // Create Pool Image (for new pool creation)
+        let createPoolImage = null;
+        
+        function previewCreatePoolImage(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            
+            if (file.size > 2 * 1024 * 1024) {
+                showToast('Image must be smaller than 2MB', true);
+                return;
+            }
+            
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                createPoolImage = e.target.result;
+                document.getElementById('create-pool-image-preview').src = createPoolImage;
+                document.getElementById('remove-create-pool-image-btn').style.display = 'inline-block';
+            };
+            reader.readAsDataURL(file);
+        }
+        
+        function removeCreatePoolImage() {
+            createPoolImage = null;
+            document.getElementById('create-pool-image-preview').src = "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect fill='%23e5e7eb' width='100' height='100'/><text x='50' y='55' text-anchor='middle' fill='%239ca3af' font-size='40'>🏌️</text></svg>";
+            document.getElementById('remove-create-pool-image-btn').style.display = 'none';
+            document.getElementById('create-pool-image-input').value = '';
+        }
+        
+        function resetCreatePoolForm() {
+            document.getElementById('pool-name').value = '';
+            createPoolImage = null;
+            document.getElementById('create-pool-image-preview').src = "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect fill='%23e5e7eb' width='100' height='100'/><text x='50' y='55' text-anchor='middle' fill='%239ca3af' font-size='40'>🏌️</text></svg>";
+            document.getElementById('remove-create-pool-image-btn').style.display = 'none';
+            document.getElementById('create-pool-image-input').value = '';
+            document.getElementById('invite-list').innerHTML = '';
+            inviteEmails = [];
+        }
+        
         function previewPoolImage(event) {
             const file = event.target.files[0];
             if (!file) return;
@@ -4373,7 +4411,8 @@
                                 season: season,
                                 invite_code: inviteCode,
                                 created_by: store.currentUser.id,
-                                unique_picks: uniquePicks
+                                unique_picks: uniquePicks,
+                                pool_image: createPoolImage
                             })
                             .select()
                             .single()
@@ -4406,9 +4445,11 @@
                         name: newPool.name,
                         season: newPool.season,
                         ownerId: store.currentUser.id,
+                        createdBy: store.currentUser.id,
                         members: [store.currentUser.id],
                         inviteCode: newPool.invite_code,
-                        uniquePicks: newPool.unique_picks
+                        uniquePicks: newPool.unique_picks,
+                        poolImage: newPool.pool_image
                     };
                 } else {
                     // Fallback to local
@@ -4417,9 +4458,11 @@
                         name,
                         season,
                         ownerId: store.currentUser.id,
+                        createdBy: store.currentUser.id,
                         members: [store.currentUser.id],
                         inviteCode: generateId().toUpperCase(),
-                        uniquePicks: uniquePicks
+                        uniquePicks: uniquePicks,
+                        poolImage: createPoolImage
                     };
                 }
 
@@ -4467,6 +4510,9 @@ See you on the course!`
                 renderInviteList();
 
                 showToast('Pool created successfully!');
+                
+                // Reset form
+                resetCreatePoolForm();
                 
                 // Show the invite modal with the code
                 setTimeout(() => {
