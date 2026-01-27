@@ -4233,18 +4233,6 @@
             document.getElementById('pool-image-modal').classList.add('active');
         }
         
-        // Create Pool Image (for new pool creation)
-        let createPoolImage = null;
-        
-        function previewCreatePoolImage(event) {
-            const file = event.target.files[0];
-            if (!file) return;
-            
-            if (file.size > 2 * 1024 * 1024) {
-                showToast('Image must be smaller than 2MB', true);
-                return;
-            }
-            
         // Compress image to max dimensions while maintaining aspect ratio
         function compressImage(file, maxSize = 200, quality = 0.8) {
             return new Promise((resolve) => {
@@ -4283,6 +4271,9 @@
                 reader.readAsDataURL(file);
             });
         }
+        
+        // Create Pool Image (for new pool creation)
+        let createPoolImage = null;
         
         async function previewCreatePoolImage(event) {
             const file = event.target.files[0];
