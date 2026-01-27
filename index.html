@@ -128,7 +128,7 @@
             height: 48px;
             border-radius: 50%;
             object-fit: cover;
-            border: 3px solid var(--gold);
+            border: 2px solid var(--gold);
             background: var(--gold);
             padding: 2px;
             transition: transform 0.2s, border-color 0.2s;
@@ -941,19 +941,6 @@
             object-fit: cover;
             border: 2px solid var(--gold);
         }
-        
-        .edit-pool-image-text {
-            display: none;
-            font-size: 0.6rem;
-            color: var(--gold);
-            margin-top: 0.15rem;
-            font-weight: 600;
-            letter-spacing: 0.5px;
-        }
-        
-        .pool-image-container:hover .edit-pool-image-text {
-            text-decoration: underline;
-        }
 
         .pool-total {
             font-family: 'Oswald', sans-serif;
@@ -1605,7 +1592,6 @@
         .clickable-profile {
             cursor: pointer;
             transition: transform 0.2s, box-shadow 0.2s;
-            border: 2px solid var(--gold);
         }
         .clickable-profile:hover {
             transform: scale(1.1);
@@ -1853,7 +1839,6 @@
                         </div>
                         <div class="pool-image-container" id="pool-image-container" onclick="handlePoolImageClick()">
                             <img id="pool-image-display" src="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='50' fill='%23C4A747'/><text x='50' y='62' text-anchor='middle' font-size='45'>⛳</text></svg>" alt="Pool Image">
-                            <span id="edit-pool-image-text" class="edit-pool-image-text">EDIT</span>
                         </div>
                     </div>
 
@@ -4374,10 +4359,7 @@
             if (!pool) return;
             
             const imgDisplay = document.getElementById('pool-image-display');
-            const editText = document.getElementById('edit-pool-image-text');
             const container = document.getElementById('pool-image-container');
-            
-            const isCreator = pool.createdBy === store.currentUser.id;
             
             // Set the image
             if (pool.poolImage) {
@@ -4386,8 +4368,7 @@
                 imgDisplay.src = DEFAULT_POOL_LOGO;
             }
             
-            // Show EDIT text only for creator, but clickable for everyone
-            editText.style.display = isCreator ? 'block' : 'none';
+            // Clickable for everyone (creators edit, others view expanded)
             container.style.cursor = 'pointer';
             container.onclick = handlePoolImageClick;
         }
