@@ -1605,6 +1605,7 @@
         .clickable-profile {
             cursor: pointer;
             transition: transform 0.2s, box-shadow 0.2s;
+            border: 2px solid var(--gold);
         }
         .clickable-profile:hover {
             transform: scale(1.1);
@@ -1831,6 +1832,9 @@
                 </div>
             </div>
             <div class="pool-options-dropdown" id="pool-options-dropdown">
+                <button id="edit-pool-image-dropdown-btn" onclick="openPoolImageModal(); closePoolOptionsDropdown();" style="display: none;">
+                    <span>📷 Edit Pool Image</span>
+                </button>
                 <button onclick="confirmLeaveCurrentPool()">
                     <span style="color: var(--red);">🚪 Leave Pool</span>
                 </button>
@@ -4608,6 +4612,11 @@ See you on the course!`
             
             dropdown.classList.toggle('active');
         }
+        
+        function closePoolOptionsDropdown() {
+            const dropdown = document.getElementById('pool-options-dropdown');
+            if (dropdown) dropdown.classList.remove('active');
+        }
 
         // Close dropdown when clicking elsewhere
         document.addEventListener('click', (e) => {
@@ -4779,12 +4788,14 @@ See you on the course!`
             renderPoolView();
             checkTabsOverflow();
             
-            // Show delete button only for pool creator
+            // Show creator-only buttons
             const pool = store.pools.find(p => p.id === poolId);
             const deleteBtn = document.getElementById('delete-pool-btn');
-            if (deleteBtn && pool) {
+            const editImageBtn = document.getElementById('edit-pool-image-dropdown-btn');
+            if (pool) {
                 const isCreator = pool.createdBy === store.currentUser.id;
-                deleteBtn.style.display = isCreator ? 'block' : 'none';
+                if (deleteBtn) deleteBtn.style.display = isCreator ? 'block' : 'none';
+                if (editImageBtn) editImageBtn.style.display = isCreator ? 'block' : 'none';
             }
             
             // Update pool image display
