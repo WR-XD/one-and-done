@@ -4056,7 +4056,7 @@
             document.getElementById('profile-editor-modal').classList.add('active');
         }
 
-        function previewNewProfilePicture(event) {
+        async function previewNewProfilePicture(event) {
             if (!canChangeProfilePicture()) {
                 showToast('You\'ve reached the limit of 2 profile changes per 24 hours', true);
                 return;
@@ -4071,13 +4071,10 @@
                 return;
             }
             
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                pendingProfilePicture = e.target.result;
-                document.getElementById('profile-editor-preview').src = pendingProfilePicture;
-                document.getElementById('save-profile-btn').style.display = 'block';
-            };
-            reader.readAsDataURL(file);
+            // Compress image to 200x200 max
+            pendingProfilePicture = await compressImage(file, 200, 0.8);
+            document.getElementById('profile-editor-preview').src = pendingProfilePicture;
+            document.getElementById('save-profile-btn').style.display = 'block';
         }
 
         async function saveNewProfilePicture() {
@@ -4248,13 +4245,58 @@
                 return;
             }
             
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                createPoolImage = e.target.result;
-                document.getElementById('create-pool-image-preview').src = createPoolImage;
-                document.getElementById('remove-create-pool-image-btn').style.display = 'inline-block';
-            };
-            reader.readAsDataURL(file);
+        // Compress image to max dimensions while maintaining aspect ratio
+        function compressImage(file, maxSize = 200, quality = 0.8) {
+            return new Promise((resolve) => {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const img = new Image();
+                    img.onload = function() {
+                        const canvas = document.createElement('canvas');
+                        let width = img.width;
+                        let height = img.height;
+                        
+                        // Scale down if larger than maxSize
+                        if (width > height) {
+                            if (width > maxSize) {
+                                height = Math.round(height * maxSize / width);
+                                width = maxSize;
+                            }
+                        } else {
+                            if (height > maxSize) {
+                                width = Math.round(width * maxSize / height);
+                                height = maxSize;
+                            }
+                        }
+                        
+                        canvas.width = width;
+                        canvas.height = height;
+                        
+                        const ctx = canvas.getContext('2d');
+                        ctx.drawImage(img, 0, 0, width, height);
+                        
+                        // Convert to compressed JPEG
+                        resolve(canvas.toDataURL('image/jpeg', quality));
+                    };
+                    img.src = e.target.result;
+                };
+                reader.readAsDataURL(file);
+            });
+        }
+        
+        async function previewCreatePoolImage(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            
+            if (file.size > 2 * 1024 * 1024) {
+                showToast('Image must be smaller than 2MB', true);
+                return;
+            }
+            
+            // Compress image to 200x200 max
+            createPoolImage = await compressImage(file, 200, 0.8);
+            document.getElementById('create-pool-image-preview').src = createPoolImage;
+            document.getElementById('remove-create-pool-image-btn').style.display = 'inline-block';
         }
         
         function removeCreatePoolImage() {
@@ -4274,7 +4316,7 @@
             inviteEmails = [];
         }
         
-        function previewPoolImage(event) {
+        async function previewPoolImage(event) {
             const file = event.target.files[0];
             if (!file) return;
             
@@ -4284,13 +4326,10 @@
                 return;
             }
             
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                pendingPoolImage = e.target.result;
-                document.getElementById('pool-image-preview').src = pendingPoolImage;
-                document.getElementById('remove-pool-image-btn').style.display = 'inline-block';
-            };
-            reader.readAsDataURL(file);
+            // Compress image to 200x200 max
+            pendingPoolImage = await compressImage(file, 200, 0.8);
+            document.getElementById('pool-image-preview').src = pendingPoolImage;
+            document.getElementById('remove-pool-image-btn').style.display = 'inline-block';
         }
         
         function removePoolImage() {
