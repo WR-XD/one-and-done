@@ -1774,7 +1774,7 @@
                         <label>Pool Image (optional)</label>
                         <p style="color: var(--gray); font-size: 0.85rem; margin-bottom: 0.5rem;">This will be shown on your pool card</p>
                         <div style="display: flex; align-items: center; gap: 1rem;">
-                            <img id="create-pool-image-preview" src="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect fill='%23e5e7eb' width='100' height='100'/><text x='50' y='55' text-anchor='middle' fill='%239ca3af' font-size='40'>🏌️</text></svg>" 
+                            <img id="create-pool-image-preview" src="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='50' fill='%23C4A747'/><text x='50' y='62' text-anchor='middle' font-size='45'>⛳</text></svg>" 
                                  style="width: 60px; height: 60px; border-radius: 50%; object-fit: cover; border: 2px solid #e5e7eb;">
                             <div style="flex: 1;">
                                 <input type="file" id="create-pool-image-input" accept="image/*" onchange="previewCreatePoolImage(event)" style="display: none;">
@@ -1848,7 +1848,7 @@
                             <p id="pool-season-display">2025-2026 Season</p>
                         </div>
                         <div class="pool-image-container" id="pool-image-container" onclick="openPoolImageModal()">
-                            <img id="pool-image-display" src="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect fill='%23e5e7eb' width='100' height='100'/><text x='50' y='55' text-anchor='middle' fill='%239ca3af' font-size='40'>🏌️</text></svg>" alt="Pool Image">
+                            <img id="pool-image-display" src="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='50' fill='%23C4A747'/><text x='50' y='62' text-anchor='middle' font-size='45'>⛳</text></svg>" alt="Pool Image">
                             <span id="edit-pool-image-text" class="edit-pool-image-text">EDIT</span>
                         </div>
                     </div>
@@ -2143,7 +2143,7 @@
             </div>
             <div class="modal-body">
                 <div style="text-align: center; margin-bottom: 1.5rem;">
-                    <img id="pool-image-preview" src="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect fill='%23e5e7eb' width='100' height='100'/><text x='50' y='55' text-anchor='middle' fill='%239ca3af' font-size='40'>🏌️</text></svg>" 
+                    <img id="pool-image-preview" src="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='50' fill='%23C4A747'/><text x='50' y='62' text-anchor='middle' font-size='45'>⛳</text></svg>" 
                          style="width: 120px; height: 120px; border-radius: 50%; object-fit: cover; border: 3px solid var(--gold); margin-bottom: 1rem;">
                     <p style="color: var(--gray); font-size: 0.9rem;">This image will appear on your pool card and standings</p>
                 </div>
@@ -2177,6 +2177,9 @@
             picks: [],
             invites: []
         };
+
+        // Default pool logo - gold circle with golf flag (matches site logo)
+        const DEFAULT_POOL_LOGO = "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='50' fill='%23C4A747'/><text x='50' y='62' text-anchor='middle' font-size='45'>⛳</text></svg>";
 
         // ==================== SUPABASE CONFIGURATION ====================
         const SUPABASE_URL = 'https://ttwtifdhlaijdswhehve.supabase.co';
@@ -3880,7 +3883,7 @@
                                 <h3>${pool.name}</h3>
                                 <p>${pool.season}</p>
                             </div>
-                            <img src="${pool.poolImage || "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect fill='%23e5e7eb' width='100' height='100'/><text x='50' y='55' text-anchor='middle' fill='%239ca3af' font-size='40'>🏌️</text></svg>"}" alt="Pool Image" style="width: 50px; height: 50px; border-radius: 50%; object-fit: cover; border: 2px solid var(--gold);">
+                            <img src="${pool.poolImage || DEFAULT_POOL_LOGO}" alt="Pool Image" style="width: 50px; height: 50px; border-radius: 50%; object-fit: cover; border: 2px solid var(--gold);">
                         </div>
                         <div class="tournament-body">
                             <div class="tournament-stat">
@@ -4209,7 +4212,7 @@
                 preview.src = pool.poolImage;
                 removeBtn.style.display = 'inline-block';
             } else {
-                preview.src = "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect fill='%23e5e7eb' width='100' height='100'/><text x='50' y='55' text-anchor='middle' fill='%239ca3af' font-size='40'>🏌️</text></svg>";
+                preview.src = DEFAULT_POOL_LOGO;
                 removeBtn.style.display = 'none';
             }
             
@@ -4240,7 +4243,7 @@
         
         function removeCreatePoolImage() {
             createPoolImage = null;
-            document.getElementById('create-pool-image-preview').src = "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect fill='%23e5e7eb' width='100' height='100'/><text x='50' y='55' text-anchor='middle' fill='%239ca3af' font-size='40'>🏌️</text></svg>";
+            document.getElementById('create-pool-image-preview').src = DEFAULT_POOL_LOGO;
             document.getElementById('remove-create-pool-image-btn').style.display = 'none';
             document.getElementById('create-pool-image-input').value = '';
         }
@@ -4248,7 +4251,7 @@
         function resetCreatePoolForm() {
             document.getElementById('pool-name').value = '';
             createPoolImage = null;
-            document.getElementById('create-pool-image-preview').src = "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect fill='%23e5e7eb' width='100' height='100'/><text x='50' y='55' text-anchor='middle' fill='%239ca3af' font-size='40'>🏌️</text></svg>";
+            document.getElementById('create-pool-image-preview').src = DEFAULT_POOL_LOGO;
             document.getElementById('remove-create-pool-image-btn').style.display = 'none';
             document.getElementById('create-pool-image-input').value = '';
             document.getElementById('invite-list').innerHTML = '';
@@ -4276,7 +4279,7 @@
         
         function removePoolImage() {
             pendingPoolImage = null;
-            document.getElementById('pool-image-preview').src = "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect fill='%23e5e7eb' width='100' height='100'/><text x='50' y='55' text-anchor='middle' fill='%239ca3af' font-size='40'>🏌️</text></svg>";
+            document.getElementById('pool-image-preview').src = DEFAULT_POOL_LOGO;
             document.getElementById('remove-pool-image-btn').style.display = 'none';
         }
         
@@ -4330,7 +4333,7 @@
             if (pool.poolImage) {
                 imgDisplay.src = pool.poolImage;
             } else {
-                imgDisplay.src = "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect fill='%23e5e7eb' width='100' height='100'/><text x='50' y='55' text-anchor='middle' fill='%239ca3af' font-size='40'>🏌️</text></svg>";
+                imgDisplay.src = DEFAULT_POOL_LOGO;
             }
             
             // Show EDIT text and make clickable only for creator
