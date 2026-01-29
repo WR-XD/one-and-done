@@ -1736,8 +1736,8 @@
                     <div class="form-group">
                         <label>Tour & Season</label>
                         <select id="pool-season" style="width: 100%; padding: 0.875rem 1rem; border: 2px solid #e5e7eb; font-size: 1rem;">
-                            <option value="pga|2025-2026">PGA Tour - 2025-2026 Season</option>
-                            <option value="champions|2025-2026">PGA Tour Champions - 2025-2026 Season</option>
+                            <option value="pga|2026">PGA Tour - 2026</option>
+                            <option value="champions|2026">PGA Tour Champions - 2026</option>
                         </select>
                     </div>
 
@@ -1972,7 +1972,7 @@
                                 <th>Tournament</th>
                                 <th>Dates</th>
                                 <th>Course</th>
-                                <th>Previous Winner</th>
+                                <th>Purse</th>
                             </tr>
                         </thead>
                         <tbody id="schedule-body">
@@ -4223,12 +4223,22 @@
                 // Find user's rank (1-indexed)
                 const userRank = standings.findIndex(s => s.memberId === store.currentUser.id) + 1;
 
+                // Get tour name and schedule for this pool
+                const poolTour = pool.tour || 'pga';
+                const tourName = poolTour === 'champions' ? 'PGA Tour Champions' : 'PGA Tour';
+                const poolSchedule = getScheduleForTour(poolTour);
+                const year = pool.season.includes('-') ? pool.season.split('-')[1] : pool.season;
+                
+                // Get current tournament for this pool's tour
+                const poolTournamentState = getCurrentTournaments(poolTour);
+                const poolCurrentTournament = poolTournamentState.upcoming || poolTournamentState.current;
+
                 return `
                     <div class="tournament-card">
                         <div class="tournament-header">
                             <div>
                                 <h3>${pool.name}</h3>
-                                <p>${pool.season}</p>
+                                <p>${tourName} ${year}</p>
                             </div>
                             <img src="${pool.poolImage || DEFAULT_POOL_LOGO}" alt="Pool Image" style="width: 50px; height: 50px; border-radius: 50%; object-fit: cover; border: 2px solid var(--gold);">
                         </div>
@@ -4243,11 +4253,11 @@
                             </div>
                             <div class="tournament-stat">
                                 <span>Picks Used</span>
-                                <span>${userPicks.length} / ${pga2026Schedule.length}</span>
+                                <span>${userPicks.length} / ${poolSchedule.length}</span>
                             </div>
                             <div class="tournament-stat">
                                 <span>Current Week</span>
-                                <span>${currentTournament.name}</span>
+                                <span>${poolCurrentTournament?.name || 'TBD'}</span>
                             </div>
                         </div>
                         <div class="tournament-actions">
@@ -5197,9 +5207,11 @@ See you on the course!`
 
             document.getElementById('pool-title').textContent = pool.name;
             
-            // Show tour and season (e.g., "PGA Tour Champions - 2025-2026")
+            // Show tour and season (e.g., "PGA Tour - 2026" or "PGA Tour Champions - 2026")
             const tourName = pool.tour === 'champions' ? 'PGA Tour Champions' : 'PGA Tour';
-            document.getElementById('pool-season-display').textContent = `${tourName} - ${pool.season}`;
+            // Extract just the year (handles both "2026" and "2025-2026" formats)
+            const year = pool.season.includes('-') ? pool.season.split('-')[1] : pool.season;
+            document.getElementById('pool-season-display').textContent = `${tourName} - ${year}`;
             renderStandings();
         }
 
@@ -5388,16 +5400,21 @@ See you on the course!`
             // Use the display tournament (might be just-finished or upcoming)
             const displayTournament = getCurrentDisplayTournament();
             
+            if (!displayTournament) {
+                document.getElementById('leaderboard-body').innerHTML = `
+                    <tr><td colspan="7" style="text-align: center; padding: 2rem;">No tournament data available for this tour yet.</td></tr>
+                `;
+                return;
+            }
+            
             document.getElementById('current-tournament-name').textContent = displayTournament.name;
             document.getElementById('tournament-dates').textContent = displayTournament.dates;
             document.getElementById('tournament-course').textContent = displayTournament.course;
             document.getElementById('tournament-round').textContent = displayTournament.status === 'Complete' ? 'Final' : `Round ${displayTournament.round}`;
             document.getElementById('tournament-logo').src = displayTournament.logo;
 
-            // Try to fetch live ESPN data if not already loaded
-            if (!espnDataLoaded && liveLeaderboard.length === 0) {
-                await fetchESPNLeaderboard();
-            }
+            // Always fetch fresh ESPN data when rendering leaderboard
+            await fetchESPNLeaderboard();
 
             // Use ESPN data if available, otherwise fall back to mock data
             const leaderboardData = espnDataLoaded && liveLeaderboard.length > 0 ? liveLeaderboard : mockLeaderboard;
@@ -6026,9 +6043,25 @@ See you on the course!`
                 }).join('');
             }
 
-            // Render upcoming schedule
+            // Render upcoming schedule based on pool's tour
             const scheduleBody = document.getElementById('schedule-body');
-            scheduleBody.innerHTML = upcomingSchedule.map(tournament => {
+            const poolSchedule = getScheduleForTour(currentPoolTour);
+            const now = new Date();
+            
+            // Get upcoming tournaments from the pool's tour schedule
+            const upcomingFromSchedule = poolSchedule
+                .filter(t => new Date(t.endDate) > now)
+                .slice(0, 10) // Show next 10 tournaments
+                .map((t, index) => ({
+                    id: t.id,
+                    name: t.name,
+                    dates: formatTournament(t).dates,
+                    week: index + 1,
+                    course: t.course,
+                    purse: t.purse
+                }));
+            
+            scheduleBody.innerHTML = upcomingFromSchedule.map(tournament => {
                 const logo = tournamentLogos[tournament.id] || '';
                 return `
                     <tr>
@@ -6042,8 +6075,7 @@ See you on the course!`
                         <td>${tournament.dates}</td>
                         <td>${tournament.course}</td>
                         <td>
-                            <span style="color: var(--green-fairway);">${tournament.previousWinner}</span>
-                            <span style="color: var(--gray); font-size: 0.8rem;">(${formatCurrency(tournament.previousWinnings)})</span>
+                            <span style="color: var(--green-fairway);">${formatCurrency(tournament.purse)}</span>
                         </td>
                     </tr>
                 `;
