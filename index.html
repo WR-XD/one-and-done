@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>One & Done Golf | PGA Tour Fantasy</title>
-    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text x='50' y='70' text-anchor='middle' font-size='70'>⛳</text></svg>">
+    <link rel="icon" type="image/png" href="logo.png">
     <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=Source+Sans+3:wght@300;400;500;600&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
@@ -69,6 +69,11 @@
             align-items: center;
             justify-content: center;
             font-size: 1.5rem;
+        }
+
+        .logo-image {
+            height: 60px;
+            width: auto;
         }
 
         .logo h1 {
@@ -1605,8 +1610,7 @@
     <header>
         <div class="header-content">
             <div class="logo">
-                <div class="logo-icon">⛳</div>
-                <h1>ONE <span>&</span> DONE</h1>
+                <img src="logo.png" alt="One & Done Golf" class="logo-image">
             </div>
             <nav id="nav-guest">
                 <button class="nav-btn" onclick="showScreen('login')">Log In</button>
