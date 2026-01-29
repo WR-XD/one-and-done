@@ -5444,13 +5444,17 @@ See you on the course!`
             document.getElementById('tournament-round').textContent = displayTournament.status === 'Complete' ? 'Final' : `Round ${displayTournament.round}`;
             document.getElementById('tournament-logo').src = displayTournament.logo;
 
-            // Check if tournament hasn't started yet
+            // Always try to fetch ESPN data first
+            await fetchESPNLeaderboard();
+            
+            // Check if tournament hasn't started yet AND no ESPN data available
             const now = new Date();
             const tournamentStart = new Date(displayTournament.startTime);
             const tournamentNotStarted = now < tournamentStart;
+            const hasLeaderboardData = espnDataLoaded && liveLeaderboard.length > 0;
             
-            if (tournamentNotStarted) {
-                // Show "Tournament Not Started" message
+            if (tournamentNotStarted && !hasLeaderboardData) {
+                // Show "Tournament Not Started" message only if no data available
                 const myPickSection = document.getElementById('my-pick-section');
                 myPickSection.style.display = 'none';
                 
@@ -5476,9 +5480,6 @@ See you on the course!`
                 `;
                 return;
             }
-
-            // Always fetch fresh ESPN data when rendering leaderboard
-            await fetchESPNLeaderboard();
 
             // Use ESPN data if available, otherwise fall back to mock data
             const leaderboardData = espnDataLoaded && liveLeaderboard.length > 0 ? liveLeaderboard : mockLeaderboard;
