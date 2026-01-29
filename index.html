@@ -5444,6 +5444,39 @@ See you on the course!`
             document.getElementById('tournament-round').textContent = displayTournament.status === 'Complete' ? 'Final' : `Round ${displayTournament.round}`;
             document.getElementById('tournament-logo').src = displayTournament.logo;
 
+            // Check if tournament hasn't started yet
+            const now = new Date();
+            const tournamentStart = new Date(displayTournament.startTime);
+            const tournamentNotStarted = now < tournamentStart;
+            
+            if (tournamentNotStarted) {
+                // Show "Tournament Not Started" message
+                const myPickSection = document.getElementById('my-pick-section');
+                myPickSection.style.display = 'none';
+                
+                const startDate = tournamentStart.toLocaleDateString('en-GB', { 
+                    weekday: 'short', 
+                    day: 'numeric', 
+                    month: 'short',
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    timeZoneName: 'short'
+                });
+                
+                document.getElementById('leaderboard-body').innerHTML = `
+                    <tr>
+                        <td colspan="6" class="empty-state" style="padding: 3rem; text-align: center;">
+                            <div style="font-size: 2rem; margin-bottom: 1rem;">⏳</div>
+                            <h3 style="margin-bottom: 0.5rem;">Tournament Not Started Yet</h3>
+                            <p style="color: var(--gray); margin-bottom: 1rem;">The ${displayTournament.name} begins:</p>
+                            <p style="color: var(--gold); font-weight: 600; font-size: 1.1rem;">${startDate}</p>
+                            <p style="color: var(--gray); margin-top: 1rem;">Check back once the tournament is underway for live leaderboard updates.</p>
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+
             // Always fetch fresh ESPN data when rendering leaderboard
             await fetchESPNLeaderboard();
 
