@@ -3379,6 +3379,20 @@
                         }
                     }
 
+                    // Transform ESPN headshot URL to optimized size
+                    let headshot = null;
+                    if (athlete.headshot && athlete.headshot.href) {
+                        // ESPN URLs like: https://a.espncdn.com/i/headshots/golf/players/full/3448.png
+                        // Convert to combiner URL for better quality at small sizes
+                        const originalUrl = athlete.headshot.href;
+                        if (originalUrl.includes('a.espncdn.com/i/')) {
+                            const path = originalUrl.replace('https://a.espncdn.com', '');
+                            headshot = `https://a.espncdn.com/combiner/i?img=${path}&w=96&h=96`;
+                        } else {
+                            headshot = originalUrl;
+                        }
+                    }
+
                     liveLeaderboard.push({
                         playerId: athlete.id,
                         playerName: athlete.displayName || 'Unknown',
@@ -3387,7 +3401,7 @@
                         today: todayScore,
                         thru: status.displayThru || status.thru || '-',
                         projectedEarnings: calculateProjectedEarnings(position, currentTournament?.purse || 0),
-                        headshot: athlete.headshot ? athlete.headshot.href : null,
+                        headshot: headshot,
                         flag: athlete.flag ? athlete.flag.href : null
                     });
                 });
