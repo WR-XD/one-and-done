@@ -6047,23 +6047,26 @@ See you on the course!`
             const upcomingFromSchedule = poolSchedule
                 .filter(t => new Date(t.endDate) > now)
                 .slice(0, 10) // Show next 10 tournaments
-                .map((t, index) => ({
-                    id: t.id,
-                    name: t.name,
-                    dates: formatTournament(t).dates,
-                    week: index + 1,
-                    course: t.course,
-                    purse: t.purse
-                }));
+                .map((t, index) => {
+                    const formatted = formatTournament(t);
+                    return {
+                        id: t.id,
+                        name: t.name,
+                        dates: formatted.dates,
+                        week: index + 1,
+                        course: t.course,
+                        purse: t.purse,
+                        logo: formatted.logo
+                    };
+                });
             
             scheduleBody.innerHTML = upcomingFromSchedule.map(tournament => {
-                const logo = tournamentLogos[tournament.id] || '';
                 return `
                     <tr>
                         <td>${tournament.week}</td>
                         <td>
                             <div class="player-cell">
-                                ${logo ? `<img src="${logo}" class="tournament-logo-small" alt="" onerror="this.style.display='none'">` : ''}
+                                <img src="${tournament.logo}" class="tournament-logo-small" alt="" onerror="this.style.display='none'">
                                 <strong>${tournament.name}</strong>
                             </div>
                         </td>
