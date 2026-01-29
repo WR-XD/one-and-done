@@ -5971,12 +5971,26 @@ See you on the course!`
             } else {
                 tbody.innerHTML = userPicks.map((pick, index) => {
                     const player = getPlayerById(pick.playerId);
-                    const leaderboardEntry = mockLeaderboard.find(l => String(l.playerId) === String(pick.playerId));
+                    // Check both live and mock leaderboard for the player
+                    let leaderboardEntry = liveLeaderboard.find(l => String(l.playerId) === String(pick.playerId));
+                    if (!leaderboardEntry) {
+                        leaderboardEntry = liveLeaderboard.find(l => 
+                            l.playerName && pick.playerName && 
+                            l.playerName.toLowerCase() === pick.playerName.toLowerCase()
+                        );
+                    }
+                    if (!leaderboardEntry) {
+                        leaderboardEntry = mockLeaderboard.find(l => String(l.playerId) === String(pick.playerId));
+                    }
+                    
                     const isCurrentTournament = pick.tournamentId === currentTournament.id;
                     const tournamentLogo = tournamentLogos[pick.tournamentId] || '';
                     // Get tournament name - fallback to current tournament if it matches, otherwise use ID
                     const tournamentName = pick.tournamentName || 
                         (isCurrentTournament ? currentTournament.name : pick.tournamentId);
+                    
+                    // Get player headshot - prefer leaderboard data, then player photo, then ESPN fallback
+                    const playerHeadshot = leaderboardEntry?.headshot || player?.photo || getPlayerPhoto(pick.playerId);
 
                     return `
                         <tr>
@@ -5989,7 +6003,7 @@ See you on the course!`
                             </td>
                             <td>
                                 <div class="player-cell">
-                                    <img src="${player?.photo || getPlayerPhoto(pick.playerId)}" alt="" 
+                                    <img src="${playerHeadshot}" alt="" 
                                          onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect fill=%22%23e5e7eb%22 width=%22100%22 height=%22100%22/></svg>'">
                                     <span>${pick.playerName || player?.name || 'Unknown'}</span>
                                 </div>
