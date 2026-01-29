@@ -5242,6 +5242,7 @@ See you on the course!`
                     // Get current week pick info
                     let currentWeekEarnings = 0;
                     let currentPlayer = null;
+                    let playerHeadshot = null;
                     
                     if (s.current_week_pick && s.current_week_pick.player_id) {
                         currentPlayer = getPlayerById(s.current_week_pick.player_id) || {
@@ -5259,6 +5260,8 @@ See you on the course!`
                             );
                         }
                         currentWeekEarnings = leaderboardEntry ? leaderboardEntry.projectedEarnings : 0;
+                        // Get headshot from leaderboard if available
+                        playerHeadshot = leaderboardEntry?.headshot || null;
                     }
                     
                     return {
@@ -5267,7 +5270,8 @@ See you on the course!`
                         completedEarnings: Number(s.total_earnings) || 0,
                         totalEarnings: (Number(s.total_earnings) || 0) + currentWeekEarnings,
                         currentWeekEarnings,
-                        currentPlayer
+                        currentPlayer,
+                        playerHeadshot
                     };
                 }).sort((a, b) => b.completedEarnings - a.completedEarnings);
             } else {
@@ -5310,6 +5314,7 @@ See you on the course!`
                     const currentPick = userPicks.find(p => p.tournamentId === currentTournament.id);
                     let currentWeekEarnings = 0;
                     let currentPlayer = null;
+                    let playerHeadshot = null;
 
                     if (currentPick) {
                         currentPlayer = getPlayerById(currentPick.playerId);
@@ -5325,6 +5330,7 @@ See you on the course!`
                             );
                         }
                         currentWeekEarnings = leaderboardEntry ? leaderboardEntry.projectedEarnings : 0;
+                        playerHeadshot = leaderboardEntry?.headshot || null;
                     }
 
                     return {
@@ -5333,7 +5339,8 @@ See you on the course!`
                         completedEarnings,
                         totalEarnings: completedEarnings + currentWeekEarnings,
                         currentWeekEarnings,
-                        currentPlayer
+                        currentPlayer,
+                        playerHeadshot
                     };
                 }).filter(s => s.user).sort((a, b) => b.completedEarnings - a.completedEarnings);
             }
@@ -5376,7 +5383,7 @@ See you on the course!`
                         <td>
                             ${standing.currentPlayer ? `
                                 <div class="weekly-pick">
-                                    <img src="${standing.currentPlayer.photo || getPlayerPhoto(standing.currentPlayer.id)}" alt="" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect fill=%22%23e5e7eb%22 width=%22100%22 height=%22100%22/></svg>'">
+                                    <img src="${standing.playerHeadshot || standing.currentPlayer.photo || getPlayerPhoto(standing.currentPlayer.id)}" alt="" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect fill=%22%23e5e7eb%22 width=%22100%22 height=%22100%22/></svg>'">
                                     <span>${standing.currentPlayer.name}</span>
                                     <span style="color: var(--gold); font-size: 0.8rem; margin-left: 0.25rem;">(${formatCurrency(standing.currentWeekEarnings)} proj)</span>
                                 </div>
