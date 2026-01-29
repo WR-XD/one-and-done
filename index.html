@@ -3136,7 +3136,7 @@
             // Use different logo URL pattern for Champions Tour (S prefix) vs PGA Tour (R prefix)
             const isChampionsTour = t.logoCode && t.logoCode.startsWith('S');
             const logoUrl = isChampionsTour
-                ? `https://res.cloudinary.com/pgatour-prod/d_tournaments:logos:S000.png/tournaments/logos/${t.logoCode}.png`
+                ? `https://pga-tour-res.cloudinary.com/image/upload/c_fill,f_auto,g_center,h_120,q_auto,w_120/tournaments/logos/${t.logoCode}.png`
                 : `https://res.cloudinary.com/pgatour-prod/d_tournaments:logos:R000.png/tournaments/logos/${t.logoCode}.png`;
             
             return {
