@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>One & Done Golf | PGA Tour Fantasy</title>
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='48' fill='%23c4a747'/><text x='50' y='62' text-anchor='middle' font-size='50'>⛳</text></svg>">
     <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=Source+Sans+3:wght@300;400;500;600&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
@@ -5244,14 +5245,18 @@ See you on the course!`
             if (serverStandings && serverStandings.length > 0) {
                 // Use server-side calculated standings
                 standings = serverStandings.map(s => {
-                    // Ensure user is in store
-                    if (!store.users.find(u => u.id === s.user_id)) {
+                    // Ensure user is in store and update profile picture if available
+                    const existingUser = store.users.find(u => u.id === s.user_id);
+                    if (!existingUser) {
                         store.users.push({
                             id: s.user_id,
                             name: s.user_name || 'Player',
                             email: s.user_email || '',
                             profilePicture: s.profile_picture || null
                         });
+                    } else if (s.profile_picture && !existingUser.profilePicture) {
+                        // Update profile picture if we have it from server but not in store
+                        existingUser.profilePicture = s.profile_picture;
                     }
                     
                     const user = store.users.find(u => u.id === s.user_id) || { 
