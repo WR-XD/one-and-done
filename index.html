@@ -1734,9 +1734,10 @@
                         <input type="text" id="pool-name" required placeholder="e.g., Office Golf League 2026">
                     </div>
                     <div class="form-group">
-                        <label>Season</label>
+                        <label>Tour & Season</label>
                         <select id="pool-season" style="width: 100%; padding: 0.875rem 1rem; border: 2px solid #e5e7eb; font-size: 1rem;">
-                            <option value="2025-2026">2025-2026 PGA Tour Season</option>
+                            <option value="pga|2025-2026">PGA Tour - 2025-2026 Season</option>
+                            <option value="champions|2025-2026">PGA Tour Champions - 2025-2026 Season</option>
                         </select>
                     </div>
 
@@ -2805,6 +2806,326 @@
             return { start, end, pickWindowOpen, showUntil };
         }
 
+        // PGA Tour Champions 2026 Schedule
+        const champions2026Schedule = [
+            {
+                id: "hualalai-champ-2026",
+                fieldId: "S2026524",
+                name: "Mitsubishi Electric Championship",
+                startDate: "2026-01-22",
+                endDate: "2026-01-24",
+                course: "Hualalai Golf Course",
+                location: "Ka'upulehu-Kona, HI",
+                purse: 2200000,
+                logoCode: "S524"
+            },
+            {
+                id: "chubb-champ-2026",
+                fieldId: "S2026003",
+                name: "Chubb Classic",
+                startDate: "2026-02-13",
+                endDate: "2026-02-15",
+                course: "Tiburón Golf Club",
+                location: "Naples, FL",
+                purse: 2200000,
+                logoCode: "S003"
+            },
+            {
+                id: "hardie-champ-2026",
+                fieldId: "S2026541",
+                name: "James Hardie Pro Football HOF Invitational",
+                startDate: "2026-03-06",
+                endDate: "2026-03-08",
+                course: "The Old Course at Broken Sound Club",
+                location: "Boca Raton, FL",
+                purse: 2200000,
+                logoCode: "S541"
+            },
+            {
+                id: "cologuard-champ-2026",
+                fieldId: "S2026006",
+                name: "Cologuard Classic",
+                startDate: "2026-03-20",
+                endDate: "2026-03-22",
+                course: "La Paloma Country Club",
+                location: "Tucson, AZ",
+                purse: 2200000,
+                logoCode: "S006"
+            },
+            {
+                id: "hoag-champ-2026",
+                fieldId: "S2026007",
+                name: "Hoag Classic",
+                startDate: "2026-03-27",
+                endDate: "2026-03-29",
+                course: "Newport Beach Country Club",
+                location: "Newport Beach, CA",
+                purse: 2200000,
+                logoCode: "S007"
+            },
+            {
+                id: "senior-pga-2026",
+                fieldId: "S2026520",
+                name: "Senior PGA Championship",
+                startDate: "2026-04-16",
+                endDate: "2026-04-19",
+                course: "The Concession Golf Club",
+                location: "Bradenton, FL",
+                purse: 4500000,
+                logoCode: "S520"
+            },
+            {
+                id: "mitsubishi-classic-2026",
+                fieldId: "S2026009",
+                name: "Mitsubishi Electric Classic",
+                startDate: "2026-04-24",
+                endDate: "2026-04-26",
+                course: "TPC Sugarloaf",
+                location: "Duluth, GA",
+                purse: 2200000,
+                logoCode: "S009"
+            },
+            {
+                id: "regions-tradition-2026",
+                fieldId: "S2026505",
+                name: "Regions Tradition",
+                startDate: "2026-05-01",
+                endDate: "2026-05-03",
+                course: "Greystone Golf & Country Club",
+                location: "Birmingham, AL",
+                purse: 2600000,
+                logoCode: "S505"
+            },
+            {
+                id: "insperity-2026",
+                fieldId: "S2026010",
+                name: "Insperity Invitational",
+                startDate: "2026-05-08",
+                endDate: "2026-05-10",
+                course: "The Woodlands CC",
+                location: "The Woodlands, TX",
+                purse: 3000000,
+                logoCode: "S010"
+            },
+            {
+                id: "trophy-hassan-2026",
+                fieldId: "S2026540",
+                name: "Trophy Hassan II",
+                startDate: "2026-05-22",
+                endDate: "2026-05-24",
+                course: "Royal Golf Dar Es Salam",
+                location: "Rabat, Morocco",
+                purse: 2500000,
+                logoCode: "S540"
+            },
+            {
+                id: "american-family-2026",
+                fieldId: "S2026013",
+                name: "American Family Insurance Championship",
+                startDate: "2026-06-05",
+                endDate: "2026-06-07",
+                course: "TPC Wisconsin",
+                location: "Madison, WI",
+                purse: 2200000,
+                logoCode: "S013"
+            },
+            {
+                id: "principal-charity-2026",
+                fieldId: "S2026012",
+                name: "Principal Charity Classic",
+                startDate: "2026-06-12",
+                endDate: "2026-06-14",
+                course: "Wakonda Club",
+                location: "Des Moines, IA",
+                purse: 2200000,
+                logoCode: "S012"
+            },
+            {
+                id: "dicks-open-2026",
+                fieldId: "S2026016",
+                name: "DICK'S Open",
+                startDate: "2026-06-26",
+                endDate: "2026-06-28",
+                course: "En-Joie GC",
+                location: "Endicott, NY",
+                purse: 2200000,
+                logoCode: "S016"
+            },
+            {
+                id: "us-senior-open-2026",
+                fieldId: "S2026521",
+                name: "U.S. Senior Open",
+                startDate: "2026-07-02",
+                endDate: "2026-07-05",
+                course: "Scioto Country Club",
+                location: "Columbus, OH",
+                purse: 4000000,
+                logoCode: "S521"
+            },
+            {
+                id: "kaulig-2026",
+                fieldId: "S2026506",
+                name: "Kaulig Companies Championship",
+                startDate: "2026-07-09",
+                endDate: "2026-07-12",
+                course: "Firestone Country Club",
+                location: "Akron, OH",
+                purse: 3500000,
+                logoCode: "S506"
+            },
+            {
+                id: "senior-open-2026",
+                fieldId: "S2026519",
+                name: "ISPS HANDA Senior Open",
+                startDate: "2026-07-23",
+                endDate: "2026-07-26",
+                course: "Gleneagles",
+                location: "Auchterarder, Scotland",
+                purse: 3000000,
+                logoCode: "S519"
+            },
+            {
+                id: "portugal-2026",
+                fieldId: "S2026542",
+                name: "Portugal Invitational",
+                startDate: "2026-07-30",
+                endDate: "2026-08-02",
+                course: "The Els Club Vilamoura",
+                location: "Algarve, Portugal",
+                purse: 2200000,
+                logoCode: "S542"
+            },
+            {
+                id: "boeing-2026",
+                fieldId: "S2026022",
+                name: "Boeing Classic",
+                startDate: "2026-08-14",
+                endDate: "2026-08-16",
+                course: "The Club at Snoqualmie Ridge",
+                location: "Snoqualmie, WA",
+                purse: 2300000,
+                logoCode: "S022"
+            },
+            {
+                id: "rogers-charity-2026",
+                fieldId: "S2026017",
+                name: "Rogers Charity Classic",
+                startDate: "2026-08-21",
+                endDate: "2026-08-23",
+                course: "Canyon Meadows Golf & Country Club",
+                location: "Calgary, AB, Canada",
+                purse: 2500000,
+                logoCode: "S017"
+            },
+            {
+                id: "ally-challenge-2026",
+                fieldId: "S2026023",
+                name: "The Ally Challenge",
+                startDate: "2026-08-28",
+                endDate: "2026-08-30",
+                course: "Warwick Hills Golf & Country Club",
+                location: "Grand Blanc, MI",
+                purse: 2200000,
+                logoCode: "S023"
+            },
+            {
+                id: "sanford-2026",
+                fieldId: "S2026026",
+                name: "Sanford International",
+                startDate: "2026-09-11",
+                endDate: "2026-09-13",
+                course: "Minnehaha Country Club",
+                location: "Sioux Falls, SD",
+                purse: 2200000,
+                logoCode: "S026"
+            },
+            {
+                id: "pure-insurance-2026",
+                fieldId: "S2026024",
+                name: "PURE Insurance Championship",
+                startDate: "2026-09-18",
+                endDate: "2026-09-20",
+                course: "Pebble Beach Golf Links",
+                location: "Pebble Beach, CA",
+                purse: 2400000,
+                logoCode: "S024"
+            },
+            {
+                id: "lehigh-valley-2026",
+                fieldId: "S2026543",
+                name: "Jefferson Lehigh Valley Classic",
+                startDate: "2026-10-02",
+                endDate: "2026-10-04",
+                course: "Lehigh Country Club",
+                location: "Allentown, PA",
+                purse: 2200000,
+                logoCode: "S543"
+            },
+            {
+                id: "furyk-2026",
+                fieldId: "S2026029",
+                name: "Constellation FURYK & FRIENDS",
+                startDate: "2026-10-09",
+                endDate: "2026-10-11",
+                course: "Hammock Beach Golf Resort & Spa",
+                location: "Palm Coast, FL",
+                purse: 2100000,
+                logoCode: "S029"
+            },
+            {
+                id: "sas-2026",
+                fieldId: "S2026030",
+                name: "SAS Championship",
+                startDate: "2026-10-16",
+                endDate: "2026-10-18",
+                course: "Prestonwood CC",
+                location: "Cary, NC",
+                purse: 2100000,
+                logoCode: "S030"
+            },
+            {
+                id: "stifel-charity-2026",
+                fieldId: "S2026031",
+                name: "Stifel Charity Classic",
+                startDate: "2026-10-23",
+                endDate: "2026-10-25",
+                course: "Norwood Hills Country Club",
+                location: "St. Louis, MO",
+                purse: 2100000,
+                logoCode: "S031"
+            },
+            {
+                id: "simmons-bank-2026",
+                fieldId: "S2026032",
+                name: "Simmons Bank Championship",
+                startDate: "2026-10-30",
+                endDate: "2026-11-01",
+                course: "Pleasant Valley Country Club",
+                location: "Little Rock, AR",
+                purse: 2400000,
+                logoCode: "S032"
+            },
+            {
+                id: "schwab-cup-2026",
+                fieldId: "S2026034",
+                name: "Charles Schwab Cup Championship",
+                startDate: "2026-11-13",
+                endDate: "2026-11-15",
+                course: "Phoenix Country Club",
+                location: "Phoenix, AZ",
+                purse: 3500000,
+                logoCode: "S034"
+            }
+        ];
+
+        // Get schedule for a specific tour (defaults to 'pga')
+        function getScheduleForTour(tour) {
+            if (tour === 'champions') {
+                return champions2026Schedule;
+            }
+            return pga2026Schedule; // Default fallback for existing pools
+        }
+
         function formatTournament(t) {
             const dates = getTournamentDates(t);
             const startMonth = new Date(t.startDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
@@ -2829,17 +3150,18 @@
             };
         }
 
-        function getCurrentTournaments() {
+        function getCurrentTournaments(tour = 'pga') {
             const now = new Date();
+            const schedule = getScheduleForTour(tour);
             
             let justFinished = null;
             let current = null;
             let upcoming = null;
             let next = null;
             
-            for (let i = 0; i < pga2026Schedule.length; i++) {
-                const t = formatTournament(pga2026Schedule[i]);
-                const dates = getTournamentDates(pga2026Schedule[i]);
+            for (let i = 0; i < schedule.length; i++) {
+                const t = formatTournament(schedule[i]);
+                const dates = getTournamentDates(schedule[i]);
                 
                 // Just finished: ended but still within show window
                 if (now > dates.end && now < dates.showUntil) {
@@ -2865,8 +3187,8 @@
                 // Upcoming fallback: if no current tournament, find the next one
                 if (!current && !upcoming && now < dates.start) {
                     upcoming = t;
-                    if (i + 1 < pga2026Schedule.length) {
-                        next = formatTournament(pga2026Schedule[i + 1]);
+                    if (i + 1 < schedule.length) {
+                        next = formatTournament(schedule[i + 1]);
                     }
                     break;
                 }
@@ -2880,12 +3202,36 @@
             return { justFinished, current, upcoming, next };
         }
 
-        // Get current tournament state
-        const tournamentState = getCurrentTournaments();
-        const justFinishedTournament = tournamentState.justFinished;
-        const upcomingTournament = tournamentState.upcoming || tournamentState.current;
-        const nextTournament = tournamentState.next;
-        const currentTournament = upcomingTournament;
+        // Get current tournament state (default to PGA Tour for backwards compatibility)
+        let currentPoolTour = 'pga'; // Track current pool's tour
+        let tournamentState = getCurrentTournaments('pga');
+        let justFinishedTournament = tournamentState.justFinished;
+        let upcomingTournament = tournamentState.upcoming || tournamentState.current;
+        let nextTournament = tournamentState.next;
+        let currentTournament = upcomingTournament;
+
+        // Update tournament state when pool changes
+        function updateTournamentStateForPool() {
+            tournamentState = getCurrentTournaments(currentPoolTour);
+            justFinishedTournament = tournamentState.justFinished;
+            upcomingTournament = tournamentState.upcoming || tournamentState.current;
+            nextTournament = tournamentState.next;
+            currentTournament = upcomingTournament;
+            
+            console.log(`Tournament State for ${currentPoolTour}:`, {
+                justFinished: justFinishedTournament?.name,
+                upcoming: upcomingTournament?.name,
+                next: nextTournament?.name
+            });
+            
+            // Refresh ESPN leaderboard for new tour
+            fetchESPNLeaderboard();
+            
+            // Refresh field data for new tour
+            if (currentTournament) {
+                fetchTournamentField(currentTournament.fieldId || currentTournament.id);
+            }
+        }
 
         // Log current tournament state for debugging
         console.log('Tournament State:', {
@@ -2950,6 +3296,15 @@
 
         // ESPN API configuration
         const ESPN_API_URL = 'https://site.web.api.espn.com/apis/site/v2/sports/golf/leaderboard?league=pga';
+        const ESPN_CHAMPIONS_API_URL = 'https://site.web.api.espn.com/apis/site/v2/sports/golf/leaderboard?league=champions-tour';
+        
+        // Get ESPN API URL for the pool's tour
+        function getESPNApiUrl(tour) {
+            if (tour === 'champions') {
+                return ESPN_CHAMPIONS_API_URL;
+            }
+            return ESPN_API_URL; // Default to PGA
+        }
 
         // Purse payout percentages (based on PGA Tour standard)
         const PURSE_PAYOUTS = {
@@ -2983,7 +3338,9 @@
         // Fetch live leaderboard from ESPN API
         async function fetchESPNLeaderboard() {
             try {
-                const response = await fetch(ESPN_API_URL);
+                const apiUrl = getESPNApiUrl(currentPoolTour);
+                console.log(`Fetching ESPN leaderboard for ${currentPoolTour} tour...`);
+                const response = await fetch(apiUrl);
                 if (!response.ok) throw new Error('ESPN API request failed');
                 
                 const data = await response.json();
@@ -2996,9 +3353,11 @@
                 const competition = event.competitions[0];
                 
                 // Update tournament info
-                if (event.purse) currentTournament.purse = event.purse;
-                if (competition.status && competition.status.period) {
-                    currentTournament.round = competition.status.period;
+                if (currentTournament) {
+                    if (event.purse) currentTournament.purse = event.purse;
+                    if (competition.status && competition.status.period) {
+                        currentTournament.round = competition.status.period;
+                    }
                 }
 
                 // Build leaderboard from competitors
@@ -3030,14 +3389,14 @@
                         score: scoreToPar ? scoreToPar.value : 0,
                         today: todayScore,
                         thru: status.displayThru || status.thru || '-',
-                        projectedEarnings: calculateProjectedEarnings(position, currentTournament.purse),
+                        projectedEarnings: calculateProjectedEarnings(position, currentTournament?.purse || 0),
                         headshot: athlete.headshot ? athlete.headshot.href : null,
                         flag: athlete.flag ? athlete.flag.href : null
                     });
                 });
 
                 espnDataLoaded = true;
-                console.log('ESPN leaderboard loaded:', liveLeaderboard.length, 'players');
+                console.log(`ESPN leaderboard loaded for ${currentPoolTour}:`, liveLeaderboard.length, 'players');
                 return liveLeaderboard;
 
             } catch (error) {
@@ -3661,6 +4020,7 @@
                                 id: dbPool.id,
                                 name: dbPool.name,
                                 season: dbPool.season,
+                                tour: dbPool.tour || 'pga',
                                 inviteCode: dbPool.invite_code,
                                 createdBy: dbPool.created_by,
                                 members: memberIds,
@@ -4417,15 +4777,23 @@
         async function handleCreateTournament(event) {
             event.preventDefault();
             const name = document.getElementById('pool-name').value;
-            const season = document.getElementById('pool-season').value;
+            const tourSeasonValue = document.getElementById('pool-season').value;
             const uniquePicks = document.getElementById('unique-picks').checked;
+
+            // Parse tour|season format (e.g., "pga|2025-2026" or "champions|2025-2026")
+            // For backwards compatibility, if no pipe, assume PGA tour
+            let tour = 'pga';
+            let season = tourSeasonValue;
+            if (tourSeasonValue.includes('|')) {
+                [tour, season] = tourSeasonValue.split('|');
+            }
 
             if (!name || !season) {
                 showToast('Please fill in all fields', true);
                 return;
             }
 
-            console.log('Creating pool:', name, season, 'uniquePicks:', uniquePicks);
+            console.log('Creating pool:', name, 'tour:', tour, 'season:', season, 'uniquePicks:', uniquePicks);
 
             try {
                 let pool;
@@ -4441,6 +4809,7 @@
                             .insert({
                                 name: name,
                                 season: season,
+                                tour: tour,
                                 invite_code: inviteCode,
                                 created_by: store.currentUser.id,
                                 unique_picks: uniquePicks,
@@ -4476,6 +4845,7 @@
                         id: newPool.id,
                         name: newPool.name,
                         season: newPool.season,
+                        tour: newPool.tour || 'pga',
                         ownerId: store.currentUser.id,
                         createdBy: store.currentUser.id,
                         members: [store.currentUser.id],
@@ -4489,6 +4859,7 @@
                         id: generateId(),
                         name,
                         season,
+                        tour: tour,
                         ownerId: store.currentUser.id,
                         createdBy: store.currentUser.id,
                         members: [store.currentUser.id],
@@ -4762,13 +5133,20 @@ See you on the course!`
             selectedPlayerId = null;
             // Save to localStorage so we can restore after refresh
             localStorage.setItem('currentPoolId', poolId);
+            
+            // Update tournament state based on pool's tour
+            const pool = store.pools.find(p => p.id === poolId);
+            if (pool) {
+                currentPoolTour = pool.tour || 'pga';
+                updateTournamentStateForPool();
+            }
+            
             showScreen('pool-view');
             switchPoolTab('standings');
             renderPoolView();
             checkTabsOverflow();
             
             // Show creator-only buttons
-            const pool = store.pools.find(p => p.id === poolId);
             const deleteBtn = document.getElementById('delete-pool-btn');
             const editImageBtn = document.getElementById('edit-pool-image-dropdown-btn');
             if (pool) {
@@ -4818,7 +5196,10 @@ See you on the course!`
             if (!pool) return;
 
             document.getElementById('pool-title').textContent = pool.name;
-            document.getElementById('pool-season-display').textContent = pool.season;
+            
+            // Show tour and season (e.g., "PGA Tour Champions - 2025-2026")
+            const tourName = pool.tour === 'champions' ? 'PGA Tour Champions' : 'PGA Tour';
+            document.getElementById('pool-season-display').textContent = `${tourName} - ${pool.season}`;
             renderStandings();
         }
 
