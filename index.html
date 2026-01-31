@@ -1681,6 +1681,9 @@
                 <p class="auth-switch">
                     Don't have an account? <a onclick="showScreen('signup')">Sign up</a>
                 </p>
+                <p id="forgot-password-link" class="auth-switch" style="display: none; margin-top: 0.5rem;">
+                    <a onclick="handleForgotPassword()" style="color: var(--gold);">Forgot your password?</a>
+                </p>
             </div>
         </section>
 
@@ -3913,6 +3916,9 @@
                     });
                     if (error) throw error;
                     
+                    // Hide forgot password link on successful login
+                    document.getElementById('forgot-password-link').style.display = 'none';
+                    
                     // Set user directly instead of waiting for onAuthStateChange
                     store.currentUser = {
                         id: data.user.id,
@@ -3941,6 +3947,7 @@
                     const user = store.users.find(u => u.email === email && u.password === password);
                     if (!user) {
                         showToast('Invalid email or password', true);
+                        document.getElementById('forgot-password-link').style.display = 'block';
                         return;
                     }
                     store.currentUser = user;
@@ -3952,6 +3959,8 @@
             } catch (error) {
                 console.error('Login error:', error);
                 showToast(error.message || 'Login failed', true);
+                // Show forgot password link on any login error
+                document.getElementById('forgot-password-link').style.display = 'block';
             }
         }
 
@@ -3969,6 +3978,37 @@
             updateNavigation();
             showScreen('landing');
             showToast('Logged out successfully');
+        }
+
+        async function handleForgotPassword() {
+            const email = document.getElementById('login-email').value.toLowerCase().trim();
+            
+            if (!email) {
+                showToast('Please enter your email address first', true);
+                return;
+            }
+            
+            if (!supabaseClient) {
+                showToast('Password reset not available', true);
+                return;
+            }
+            
+            try {
+                // Supabase will only send reset email if email exists in auth.users
+                // It returns success even if email doesn't exist (for security)
+                const { error } = await supabaseClient.auth.resetPasswordForEmail(email, {
+                    redirectTo: window.location.origin + '?reset=true'
+                });
+                
+                if (error) throw error;
+                
+                // Always show same message for security (don't reveal if email exists)
+                showToast('If an account exists with this email, a password reset link has been sent');
+                document.getElementById('forgot-password-link').style.display = 'none';
+            } catch (error) {
+                console.error('Password reset error:', error);
+                showToast('Unable to send reset email. Please try again.', true);
+            }
         }
 
         // Load user's pools and picks from Supabase
