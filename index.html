@@ -6112,7 +6112,7 @@ See you on the course!`
                                 <div class="weekly-pick">
                                     <img src="${standing.playerHeadshot || getPlayerHeadshot(standing.currentPlayer)}" alt="" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect fill=%22%23e5e7eb%22 width=%22100%22 height=%22100%22/></svg>'">
                                     <span>${standing.currentPlayer.name}</span>
-                                    <span style="color: var(--gold); font-size: 0.8rem; margin-left: 0.25rem;">(${standing.playerPosition || '-'}, ${formatCurrency(standing.currentWeekEarnings)} proj)</span>
+                                    <span style="color: var(--gold); font-size: 0.8rem; margin-left: 0.25rem;">${standing.playerPosition || 'MC'} (${formatCurrency(standing.currentWeekEarnings)} proj)</span>
                                 </div>
                             ` : '<span style="color: var(--gray);">No pick yet</span>'}
                         </td>
