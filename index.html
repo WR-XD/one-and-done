@@ -3974,14 +3974,20 @@
             46: 0.0032, 47: 0.003, 48: 0.0028, 49: 0.0027, 50: 0.0026,
             51: 0.0025, 52: 0.0025, 53: 0.0024, 54: 0.0024, 55: 0.0024,
             56: 0.0023, 57: 0.0023, 58: 0.0023, 59: 0.0023, 60: 0.0023,
-            61: 0.0022, 62: 0.0022, 63: 0.0022, 64: 0.0022, 65: 0.0022
+            61: 0.0022, 62: 0.0022, 63: 0.0022, 64: 0.0022, 65: 0.0022,
+            // Extended for "top 65 and ties" cut rule
+            66: 0.0021, 67: 0.0021, 68: 0.0021, 69: 0.0021, 70: 0.0021,
+            71: 0.0020, 72: 0.0020, 73: 0.0020, 74: 0.0020, 75: 0.0020,
+            76: 0.0019, 77: 0.0019, 78: 0.0019, 79: 0.0019, 80: 0.0019,
+            81: 0.0018, 82: 0.0018, 83: 0.0018, 84: 0.0018, 85: 0.0018,
+            86: 0.0017, 87: 0.0017, 88: 0.0017, 89: 0.0017, 90: 0.0017
         };
 
         function calculateProjectedEarnings(position, purse) {
             if (!position || position === '-' || position === 'WD' || position === 'CUT' || position === 'MC') return 0;
             const posNum = parseInt(position.replace('T', ''));
-            if (isNaN(posNum) || posNum > 65) return 0;
-            const pct = PURSE_PAYOUTS[posNum] || 0.002;
+            if (isNaN(posNum) || posNum > 90) return 0;
+            const pct = PURSE_PAYOUTS[posNum] || 0.0017;
             return Math.round(purse * pct);
         }
 
