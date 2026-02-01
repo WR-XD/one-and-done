@@ -1187,8 +1187,10 @@
                 overflow-x: visible;
                 -webkit-overflow-scrolling: touch;
                 scrollbar-width: none;
-                padding: 0;
+                padding: 0 0.25rem;
                 display: flex;
+                justify-content: space-evenly;
+                align-items: center;
             }
 
             .tabs::-webkit-scrollbar {
@@ -1196,13 +1198,10 @@
             }
 
             .tab {
-                padding: 0.75rem 0;
-                font-size: 0.62rem;
+                padding: 0.75rem 0.1rem;
+                font-size: 0.65rem;
                 white-space: nowrap;
-                flex: 1 1 0;
                 text-align: center;
-                min-width: 0;
-                width: 0; /* Forces equal width with flex: 1 1 0 */
             }
 
             .tab.active::after {
@@ -1216,15 +1215,13 @@
 
             /* Pool options menu - compact */
             .pool-options-menu {
-                flex: 0 0 32px;
+                flex: 0 0 auto;
                 padding: 0;
-                display: flex;
-                align-items: center;
-                justify-content: center;
+                margin: 0;
             }
 
             .pool-options-btn {
-                padding: 0.5rem 0.25rem;
+                padding: 0.5rem 0.35rem;
                 font-size: 1.1rem;
             }
 
@@ -1459,19 +1456,19 @@
             .leaderboard-table th:nth-child(1),
             .leaderboard-table td:nth-child(1) { width: 28px; text-align: center; } /* Pos */
             .leaderboard-table th:nth-child(2),
-            .leaderboard-table td:nth-child(2) { width: 32%; } /* Player - narrower percentage */
+            .leaderboard-table td:nth-child(2) { width: auto; } /* Player - flexible */
             .leaderboard-table th:nth-child(3),
-            .leaderboard-table td:nth-child(3) { width: 42px; text-align: center; } /* Score */
+            .leaderboard-table td:nth-child(3) { width: 38px; text-align: center; } /* Score */
             .leaderboard-table th:nth-child(4),
-            .leaderboard-table td:nth-child(4) { width: 40px; text-align: center; } /* Today */
+            .leaderboard-table td:nth-child(4) { width: 36px; text-align: center; } /* Today */
             .leaderboard-table th:nth-child(5),
             .leaderboard-table td:nth-child(5) { 
-                display: table-cell !important; /* SHOW Thru on mobile */
-                width: 32px; 
+                display: table-cell !important;
+                width: 30px; 
                 text-align: center; 
             } /* Thru */
             .leaderboard-table th:nth-child(6),
-            .leaderboard-table td:nth-child(6) { width: 80px; text-align: right; padding-right: 0.3rem; } /* Projected $ */
+            .leaderboard-table td:nth-child(6) { width: 68px; text-align: right; padding-right: 0.3rem; } /* Projected $ */
 
             .leaderboard-table .pos-cell {
                 font-size: 0.85rem;
@@ -1765,16 +1762,8 @@
             }
 
             .tab {
-                padding: 0.7rem 0;
-                font-size: 0.58rem;
-            }
-
-            .pool-options-menu {
-                flex: 0 0 28px;
-            }
-
-            .pool-options-btn {
-                font-size: 1rem;
+                padding: 0.7rem 0.05rem;
+                font-size: 0.6rem;
             }
 
             .standings-table tr {
@@ -1830,16 +1819,14 @@
             /* Tighter columns on extra small screens */
             .leaderboard-table th:nth-child(1),
             .leaderboard-table td:nth-child(1) { width: 24px; }
-            .leaderboard-table th:nth-child(2),
-            .leaderboard-table td:nth-child(2) { width: 28%; }
             .leaderboard-table th:nth-child(3),
-            .leaderboard-table td:nth-child(3) { width: 36px; }
+            .leaderboard-table td:nth-child(3) { width: 34px; }
             .leaderboard-table th:nth-child(4),
-            .leaderboard-table td:nth-child(4) { width: 34px; }
+            .leaderboard-table td:nth-child(4) { width: 32px; }
             .leaderboard-table th:nth-child(5),
-            .leaderboard-table td:nth-child(5) { width: 28px; }
+            .leaderboard-table td:nth-child(5) { width: 26px; }
             .leaderboard-table th:nth-child(6),
-            .leaderboard-table td:nth-child(6) { width: 70px; }
+            .leaderboard-table td:nth-child(6) { width: 60px; }
 
             .leaderboard-table .earnings-cell {
                 font-size: 0.65rem;
@@ -2542,7 +2529,7 @@
                                 <th>Score</th>
                                 <th>Today</th>
                                 <th>Thru</th>
-                                <th>Proj $</th>
+                                <th>Projected $</th>
                             </tr>
                         </thead>
                         <tbody id="leaderboard-body">
