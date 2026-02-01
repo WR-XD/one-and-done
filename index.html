@@ -1437,8 +1437,8 @@
             }
 
             .leaderboard-table th {
-                padding: 0.5rem 0.2rem;
-                font-size: 0.65rem;
+                padding: 0.5rem 0.15rem;
+                font-size: 0.6rem;
                 text-align: center;
             }
 
@@ -1447,53 +1447,63 @@
             }
 
             .leaderboard-table td {
-                padding: 0.6rem 0.2rem;
+                padding: 0.6rem 0.15rem;
                 vertical-align: middle;
             }
 
             /* Fixed column widths for leaderboard - balanced for readability */
             .leaderboard-table th:nth-child(1),
-            .leaderboard-table td:nth-child(1) { width: 32px; text-align: center; } /* Pos */
+            .leaderboard-table td:nth-child(1) { width: 28px; text-align: center; } /* Pos */
             .leaderboard-table th:nth-child(2),
-            .leaderboard-table td:nth-child(2) { width: 38%; } /* Player - percentage based */
+            .leaderboard-table td:nth-child(2) { width: auto; } /* Player - flexible */
             .leaderboard-table th:nth-child(3),
-            .leaderboard-table td:nth-child(3) { width: 44px; text-align: center; } /* Score */
+            .leaderboard-table td:nth-child(3) { width: 38px; text-align: center; } /* Score */
             .leaderboard-table th:nth-child(4),
-            .leaderboard-table td:nth-child(4) { width: 38px; text-align: center; } /* Today */
+            .leaderboard-table td:nth-child(4) { width: 34px; text-align: center; } /* Today */
+            .leaderboard-table th:nth-child(5),
+            .leaderboard-table td:nth-child(5) { 
+                display: table-cell !important; /* SHOW Thru on mobile */
+                width: 28px; 
+                text-align: center; 
+            } /* Thru */
             .leaderboard-table th:nth-child(6),
-            .leaderboard-table td:nth-child(6) { width: 88px; text-align: right; padding-right: 0.4rem; } /* Projected $ - wider for header */
+            .leaderboard-table td:nth-child(6) { width: 72px; text-align: right; padding-right: 0.3rem; } /* Projected $ */
 
             .leaderboard-table .pos-cell {
-                font-size: 0.9rem;
+                font-size: 0.85rem;
                 text-align: center;
             }
 
             .leaderboard-table .player-cell {
-                gap: 0.4rem;
+                gap: 0.35rem;
                 flex-wrap: wrap;
             }
 
             .leaderboard-table .player-cell img {
-                width: 28px;
-                height: 28px;
+                width: 26px;
+                height: 26px;
                 flex-shrink: 0;
             }
 
             .leaderboard-table .player-cell span {
-                font-size: 0.85rem;
+                font-size: 0.8rem;
                 white-space: nowrap;
                 overflow: hidden;
                 text-overflow: ellipsis;
             }
 
             .leaderboard-table .score-cell {
-                font-size: 0.95rem;
+                font-size: 0.9rem;
                 font-weight: 600;
                 text-align: center;
             }
 
+            .leaderboard-table .thru-cell {
+                font-size: 0.75rem;
+            }
+
             .leaderboard-table .earnings-cell {
-                font-size: 0.8rem;
+                font-size: 0.75rem;
                 text-align: right;
             }
 
@@ -1518,16 +1528,6 @@
                 align-items: center;
             }
 
-            /* Hide less important columns */
-            .hide-mobile {
-                display: none !important;
-            }
-
-            .leaderboard-table td:nth-child(5),
-            .leaderboard-table th:nth-child(5) {
-                display: none;
-            }
-
             /* --- PICK HISTORY TABLE IMPROVEMENTS --- */
             #tab-history .leaderboard-table {
                 table-layout: fixed;
@@ -1535,33 +1535,36 @@
 
             /* Pick History columns */
             #tab-history .leaderboard-table th:nth-child(1),
-            #tab-history .leaderboard-table td:nth-child(1) { width: 32px; } /* Week - narrower */
+            #tab-history .leaderboard-table td:nth-child(1) { width: 28px; } /* Week */
             #tab-history .leaderboard-table th:nth-child(2),
             #tab-history .leaderboard-table td:nth-child(2) { width: auto; } /* Tournament */
             #tab-history .leaderboard-table th:nth-child(3),
             #tab-history .leaderboard-table td:nth-child(3) { width: auto; } /* Your Pick */
             #tab-history .leaderboard-table th:nth-child(4),
-            #tab-history .leaderboard-table td:nth-child(4) { width: 70px; } /* Finish */
+            #tab-history .leaderboard-table td:nth-child(4) { width: 58px; } /* Finish */
             #tab-history .leaderboard-table th:nth-child(5),
             #tab-history .leaderboard-table td:nth-child(5) { 
-                display: table-cell !important; /* Override hide-mobile */
-                width: 70px; 
+                display: table-cell !important;
+                width: 58px; 
             } /* Earnings */
 
-            /* Tournament logo in history */
+            /* Tournament logo in history - always inline left of text */
             #tab-history .tournament-logo-small {
-                width: 24px;
-                height: 24px;
+                width: 20px;
+                height: 20px;
                 display: inline-block !important;
                 flex-shrink: 0;
+                vertical-align: middle;
             }
 
             #tab-history .player-cell {
-                gap: 0.35rem;
+                gap: 0.3rem;
+                flex-wrap: nowrap !important;
+                align-items: center;
             }
 
             #tab-history .player-cell span {
-                font-size: 0.8rem;
+                font-size: 0.75rem;
                 white-space: nowrap;
                 overflow: hidden;
                 text-overflow: ellipsis;
@@ -1569,33 +1572,38 @@
 
             /* --- UPCOMING TOURNAMENTS TABLE --- */
             #schedule-body .tournament-logo-small {
-                width: 20px;
-                height: 20px;
+                width: 18px;
+                height: 18px;
                 display: inline-block !important;
+                vertical-align: middle;
             }
 
-            /* Upcoming Schedule columns - KEEP Course, allow tournament wrap */
+            /* Upcoming Schedule columns - KEEP Course, fit everything */
             #tab-history .leaderboard:nth-of-type(2) .leaderboard-table {
                 table-layout: fixed;
             }
             #tab-history .leaderboard:nth-of-type(2) .leaderboard-table th:nth-child(1),
-            #tab-history .leaderboard:nth-of-type(2) .leaderboard-table td:nth-child(1) { width: 38px; text-align: center; } /* Week - wider for header */
+            #tab-history .leaderboard:nth-of-type(2) .leaderboard-table td:nth-child(1) { width: 28px; text-align: center; } /* Week */
             #tab-history .leaderboard:nth-of-type(2) .leaderboard-table th:nth-child(2),
             #tab-history .leaderboard:nth-of-type(2) .leaderboard-table td:nth-child(2) { 
                 width: auto; 
             } /* Tournament - flexible, can wrap */
+            #tab-history .leaderboard:nth-of-type(2) .leaderboard-table td:nth-child(2) .player-cell {
+                flex-wrap: nowrap !important;
+            }
             #tab-history .leaderboard:nth-of-type(2) .leaderboard-table td:nth-child(2) span,
             #tab-history .leaderboard:nth-of-type(2) .leaderboard-table td:nth-child(2) strong {
                 white-space: normal !important;
                 word-wrap: break-word;
+                font-size: 0.75rem;
             }
             #tab-history .leaderboard:nth-of-type(2) .leaderboard-table th:nth-child(3),
-            #tab-history .leaderboard:nth-of-type(2) .leaderboard-table td:nth-child(3) { width: 58px; text-align: center; } /* Dates */
+            #tab-history .leaderboard:nth-of-type(2) .leaderboard-table td:nth-child(3) { width: 50px; text-align: center; font-size: 0.7rem; } /* Dates */
             #tab-history .leaderboard:nth-of-type(2) .leaderboard-table th:nth-child(4),
             #tab-history .leaderboard:nth-of-type(2) .leaderboard-table td:nth-child(4) { 
                 display: table-cell !important; /* SHOW Course */
-                width: 70px;
-                font-size: 0.75rem;
+                width: 60px;
+                font-size: 0.65rem;
             }
             #tab-history .leaderboard:nth-of-type(2) .leaderboard-table td:nth-child(4) {
                 white-space: normal;
@@ -1605,9 +1613,10 @@
             #tab-history .leaderboard:nth-of-type(2) .leaderboard-table th:nth-child(5),
             #tab-history .leaderboard:nth-of-type(2) .leaderboard-table td:nth-child(5) { 
                 display: table-cell !important; 
-                width: 72px;
+                width: 62px;
                 text-align: right;
-                padding-right: 0.4rem;
+                padding-right: 0.3rem;
+                font-size: 0.7rem;
             } /* Purse */
 
             /* --- PLAYER SELECTION --- */
@@ -1789,36 +1798,44 @@
             }
 
             .leaderboard-table {
-                font-size: 0.75rem;
+                font-size: 0.7rem;
             }
 
             .leaderboard-table th {
-                font-size: 0.6rem;
+                font-size: 0.55rem;
             }
 
             .leaderboard-table .player-cell img {
-                width: 24px;
-                height: 24px;
+                width: 22px;
+                height: 22px;
             }
 
             .leaderboard-table .player-cell span {
-                font-size: 0.75rem;
+                font-size: 0.7rem;
             }
 
             /* Tighter columns on extra small screens */
             .leaderboard-table th:nth-child(1),
-            .leaderboard-table td:nth-child(1) { width: 28px; }
-            .leaderboard-table th:nth-child(2),
-            .leaderboard-table td:nth-child(2) { width: 35%; }
+            .leaderboard-table td:nth-child(1) { width: 24px; }
             .leaderboard-table th:nth-child(3),
-            .leaderboard-table td:nth-child(3) { width: 38px; }
+            .leaderboard-table td:nth-child(3) { width: 32px; }
             .leaderboard-table th:nth-child(4),
-            .leaderboard-table td:nth-child(4) { width: 32px; }
+            .leaderboard-table td:nth-child(4) { width: 28px; }
+            .leaderboard-table th:nth-child(5),
+            .leaderboard-table td:nth-child(5) { width: 24px; }
             .leaderboard-table th:nth-child(6),
-            .leaderboard-table td:nth-child(6) { width: 78px; }
+            .leaderboard-table td:nth-child(6) { width: 62px; }
 
             .leaderboard-table .earnings-cell {
-                font-size: 0.7rem;
+                font-size: 0.65rem;
+            }
+
+            .leaderboard-table .score-cell {
+                font-size: 0.8rem;
+            }
+
+            .leaderboard-table .thru-cell {
+                font-size: 0.65rem;
             }
 
             .pick-tag {
@@ -1837,25 +1854,35 @@
 
             /* History table adjustments */
             #tab-history .leaderboard-table th:nth-child(1),
-            #tab-history .leaderboard-table td:nth-child(1) { width: 24px; }
+            #tab-history .leaderboard-table td:nth-child(1) { width: 22px; }
             #tab-history .leaderboard-table th:nth-child(4),
-            #tab-history .leaderboard-table td:nth-child(4) { width: 58px; }
+            #tab-history .leaderboard-table td:nth-child(4) { width: 50px; }
             #tab-history .leaderboard-table th:nth-child(5),
-            #tab-history .leaderboard-table td:nth-child(5) { width: 58px; }
+            #tab-history .leaderboard-table td:nth-child(5) { width: 50px; }
 
             #tab-history .player-cell span {
-                font-size: 0.7rem;
+                font-size: 0.65rem;
+            }
+
+            #tab-history .tournament-logo-small {
+                width: 16px;
+                height: 16px;
             }
 
             /* Upcoming tournaments - tighter on small screens */
             #tab-history .leaderboard:nth-of-type(2) .leaderboard-table th:nth-child(1),
-            #tab-history .leaderboard:nth-of-type(2) .leaderboard-table td:nth-child(1) { width: 32px; }
+            #tab-history .leaderboard:nth-of-type(2) .leaderboard-table td:nth-child(1) { width: 22px; }
             #tab-history .leaderboard:nth-of-type(2) .leaderboard-table th:nth-child(3),
-            #tab-history .leaderboard:nth-of-type(2) .leaderboard-table td:nth-child(3) { width: 52px; }
+            #tab-history .leaderboard:nth-of-type(2) .leaderboard-table td:nth-child(3) { width: 44px; font-size: 0.6rem; }
             #tab-history .leaderboard:nth-of-type(2) .leaderboard-table th:nth-child(4),
-            #tab-history .leaderboard:nth-of-type(2) .leaderboard-table td:nth-child(4) { width: 58px; font-size: 0.65rem; }
+            #tab-history .leaderboard:nth-of-type(2) .leaderboard-table td:nth-child(4) { width: 52px; font-size: 0.6rem; }
             #tab-history .leaderboard:nth-of-type(2) .leaderboard-table th:nth-child(5),
-            #tab-history .leaderboard:nth-of-type(2) .leaderboard-table td:nth-child(5) { width: 62px; }
+            #tab-history .leaderboard:nth-of-type(2) .leaderboard-table td:nth-child(5) { width: 55px; font-size: 0.6rem; }
+
+            #tab-history .leaderboard:nth-of-type(2) .leaderboard-table td:nth-child(2) span,
+            #tab-history .leaderboard:nth-of-type(2) .leaderboard-table td:nth-child(2) strong {
+                font-size: 0.65rem;
+            }
         }
 
         /* Loading State */
@@ -2499,7 +2526,7 @@
                                 <th>Player</th>
                                 <th>Score</th>
                                 <th>Today</th>
-                                <th class="hide-mobile">Thru</th>
+                                <th>Thru</th>
                                 <th>Projected $</th>
                             </tr>
                         </thead>
@@ -6257,7 +6284,7 @@ See you on the course!`
                         </td>
                         <td class="score-cell ${scoreClass}">${scoreDisplay}</td>
                         <td class="score-cell ${scoreClass}">${todayDisplay}</td>
-                        <td class="thru-cell hide-mobile">${entry.thru}</td>
+                        <td class="thru-cell">${entry.thru}</td>
                         <td class="earnings-cell">${formatCurrency(entry.projectedEarnings)}</td>
                     </tr>
                 `;
