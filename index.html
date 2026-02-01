@@ -1725,9 +1725,14 @@
                 </div>
             </div>
 
-            <button class="btn btn-primary" onclick="showScreen('create-tournament')" style="margin-bottom: 2rem;">
-                + Create New Pool
-            </button>
+            <div style="display: flex; gap: 1rem; margin-bottom: 2rem; flex-wrap: wrap;">
+                <button class="btn btn-primary" onclick="showScreen('create-tournament')">
+                    + Create New Pool
+                </button>
+                <button class="btn btn-secondary" onclick="showJoinPoolModal()" style="border: 2px solid var(--green-deep); color: var(--green-deep);">
+                    🔗 Join a Pool
+                </button>
+            </div>
 
             <div id="tournaments-container" class="tournaments-grid">
                 <!-- Tournaments will be rendered here -->
@@ -2040,6 +2045,24 @@
                         <button class="btn btn-secondary" onclick="copyInviteLink()" style="padding: 0.75rem 1.5rem;">Copy</button>
                     </div>
                 </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Join Pool Modal -->
+    <div id="join-pool-modal" class="modal-overlay">
+        <div class="modal">
+            <div class="modal-header">
+                <h3>Join a Pool</h3>
+                <button class="modal-close" onclick="closeModal('join-pool-modal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p style="margin-bottom: 1rem; color: var(--gray);">Enter the invite code shared by your pool commissioner.</p>
+                <div style="display: flex; gap: 0.5rem;">
+                    <input type="text" id="join-pool-code" placeholder="Enter invite code" style="flex: 1; padding: 0.75rem; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 1rem; text-transform: uppercase;" maxlength="8">
+                    <button class="btn btn-primary" onclick="handleJoinPoolByCode()" style="padding: 0.75rem 1.5rem;">Join</button>
+                </div>
+                <p id="join-pool-error" style="color: var(--red); font-size: 0.85rem; margin-top: 0.5rem; display: none;"></p>
             </div>
         </div>
     </div>
@@ -6223,6 +6246,84 @@ See you on the course!`
 
         function closeModal(modalId) {
             document.getElementById(modalId).classList.remove('active');
+        }
+
+        function showJoinPoolModal() {
+            document.getElementById('join-pool-code').value = '';
+            document.getElementById('join-pool-error').style.display = 'none';
+            document.getElementById('join-pool-modal').classList.add('active');
+            document.getElementById('join-pool-code').focus();
+        }
+
+        async function handleJoinPoolByCode() {
+            const codeInput = document.getElementById('join-pool-code');
+            const errorEl = document.getElementById('join-pool-error');
+            const code = codeInput.value.trim().toUpperCase();
+            
+            errorEl.style.display = 'none';
+            
+            if (!code || code.length < 4) {
+                errorEl.textContent = 'Please enter a valid invite code';
+                errorEl.style.display = 'block';
+                return;
+            }
+            
+            if (!supabaseClient || !store.currentUser) {
+                errorEl.textContent = 'You must be logged in to join a pool';
+                errorEl.style.display = 'block';
+                return;
+            }
+            
+            try {
+                // Find pool by invite code
+                const { data: pool, error: poolError } = await supabaseClient
+                    .from('pools')
+                    .select('*')
+                    .eq('invite_code', code)
+                    .single();
+                
+                if (poolError || !pool) {
+                    errorEl.textContent = 'Invalid invite code. Please check and try again.';
+                    errorEl.style.display = 'block';
+                    return;
+                }
+                
+                // Check if already a member
+                const { data: existingMember } = await supabaseClient
+                    .from('pool_members')
+                    .select('*')
+                    .eq('pool_id', pool.id)
+                    .eq('user_id', store.currentUser.id)
+                    .single();
+                
+                if (existingMember) {
+                    errorEl.textContent = 'You are already a member of this pool';
+                    errorEl.style.display = 'block';
+                    return;
+                }
+                
+                // Join the pool
+                const { error: joinError } = await supabaseClient
+                    .from('pool_members')
+                    .insert({
+                        pool_id: pool.id,
+                        user_id: store.currentUser.id
+                    });
+                
+                if (joinError) throw joinError;
+                
+                closeModal('join-pool-modal');
+                showToast(`Successfully joined ${pool.name}!`);
+                
+                // Reload user data to get the new pool
+                await loadUserData();
+                renderDashboard();
+                
+            } catch (error) {
+                console.error('Join pool error:', error);
+                errorEl.textContent = 'Failed to join pool. Please try again.';
+                errorEl.style.display = 'block';
+            }
         }
 
         function copyInviteLink() {
