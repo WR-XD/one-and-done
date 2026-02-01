@@ -1343,6 +1343,84 @@
                 font-size: 0.65rem;
                 padding: 0.15rem 0.3rem;
             }
+
+            /* Header nav buttons on mobile */
+            .nav-btn {
+                padding: 0.3rem 0.5rem;
+                font-size: 0.65rem;
+            }
+
+            /* Logo on mobile */
+            .logo-image {
+                height: 55px;
+            }
+
+            /* Hide columns marked hide-mobile */
+            .hide-mobile {
+                display: none !important;
+            }
+
+            /* Also hide the corresponding data cells (5th column in leaderboard, last in standings) */
+            .leaderboard-table td:nth-child(5) {
+                display: none;
+            }
+
+            .standings-table td:last-child {
+                display: none;
+            }
+
+            /* Prevent horizontal scroll */
+            .leaderboard-table,
+            .standings-table {
+                white-space: normal;
+                display: table;
+                width: 100%;
+                table-layout: fixed;
+            }
+
+            /* Condense standings table */
+            .standings-table .weekly-pick {
+                font-size: 0.7rem;
+            }
+
+            .standings-table .weekly-pick span {
+                max-width: 70px;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                white-space: nowrap;
+                display: inline-block;
+            }
+
+            /* Earnings column narrower */
+            .earnings-cell {
+                font-size: 0.7rem;
+                white-space: nowrap;
+            }
+
+            /* Compact player cell */
+            .player-cell {
+                gap: 0.3rem;
+            }
+
+            .player-cell img {
+                width: 24px;
+                height: 24px;
+            }
+
+            .player-cell span {
+                font-size: 0.8rem;
+            }
+
+            /* Score cells */
+            .score-cell {
+                font-size: 0.85rem;
+                padding: 0.4rem 0.2rem !important;
+            }
+
+            .pos-cell {
+                font-size: 0.85rem;
+                padding: 0.4rem 0.2rem !important;
+            }
         }
 
         /* Extra small screens */
@@ -1866,7 +1944,7 @@
                                 <th>Player</th>
                                 <th>This Week</th>
                                 <th>Total Earnings</th>
-                                <th>Picks Used</th>
+                                <th class="hide-mobile">Picks Used</th>
                             </tr>
                         </thead>
                         <tbody id="standings-body">
@@ -1910,7 +1988,7 @@
                                 <th>Player</th>
                                 <th>Score</th>
                                 <th>Today</th>
-                                <th>Thru</th>
+                                <th class="hide-mobile">Thru</th>
                                 <th>Projected $</th>
                             </tr>
                         </thead>
@@ -5667,7 +5745,7 @@ See you on the course!`
                         </td>
                         <td class="score-cell ${scoreClass}">${scoreDisplay}</td>
                         <td class="score-cell ${scoreClass}">${todayDisplay}</td>
-                        <td class="thru-cell">${entry.thru}</td>
+                        <td class="thru-cell hide-mobile">${entry.thru}</td>
                         <td class="earnings-cell">${formatCurrency(entry.projectedEarnings)}</td>
                     </tr>
                 `;
