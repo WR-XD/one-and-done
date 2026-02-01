@@ -1105,35 +1105,44 @@
             background: var(--red);
         }
 
-        /* Responsive */
+        /* ============================================
+           IMPROVED MOBILE RESPONSIVE STYLES
+           ============================================ */
+        
         @media (max-width: 768px) {
+            /* --- HEADER IMPROVEMENTS --- */
             .header-content {
                 flex-direction: row;
-                padding: 0.75rem 1rem;
+                padding: 0.5rem 0.75rem;
                 gap: 0.5rem;
             }
 
-            .logo-icon {
+            .logo-image {
+                height: 50px;
+            }
+
+            .nav-profile {
+                margin-right: 0.25rem;
+            }
+
+            .nav-profile img {
                 width: 36px;
                 height: 36px;
-                font-size: 1.2rem;
             }
 
-            .logo h1 {
-                font-size: 1.25rem;
+            .nav-profile-edit {
+                font-size: 0.55rem;
             }
 
-            .nav-buttons {
-                gap: 0.5rem;
+            .nav-btn {
+                padding: 0.4rem 0.6rem;
+                font-size: 0.7rem;
+                letter-spacing: 0.3px;
             }
 
-            .nav-buttons .btn {
-                padding: 0.4rem 0.75rem;
-                font-size: 0.75rem;
-            }
-
+            /* --- HERO/LANDING IMPROVEMENTS --- */
             .hero h2 {
-                font-size: 1.75rem;
+                font-size: 2rem;
             }
 
             .hero p {
@@ -1142,8 +1151,15 @@
 
             .hero-cta {
                 flex-direction: column;
+                gap: 0.75rem;
             }
 
+            .hero-cta .btn {
+                width: 100%;
+                max-width: 280px;
+            }
+
+            /* --- DASHBOARD --- */
             .dashboard-header {
                 flex-direction: column;
                 text-align: center;
@@ -1152,18 +1168,26 @@
 
             .tournaments-grid {
                 grid-template-columns: 1fr;
-                padding: 1rem;
+                padding: 0.75rem;
+                gap: 1rem;
             }
 
-            .card {
-                padding: 1rem;
+            .tournament-card {
+                max-width: 100%;
+            }
+
+            /* --- TAB NAVIGATION IMPROVEMENTS --- */
+            .tabs-container {
+                position: sticky;
+                top: 0;
+                z-index: 50;
             }
 
             .tabs {
                 overflow-x: auto;
                 -webkit-overflow-scrolling: touch;
                 scrollbar-width: none;
-                -ms-overflow-style: none;
+                padding: 0 0.5rem;
             }
 
             .tabs::-webkit-scrollbar {
@@ -1171,18 +1195,349 @@
             }
 
             .tab {
-                padding: 0.6rem 0.5rem;
-                font-size: 0.7rem;
+                padding: 0.875rem 1rem;
+                font-size: 0.8rem;
                 white-space: nowrap;
                 flex-shrink: 0;
-                min-width: auto;
             }
 
-            /* Smaller pool cards on mobile */
-            .tournament-card {
+            .tab.active::after {
+                height: 3px;
+            }
+
+            /* --- POOL STANDINGS - CARD LAYOUT --- */
+            .standings-header {
+                padding: 1rem;
+                flex-direction: column;
+                text-align: center;
+                gap: 0.75rem;
+            }
+
+            .standings-header h2 {
+                font-size: 1.4rem;
+            }
+            
+            .pool-image-container img {
+                width: 65px;
+                height: 65px;
+            }
+
+            /* Convert standings table to cards on mobile */
+            .standings-table {
+                display: block;
+                width: 100%;
+            }
+
+            .standings-table thead {
+                display: none;
+            }
+
+            .standings-table tbody {
+                display: flex;
+                flex-direction: column;
+                gap: 0.5rem;
+                padding: 0.75rem;
+            }
+
+            .standings-table tr {
+                display: flex;
+                flex-wrap: wrap;
+                align-items: center;
+                background: var(--white);
+                border: 1px solid #e5e7eb;
+                border-radius: 12px;
+                padding: 0.875rem;
+                position: relative;
+                box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            }
+
+            .standings-table tr.current-user {
+                background: linear-gradient(135deg, rgba(196, 167, 71, 0.15), rgba(196, 167, 71, 0.05));
+                border: 2px solid var(--gold);
+            }
+
+            .standings-table td {
+                border: none;
+                padding: 0;
+            }
+
+            /* Rank badge - left side */
+            .standings-table td:nth-child(1) {
+                order: 1;
+                margin-right: 0.75rem;
+            }
+
+            .standings-table .rank-badge {
+                width: 36px;
+                height: 36px;
+                font-size: 1rem;
+                border-radius: 8px;
+            }
+
+            /* Player name & avatar - grows to fill */
+            .standings-table td:nth-child(2) {
+                order: 2;
+                flex: 1;
+                min-width: 0;
+            }
+
+            .standings-table td:nth-child(2) .player-cell {
+                gap: 0.5rem;
+            }
+
+            .standings-table td:nth-child(2) img {
+                width: 36px;
+                height: 36px;
+            }
+
+            .standings-table td:nth-child(2) span {
+                font-size: 1rem;
+                font-weight: 600;
+            }
+
+            /* Total earnings - right aligned */
+            .standings-table td:nth-child(4) {
+                order: 3;
+                margin-left: auto;
+                font-size: 1.1rem;
+                font-weight: 700;
+                color: var(--green-fairway);
+            }
+
+            /* This week pick - full width below */
+            .standings-table td:nth-child(3) {
+                order: 4;
+                width: 100%;
+                margin-top: 0.75rem;
+                padding-top: 0.75rem;
+                border-top: 1px solid #e5e7eb;
+            }
+
+            .standings-table .weekly-pick {
+                flex-direction: row;
+                align-items: center;
+                gap: 0.5rem;
                 font-size: 0.85rem;
             }
 
+            .standings-table .weekly-pick img {
+                width: 32px;
+                height: 32px;
+            }
+
+            .standings-table .weekly-pick span {
+                max-width: none;
+                white-space: normal;
+            }
+
+            /* Hide "Total" column on mobile - show inline */
+            .standings-table td:last-child {
+                display: none;
+            }
+
+            /* --- MY PICK HIGHLIGHT (Your Pick Section) --- */
+            .my-pick-highlight {
+                flex-direction: column;
+                text-align: center;
+                padding: 1.25rem;
+                gap: 0.75rem;
+                background: linear-gradient(135deg, var(--gold) 0%, var(--gold-light) 100%);
+            }
+
+            .my-pick-highlight img {
+                width: 80px;
+                height: 80px;
+                border-width: 4px;
+                margin: 0 auto;
+            }
+
+            .my-pick-info {
+                text-align: center;
+            }
+
+            .my-pick-info h3 {
+                font-size: 1.4rem;
+            }
+
+            .my-pick-info p {
+                font-size: 0.9rem;
+            }
+
+            .my-pick-stats {
+                display: flex;
+                justify-content: center;
+                gap: 2rem;
+                text-align: center;
+                margin-top: 0.5rem;
+            }
+
+            .my-pick-stats .position {
+                font-size: 2.5rem;
+                line-height: 1;
+            }
+
+            .my-pick-stats .earnings {
+                font-size: 1.1rem;
+            }
+
+            /* --- LEADERBOARD IMPROVEMENTS --- */
+            .leaderboard-header {
+                padding: 1rem;
+                flex-direction: column;
+                gap: 0.75rem;
+                text-align: center;
+            }
+
+            .tournament-logo {
+                width: 60px;
+                height: 60px;
+            }
+
+            .leaderboard-header h2 {
+                font-size: 1.3rem;
+            }
+
+            .leaderboard-meta {
+                flex-direction: column;
+                gap: 0.25rem;
+                font-size: 0.85rem;
+            }
+
+            /* Leaderboard table improvements */
+            .leaderboard-table {
+                display: table;
+                width: 100%;
+                table-layout: fixed;
+                font-size: 0.85rem;
+            }
+
+            .leaderboard-table th {
+                padding: 0.5rem 0.25rem;
+                font-size: 0.7rem;
+            }
+
+            .leaderboard-table td {
+                padding: 0.6rem 0.25rem;
+                vertical-align: middle;
+            }
+
+            .leaderboard-table .pos-cell {
+                width: 35px;
+                font-size: 0.9rem;
+            }
+
+            .leaderboard-table .player-cell {
+                gap: 0.4rem;
+            }
+
+            .leaderboard-table .player-cell img {
+                width: 28px;
+                height: 28px;
+            }
+
+            .leaderboard-table .player-cell span {
+                font-size: 0.85rem;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+            }
+
+            .leaderboard-table .score-cell {
+                font-size: 0.95rem;
+                font-weight: 600;
+            }
+
+            /* Pick tags */
+            .pick-tag {
+                font-size: 0.55rem;
+                padding: 0.1rem 0.25rem;
+                margin-left: 0.25rem;
+            }
+
+            /* Hide less important columns */
+            .hide-mobile {
+                display: none !important;
+            }
+
+            .leaderboard-table td:nth-child(5) {
+                display: none;
+            }
+
+            /* --- PLAYER SELECTION --- */
+            .selection-header {
+                padding: 1rem;
+                flex-direction: column;
+                gap: 0.5rem;
+                text-align: center;
+            }
+
+            .selection-header h2 {
+                font-size: 1.3rem;
+            }
+
+            .search-filter {
+                padding: 0.75rem;
+                gap: 0.5rem;
+            }
+
+            .search-filter input {
+                padding: 0.875rem;
+                font-size: 1rem;
+            }
+
+            .player-item {
+                padding: 0.875rem;
+            }
+
+            .player-photo {
+                width: 44px;
+                height: 44px;
+            }
+
+            .player-info h4 {
+                font-size: 1rem;
+            }
+
+            .player-info p {
+                font-size: 0.8rem;
+            }
+
+            .confirm-selection {
+                padding: 1rem;
+                flex-direction: column;
+                gap: 0.75rem;
+            }
+
+            .confirm-selection .btn {
+                width: 100%;
+            }
+
+            /* --- GENERAL SPACING --- */
+            .container {
+                padding: 0;
+            }
+
+            .screen {
+                padding: 0;
+            }
+
+            /* --- FORMS --- */
+            .auth-container {
+                margin: 1rem;
+                padding: 1.5rem;
+            }
+
+            .form-group input {
+                padding: 1rem;
+                font-size: 1rem;
+            }
+
+            .form-btn {
+                padding: 1rem;
+                font-size: 1rem;
+            }
+
+            /* --- TOURNAMENT CARDS --- */
             .tournament-header {
                 padding: 1rem;
             }
@@ -1192,260 +1547,120 @@
             }
 
             .tournament-body {
-                padding: 0.75rem;
-            }
-
-            .tournament-stat {
-                padding: 0.5rem 0;
+                padding: 0.875rem;
             }
 
             .tournament-actions {
-                padding: 0.75rem;
-                gap: 0.5rem;
+                padding: 0.875rem;
+                padding-top: 0;
             }
 
             .tournament-actions .btn {
-                padding: 0.5rem 0.75rem;
-                font-size: 0.8rem;
-            }
-
-            .leaderboard {
-                padding: 1rem;
-                margin: 0.5rem;
-            }
-
-            .leaderboard-header {
-                flex-direction: column;
-                gap: 0.5rem;
-                text-align: center;
-            }
-
-            .leaderboard-header h2 {
-                font-size: 1.1rem;
-            }
-
-            /* Make tables scrollable on mobile */
-            .leaderboard-table,
-            .standings-table {
-                font-size: 0.8rem;
-                display: block;
-                overflow-x: auto;
-                white-space: nowrap;
-            }
-
-            .leaderboard-table th,
-            .leaderboard-table td,
-            .standings-table th,
-            .standings-table td {
-                padding: 0.5rem 0.4rem;
-            }
-
-            .my-pick-highlight {
-                flex-direction: column;
-                text-align: center;
-                padding: 1rem;
-            }
-
-            .my-pick-photo {
-                width: 60px;
-                height: 60px;
-            }
-
-            .my-pick-stats {
-                text-align: center;
-            }
-
-            .my-pick-position {
-                font-size: 2rem;
-            }
-
-            .pool-header {
-                padding: 1rem;
-            }
-
-            .pool-header h1 {
-                font-size: 1.5rem;
-            }
-
-            .player-item {
                 padding: 0.75rem;
+                font-size: 0.85rem;
             }
 
-            .player-photo {
-                width: 40px;
-                height: 40px;
+            /* --- MODALS --- */
+            .modal {
+                width: 95%;
+                max-height: 85vh;
             }
 
-            .player-info h4 {
-                font-size: 0.9rem;
+            .modal-header {
+                padding: 1rem;
             }
 
-            .player-info p {
-                font-size: 0.75rem;
+            .modal-body {
+                padding: 1rem;
             }
 
-            .screen {
-                padding: 0.5rem;
+            /* --- TOAST --- */
+            .toast {
+                left: 1rem;
+                right: 1rem;
+                bottom: 1rem;
+            }
+        }
+
+        /* --- EXTRA SMALL SCREENS (< 400px) --- */
+
+        /* --- EXTRA SMALL SCREENS (< 400px) --- */
+        @media (max-width: 400px) {
+            .header-content {
+                padding: 0.4rem 0.5rem;
             }
 
-            .container {
-                padding: 0 0.5rem;
-            }
-
-            /* Fix upcoming tournaments table */
-            .upcoming-table {
-                font-size: 0.75rem;
-            }
-
-            .upcoming-table th,
-            .upcoming-table td {
-                padding: 0.5rem 0.25rem;
-            }
-
-            /* Weekly pick display */
-            .weekly-pick {
-                flex-direction: column;
-                gap: 0.25rem;
-            }
-
-            .weekly-pick img {
-                width: 28px;
-                height: 28px;
-                object-fit: cover;
-            }
-
-            /* Profile pictures in standings */
-            .standings-table img {
-                width: 24px;
-                height: 24px;
-            }
-
-            /* Nav profile on mobile */
-            .nav-profile {
-                margin-right: 0.5rem;
+            .logo-image {
+                height: 42px;
             }
 
             .nav-profile img {
+                width: 30px;
+                height: 30px;
+            }
+
+            .nav-btn {
+                padding: 0.35rem 0.5rem;
+                font-size: 0.65rem;
+            }
+
+            .tab {
+                padding: 0.75rem 0.75rem;
+                font-size: 0.75rem;
+            }
+
+            .standings-table tr {
+                padding: 0.75rem;
+            }
+
+            .standings-table .rank-badge {
+                width: 32px;
+                height: 32px;
+                font-size: 0.9rem;
+            }
+
+            .standings-table td:nth-child(2) img {
                 width: 32px;
                 height: 32px;
             }
 
-            .nav-profile-edit {
-                font-size: 0.6rem;
+            .standings-table td:nth-child(2) span {
+                font-size: 0.9rem;
             }
 
-            /* Friend tags on leaderboard */
-            .friend-tags {
-                flex-wrap: wrap;
+            .my-pick-highlight img {
+                width: 70px;
+                height: 70px;
             }
 
-            .friend-tag {
-                font-size: 0.65rem;
-                padding: 0.15rem 0.3rem;
+            .my-pick-info h3 {
+                font-size: 1.2rem;
             }
 
-            /* Header nav buttons on mobile */
-            .nav-btn {
-                padding: 0.3rem 0.5rem;
-                font-size: 0.65rem;
+            .my-pick-stats .position {
+                font-size: 2rem;
             }
 
-            /* Logo on mobile */
-            .logo-image {
-                height: 55px;
+            .leaderboard-table {
+                font-size: 0.75rem;
             }
 
-            /* Hide columns marked hide-mobile */
-            .hide-mobile {
-                display: none !important;
-            }
-
-            /* Also hide the corresponding data cells (5th column in leaderboard, last in standings) */
-            .leaderboard-table td:nth-child(5) {
-                display: none;
-            }
-
-            .standings-table td:last-child {
-                display: none;
-            }
-
-            /* Prevent horizontal scroll */
-            .leaderboard-table,
-            .standings-table {
-                white-space: normal;
-                display: table;
-                width: 100%;
-                table-layout: fixed;
-            }
-
-            /* Condense standings table */
-            .standings-table .weekly-pick {
-                font-size: 0.7rem;
-            }
-
-            .standings-table .weekly-pick span {
-                max-width: 70px;
-                overflow: hidden;
-                text-overflow: ellipsis;
-                white-space: nowrap;
-                display: inline-block;
-            }
-
-            /* Earnings column narrower */
-            .earnings-cell {
-                font-size: 0.7rem;
-                white-space: nowrap;
-            }
-
-            /* Compact player cell */
-            .player-cell {
-                gap: 0.3rem;
-            }
-
-            .player-cell img {
+            .leaderboard-table .player-cell img {
                 width: 24px;
                 height: 24px;
             }
 
-            .player-cell span {
-                font-size: 0.8rem;
+            .leaderboard-table .player-cell span {
+                font-size: 0.75rem;
             }
 
-            /* Score cells */
-            .score-cell {
-                font-size: 0.85rem;
-                padding: 0.4rem 0.2rem !important;
+            .hero h2 {
+                font-size: 1.75rem;
             }
 
-            .pos-cell {
-                font-size: 0.85rem;
-                padding: 0.4rem 0.2rem !important;
-            }
-        }
-
-        /* Extra small screens */
-        @media (max-width: 400px) {
-            .header-content {
-                padding: 0.5rem;
-            }
-
-            .logo h1 {
-                font-size: 1rem;
-            }
-
-            .nav-buttons .btn {
-                padding: 0.3rem 0.5rem;
-                font-size: 0.7rem;
-            }
-
-            .tab {
-                font-size: 0.7rem;
-                padding: 0.5rem 0.25rem;
-            }
-
-            .leaderboard-table,
-            .standings-table {
-                font-size: 0.7rem;
+            .auth-container {
+                margin: 0.5rem;
+                padding: 1.25rem;
             }
         }
 
@@ -1470,6 +1685,108 @@
 
         @keyframes spin {
             to { transform: rotate(360deg); }
+        }
+
+        /* Additional mobile-friendly enhancements */
+        @media (max-width: 768px) {
+            /* Make "Your Pick" section more prominent on Live Leaderboard */
+            .my-pick-highlight {
+                border-radius: 0;
+                margin: 0;
+            }
+
+            .my-pick-highlight::before {
+                content: 'YOUR PICK';
+                display: block;
+                font-family: 'Oswald', sans-serif;
+                font-size: 0.7rem;
+                letter-spacing: 1.5px;
+                color: var(--green-deep);
+                opacity: 0.7;
+                margin-bottom: 0.5rem;
+            }
+
+            /* Projected earnings badge */
+            .my-pick-stats .earnings {
+                background: var(--green-deep);
+                color: var(--white);
+                padding: 0.3rem 0.75rem;
+                border-radius: 4px;
+                display: inline-block;
+            }
+
+            /* Better visual hierarchy for standings cards */
+            .standings-table tbody {
+                background: #f9fafb;
+            }
+
+            /* Add "This Week" label to pick section in card */
+            .standings-table td:nth-child(3)::before {
+                content: 'This Week: ';
+                font-size: 0.75rem;
+                color: var(--gray);
+                font-weight: 500;
+            }
+
+            /* Pool header improvements */
+            .standings-header .pool-image-container {
+                margin-bottom: 0.25rem;
+            }
+
+            .standings-header .pool-total {
+                font-size: 1.3rem;
+            }
+
+            /* Projected earnings styling in standings */
+            .standings-table .weekly-pick .earnings-projected {
+                color: var(--gold);
+                font-weight: 600;
+                font-size: 0.8rem;
+            }
+
+            /* Bottom safe area padding for iOS */
+            .screen.active {
+                padding-bottom: env(safe-area-inset-bottom, 0);
+            }
+        }
+
+        /* Touch-friendly improvements */
+        @media (hover: none) and (pointer: coarse) {
+            /* Larger touch targets */
+            .nav-btn {
+                min-height: 44px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+
+            .tab {
+                min-height: 48px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+
+            .player-item {
+                min-height: 60px;
+            }
+
+            .tournament-actions .btn {
+                min-height: 44px;
+            }
+
+            /* Remove hover states that don't work on touch */
+            .player-item:hover:not(.disabled) {
+                background: transparent;
+            }
+
+            .player-item:active:not(.disabled) {
+                background: rgba(26, 92, 58, 0.08);
+            }
+
+            .standings-table tr:active {
+                background: rgba(26, 92, 58, 0.05);
+            }
         }
 
         /* Empty State */
