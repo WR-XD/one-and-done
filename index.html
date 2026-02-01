@@ -1187,9 +1187,9 @@
                 overflow-x: visible;
                 -webkit-overflow-scrolling: touch;
                 scrollbar-width: none;
-                padding: 0 0.25rem;
+                padding: 0 0.15rem;
                 display: flex;
-                justify-content: space-evenly;
+                justify-content: space-between;
                 align-items: center;
             }
 
@@ -1198,14 +1198,15 @@
             }
 
             .tab {
-                padding: 0.75rem 0.1rem;
-                font-size: 0.65rem;
+                padding: 0.65rem 0.1rem;
+                font-size: 0.55rem;
                 white-space: nowrap;
                 text-align: center;
+                letter-spacing: -0.3px;
             }
 
             .tab.active::after {
-                height: 3px;
+                height: 2px;
             }
 
             /* Hide "Pool ", "Live ", "Pick " prefixes on mobile */
@@ -1221,8 +1222,8 @@
             }
 
             .pool-options-btn {
-                padding: 0.5rem 0.35rem;
-                font-size: 1.1rem;
+                padding: 0.3rem 0.15rem;
+                font-size: 0.95rem;
             }
 
             /* Hide scroll indicator since tabs fit now */
@@ -1740,8 +1741,6 @@
         }
 
         /* --- EXTRA SMALL SCREENS (< 400px) --- */
-
-        /* --- EXTRA SMALL SCREENS (< 400px) --- */
         @media (max-width: 400px) {
             .header-content {
                 padding: 0.4rem 0.5rem;
@@ -1762,8 +1761,14 @@
             }
 
             .tab {
-                padding: 0.7rem 0.05rem;
-                font-size: 0.6rem;
+                padding: 0.6rem 0.05rem;
+                font-size: 0.5rem;
+                letter-spacing: -0.4px;
+            }
+
+            .pool-options-btn {
+                padding: 0.25rem 0.1rem;
+                font-size: 0.85rem;
             }
 
             .standings-table tr {
@@ -1984,7 +1989,7 @@
             }
 
             .tab {
-                min-height: 48px;
+                min-height: 40px;
                 display: flex;
                 align-items: center;
                 justify-content: center;
