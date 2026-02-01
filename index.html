@@ -1430,13 +1430,13 @@
             .leaderboard-table th:nth-child(1),
             .leaderboard-table td:nth-child(1) { width: 32px; text-align: center; } /* Pos */
             .leaderboard-table th:nth-child(2),
-            .leaderboard-table td:nth-child(2) { width: auto; } /* Player - flexible */
+            .leaderboard-table td:nth-child(2) { width: 38%; } /* Player - percentage based */
             .leaderboard-table th:nth-child(3),
-            .leaderboard-table td:nth-child(3) { width: 48px; text-align: center; } /* Score */
+            .leaderboard-table td:nth-child(3) { width: 44px; text-align: center; } /* Score */
             .leaderboard-table th:nth-child(4),
             .leaderboard-table td:nth-child(4) { width: 38px; text-align: center; } /* Today */
             .leaderboard-table th:nth-child(6),
-            .leaderboard-table td:nth-child(6) { width: 78px; text-align: right; padding-right: 0.5rem; } /* Projected $ */
+            .leaderboard-table td:nth-child(6) { width: 88px; text-align: right; padding-right: 0.4rem; } /* Projected $ - wider for header */
 
             .leaderboard-table .pos-cell {
                 font-size: 0.9rem;
@@ -1549,21 +1549,40 @@
                 display: inline-block !important;
             }
 
-            /* Upcoming Schedule columns - hide Course, show Purse properly */
+            /* Upcoming Schedule columns - KEEP Course, allow tournament wrap */
+            #tab-history .leaderboard:nth-of-type(2) .leaderboard-table {
+                table-layout: fixed;
+            }
             #tab-history .leaderboard:nth-of-type(2) .leaderboard-table th:nth-child(1),
-            #tab-history .leaderboard:nth-of-type(2) .leaderboard-table td:nth-child(1) { width: 24px; text-align: center; } /* Week */
+            #tab-history .leaderboard:nth-of-type(2) .leaderboard-table td:nth-child(1) { width: 38px; text-align: center; } /* Week - wider for header */
             #tab-history .leaderboard:nth-of-type(2) .leaderboard-table th:nth-child(2),
-            #tab-history .leaderboard:nth-of-type(2) .leaderboard-table td:nth-child(2) { width: auto; } /* Tournament */
+            #tab-history .leaderboard:nth-of-type(2) .leaderboard-table td:nth-child(2) { 
+                width: auto; 
+            } /* Tournament - flexible, can wrap */
+            #tab-history .leaderboard:nth-of-type(2) .leaderboard-table td:nth-child(2) span,
+            #tab-history .leaderboard:nth-of-type(2) .leaderboard-table td:nth-child(2) strong {
+                white-space: normal !important;
+                word-wrap: break-word;
+            }
             #tab-history .leaderboard:nth-of-type(2) .leaderboard-table th:nth-child(3),
-            #tab-history .leaderboard:nth-of-type(2) .leaderboard-table td:nth-child(3) { width: 72px; } /* Dates */
+            #tab-history .leaderboard:nth-of-type(2) .leaderboard-table td:nth-child(3) { width: 58px; text-align: center; } /* Dates */
             #tab-history .leaderboard:nth-of-type(2) .leaderboard-table th:nth-child(4),
-            #tab-history .leaderboard:nth-of-type(2) .leaderboard-table td:nth-child(4) { display: none !important; } /* Course - HIDE */
+            #tab-history .leaderboard:nth-of-type(2) .leaderboard-table td:nth-child(4) { 
+                display: table-cell !important; /* SHOW Course */
+                width: 70px;
+                font-size: 0.75rem;
+            }
+            #tab-history .leaderboard:nth-of-type(2) .leaderboard-table td:nth-child(4) {
+                white-space: normal;
+                word-wrap: break-word;
+                line-height: 1.2;
+            }
             #tab-history .leaderboard:nth-of-type(2) .leaderboard-table th:nth-child(5),
             #tab-history .leaderboard:nth-of-type(2) .leaderboard-table td:nth-child(5) { 
                 display: table-cell !important; 
-                width: 70px;
+                width: 72px;
                 text-align: right;
-                padding-right: 0.5rem;
+                padding-right: 0.4rem;
             } /* Purse */
 
             /* --- PLAYER SELECTION --- */
@@ -1764,12 +1783,14 @@
             /* Tighter columns on extra small screens */
             .leaderboard-table th:nth-child(1),
             .leaderboard-table td:nth-child(1) { width: 28px; }
+            .leaderboard-table th:nth-child(2),
+            .leaderboard-table td:nth-child(2) { width: 35%; }
             .leaderboard-table th:nth-child(3),
-            .leaderboard-table td:nth-child(3) { width: 42px; }
+            .leaderboard-table td:nth-child(3) { width: 38px; }
             .leaderboard-table th:nth-child(4),
             .leaderboard-table td:nth-child(4) { width: 32px; }
             .leaderboard-table th:nth-child(6),
-            .leaderboard-table td:nth-child(6) { width: 68px; }
+            .leaderboard-table td:nth-child(6) { width: 78px; }
 
             .leaderboard-table .earnings-cell {
                 font-size: 0.7rem;
@@ -1802,10 +1823,14 @@
             }
 
             /* Upcoming tournaments - tighter on small screens */
+            #tab-history .leaderboard:nth-of-type(2) .leaderboard-table th:nth-child(1),
+            #tab-history .leaderboard:nth-of-type(2) .leaderboard-table td:nth-child(1) { width: 32px; }
             #tab-history .leaderboard:nth-of-type(2) .leaderboard-table th:nth-child(3),
-            #tab-history .leaderboard:nth-of-type(2) .leaderboard-table td:nth-child(3) { width: 62px; }
+            #tab-history .leaderboard:nth-of-type(2) .leaderboard-table td:nth-child(3) { width: 52px; }
+            #tab-history .leaderboard:nth-of-type(2) .leaderboard-table th:nth-child(4),
+            #tab-history .leaderboard:nth-of-type(2) .leaderboard-table td:nth-child(4) { width: 58px; font-size: 0.65rem; }
             #tab-history .leaderboard:nth-of-type(2) .leaderboard-table th:nth-child(5),
-            #tab-history .leaderboard:nth-of-type(2) .leaderboard-table td:nth-child(5) { width: 60px; }
+            #tab-history .leaderboard:nth-of-type(2) .leaderboard-table td:nth-child(5) { width: 62px; }
         }
 
         /* Loading State */
