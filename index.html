@@ -5928,6 +5928,9 @@ See you on the course!`
             const pool = store.pools.find(p => p.id === currentPoolId);
             if (!pool) return;
 
+            // Fetch ESPN data to ensure we have latest leaderboard info
+            await fetchESPNLeaderboard();
+
             // Use ESPN live data if available, otherwise mock data
             const leaderboardData = espnDataLoaded && liveLeaderboard.length > 0 ? liveLeaderboard : mockLeaderboard;
 
@@ -5961,6 +5964,7 @@ See you on the course!`
                     let currentWeekEarnings = 0;
                     let currentPlayer = null;
                     let playerHeadshot = null;
+                    let playerPosition = null;
                     
                     if (s.current_week_pick && s.current_week_pick.player_id) {
                         currentPlayer = getPlayerById(s.current_week_pick.player_id) || {
@@ -5978,6 +5982,7 @@ See you on the course!`
                             );
                         }
                         currentWeekEarnings = leaderboardEntry ? leaderboardEntry.projectedEarnings : 0;
+                        playerPosition = leaderboardEntry ? leaderboardEntry.pos : null;
                         // Get headshot from leaderboard if available
                         playerHeadshot = leaderboardEntry?.headshot || null;
                     }
@@ -5989,7 +5994,8 @@ See you on the course!`
                         totalEarnings: (Number(s.total_earnings) || 0) + currentWeekEarnings,
                         currentWeekEarnings,
                         currentPlayer,
-                        playerHeadshot
+                        playerHeadshot,
+                        playerPosition
                     };
                 }).sort((a, b) => b.completedEarnings - a.completedEarnings);
             } else {
@@ -6033,6 +6039,7 @@ See you on the course!`
                     let currentWeekEarnings = 0;
                     let currentPlayer = null;
                     let playerHeadshot = null;
+                    let playerPosition = null;
 
                     if (currentPick) {
                         currentPlayer = getPlayerById(currentPick.playerId);
@@ -6048,6 +6055,7 @@ See you on the course!`
                             );
                         }
                         currentWeekEarnings = leaderboardEntry ? leaderboardEntry.projectedEarnings : 0;
+                        playerPosition = leaderboardEntry ? leaderboardEntry.pos : null;
                         playerHeadshot = leaderboardEntry?.headshot || null;
                     }
 
@@ -6058,7 +6066,8 @@ See you on the course!`
                         totalEarnings: completedEarnings + currentWeekEarnings,
                         currentWeekEarnings,
                         currentPlayer,
-                        playerHeadshot
+                        playerHeadshot,
+                        playerPosition
                     };
                 }).filter(s => s.user).sort((a, b) => b.completedEarnings - a.completedEarnings);
             }
@@ -6103,7 +6112,7 @@ See you on the course!`
                                 <div class="weekly-pick">
                                     <img src="${standing.playerHeadshot || getPlayerHeadshot(standing.currentPlayer)}" alt="" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect fill=%22%23e5e7eb%22 width=%22100%22 height=%22100%22/></svg>'">
                                     <span>${standing.currentPlayer.name}</span>
-                                    <span style="color: var(--gold); font-size: 0.8rem; margin-left: 0.25rem;">(${formatCurrency(standing.currentWeekEarnings)} proj)</span>
+                                    <span style="color: var(--gold); font-size: 0.8rem; margin-left: 0.25rem;">(${standing.playerPosition || '-'}, ${formatCurrency(standing.currentWeekEarnings)} proj)</span>
                                 </div>
                             ` : '<span style="color: var(--gray);">No pick yet</span>'}
                         </td>
