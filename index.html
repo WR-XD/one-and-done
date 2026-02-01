@@ -1421,18 +1421,31 @@
                 vertical-align: middle;
             }
 
+            /* Fixed column widths for leaderboard */
+            .leaderboard-table th:nth-child(1),
+            .leaderboard-table td:nth-child(1) { width: 38px; } /* Pos */
+            .leaderboard-table th:nth-child(2),
+            .leaderboard-table td:nth-child(2) { width: auto; } /* Player - takes remaining space */
+            .leaderboard-table th:nth-child(3),
+            .leaderboard-table td:nth-child(3) { width: 42px; } /* Score */
+            .leaderboard-table th:nth-child(4),
+            .leaderboard-table td:nth-child(4) { width: 36px; } /* Today - narrower! */
+            .leaderboard-table th:nth-child(6),
+            .leaderboard-table td:nth-child(6) { width: 72px; } /* Projected $ */
+
             .leaderboard-table .pos-cell {
-                width: 35px;
                 font-size: 0.9rem;
             }
 
             .leaderboard-table .player-cell {
                 gap: 0.4rem;
+                flex-wrap: wrap;
             }
 
             .leaderboard-table .player-cell img {
                 width: 28px;
                 height: 28px;
+                flex-shrink: 0;
             }
 
             .leaderboard-table .player-cell span {
@@ -1440,6 +1453,7 @@
                 white-space: nowrap;
                 overflow: hidden;
                 text-overflow: ellipsis;
+                max-width: 80px;
             }
 
             .leaderboard-table .score-cell {
@@ -1447,11 +1461,25 @@
                 font-weight: 600;
             }
 
-            /* Pick tags */
+            /* Pick tags - show as username badges below player name */
             .pick-tag {
-                font-size: 0.55rem;
-                padding: 0.1rem 0.25rem;
-                margin-left: 0.25rem;
+                font-size: 0.6rem;
+                padding: 0.15rem 0.35rem;
+                margin-left: 0;
+                margin-top: 2px;
+                display: inline-block;
+                border-radius: 3px;
+                max-width: 100%;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+            }
+
+            /* Stack pick tags below player name on mobile */
+            .leaderboard-table .player-cell {
+                flex-direction: row;
+                flex-wrap: wrap;
+                align-items: center;
             }
 
             /* Hide less important columns */
@@ -1459,9 +1487,71 @@
                 display: none !important;
             }
 
-            .leaderboard-table td:nth-child(5) {
+            .leaderboard-table td:nth-child(5),
+            .leaderboard-table th:nth-child(5) {
                 display: none;
             }
+
+            /* --- PICK HISTORY TABLE IMPROVEMENTS --- */
+            #tab-history .leaderboard-table {
+                table-layout: fixed;
+            }
+
+            /* Pick History columns */
+            #tab-history .leaderboard-table th:nth-child(1),
+            #tab-history .leaderboard-table td:nth-child(1) { width: 32px; } /* Week - narrower */
+            #tab-history .leaderboard-table th:nth-child(2),
+            #tab-history .leaderboard-table td:nth-child(2) { width: auto; } /* Tournament */
+            #tab-history .leaderboard-table th:nth-child(3),
+            #tab-history .leaderboard-table td:nth-child(3) { width: auto; } /* Your Pick */
+            #tab-history .leaderboard-table th:nth-child(4),
+            #tab-history .leaderboard-table td:nth-child(4) { width: 70px; } /* Finish */
+            #tab-history .leaderboard-table th:nth-child(5),
+            #tab-history .leaderboard-table td:nth-child(5) { 
+                display: table-cell !important; /* Override hide-mobile */
+                width: 70px; 
+            } /* Earnings */
+
+            /* Tournament logo in history */
+            #tab-history .tournament-logo-small {
+                width: 24px;
+                height: 24px;
+                display: inline-block !important;
+                flex-shrink: 0;
+            }
+
+            #tab-history .player-cell {
+                gap: 0.35rem;
+            }
+
+            #tab-history .player-cell span {
+                font-size: 0.8rem;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+            }
+
+            /* --- UPCOMING TOURNAMENTS TABLE --- */
+            #schedule-body .tournament-logo-small {
+                width: 20px;
+                height: 20px;
+                display: inline-block !important;
+            }
+
+            /* Upcoming Schedule columns - show purse! */
+            #tab-history .leaderboard:last-of-type .leaderboard-table th:nth-child(1),
+            #tab-history .leaderboard:last-of-type .leaderboard-table td:nth-child(1) { width: 28px; } /* Week */
+            #tab-history .leaderboard:last-of-type .leaderboard-table th:nth-child(2),
+            #tab-history .leaderboard:last-of-type .leaderboard-table td:nth-child(2) { width: auto; } /* Tournament */
+            #tab-history .leaderboard:last-of-type .leaderboard-table th:nth-child(3),
+            #tab-history .leaderboard:last-of-type .leaderboard-table td:nth-child(3) { width: 70px; } /* Dates */
+            #tab-history .leaderboard:last-of-type .leaderboard-table th:nth-child(4),
+            #tab-history .leaderboard:last-of-type .leaderboard-table td:nth-child(4) { display: none; } /* Course - hide on mobile */
+            #tab-history .leaderboard:last-of-type .leaderboard-table th:nth-child(5),
+            #tab-history .leaderboard:last-of-type .leaderboard-table td:nth-child(5) { 
+                display: table-cell !important; 
+                width: 65px; 
+            } /* Purse - show! */
 
             /* --- PLAYER SELECTION --- */
             .selection-header {
@@ -1652,6 +1742,22 @@
 
             .leaderboard-table .player-cell span {
                 font-size: 0.75rem;
+                max-width: 65px;
+            }
+
+            /* Even narrower columns on extra small screens */
+            .leaderboard-table th:nth-child(1),
+            .leaderboard-table td:nth-child(1) { width: 32px; }
+            .leaderboard-table th:nth-child(3),
+            .leaderboard-table td:nth-child(3) { width: 36px; }
+            .leaderboard-table th:nth-child(4),
+            .leaderboard-table td:nth-child(4) { width: 30px; }
+            .leaderboard-table th:nth-child(6),
+            .leaderboard-table td:nth-child(6) { width: 62px; }
+
+            .pick-tag {
+                font-size: 0.55rem;
+                padding: 0.1rem 0.25rem;
             }
 
             .hero h2 {
@@ -1661,6 +1767,18 @@
             .auth-container {
                 margin: 0.5rem;
                 padding: 1.25rem;
+            }
+
+            /* History table adjustments */
+            #tab-history .leaderboard-table th:nth-child(1),
+            #tab-history .leaderboard-table td:nth-child(1) { width: 26px; }
+            #tab-history .leaderboard-table th:nth-child(4),
+            #tab-history .leaderboard-table td:nth-child(4) { width: 58px; }
+            #tab-history .leaderboard-table th:nth-child(5),
+            #tab-history .leaderboard-table td:nth-child(5) { width: 58px; }
+
+            #tab-history .player-cell span {
+                font-size: 0.7rem;
             }
         }
 
@@ -6039,14 +6157,14 @@ See you on the course!`
                 // Build pick tags
                 let pickTags = '';
                 if (isMyPick) {
-                    pickTags += '<span class="pick-tag your-pick">YOUR PICK</span>';
+                    pickTags += '<span class="pick-tag your-pick">YOU</span>';
                 }
                 memberPicks.forEach(pick => {
                     const friendUser = store.users.find(u => u.id === pick.userId);
                     if (friendUser) {
                         const firstName = friendUser.name.split(' ')[0];
                         const colorClass = `friend-pick-${friendColorMap[pick.userId]}`;
-                        pickTags += `<span class="pick-tag ${colorClass}">${firstName}'s PICK</span>`;
+                        pickTags += `<span class="pick-tag ${colorClass}">${firstName}</span>`;
                     }
                 });
 
