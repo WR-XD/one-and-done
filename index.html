@@ -1184,10 +1184,12 @@
             }
 
             .tabs {
-                overflow-x: auto;
+                overflow-x: visible;
                 -webkit-overflow-scrolling: touch;
                 scrollbar-width: none;
-                padding: 0 0.5rem;
+                padding: 0;
+                display: flex;
+                justify-content: space-between;
             }
 
             .tabs::-webkit-scrollbar {
@@ -1195,14 +1197,37 @@
             }
 
             .tab {
-                padding: 0.875rem 1rem;
-                font-size: 0.8rem;
+                padding: 0.7rem 0.4rem;
+                font-size: 0.68rem;
                 white-space: nowrap;
-                flex-shrink: 0;
+                flex: 1;
+                text-align: center;
+                min-width: 0;
             }
 
             .tab.active::after {
                 height: 3px;
+            }
+
+            /* Hide "Pool ", "Live ", "Pick " prefixes on mobile */
+            .tab-full {
+                display: none;
+            }
+
+            /* Pool options menu - compact */
+            .pool-options-menu {
+                flex: 0 0 auto;
+                padding: 0 0.25rem;
+            }
+
+            .pool-options-btn {
+                padding: 0.5rem;
+                font-size: 1.2rem;
+            }
+
+            /* Hide scroll indicator since tabs fit now */
+            .scroll-indicator {
+                display: none !important;
             }
 
             /* --- POOL STANDINGS - CARD LAYOUT --- */
@@ -1727,8 +1752,8 @@
             }
 
             .tab {
-                padding: 0.75rem 0.75rem;
-                font-size: 0.75rem;
+                padding: 0.65rem 0.25rem;
+                font-size: 0.6rem;
             }
 
             .standings-table tr {
@@ -2384,10 +2409,10 @@
 
             <div class="tabs-container" id="tabs-container">
                 <div class="tabs" id="pool-tabs">
-                    <button class="tab active" onclick="switchPoolTab('standings')">Pool Standings</button>
-                    <button class="tab" onclick="switchPoolTab('leaderboard')">Live Leaderboard</button>
+                    <button class="tab active" onclick="switchPoolTab('standings')"><span class="tab-full">Pool </span>Standings</button>
+                    <button class="tab" onclick="switchPoolTab('leaderboard')"><span class="tab-full">Live </span>Leaderboard</button>
                     <button class="tab" onclick="switchPoolTab('pick')">Make Pick</button>
-                    <button class="tab" onclick="switchPoolTab('history')">Pick History</button>
+                    <button class="tab" onclick="switchPoolTab('history')"><span class="tab-full">Pick </span>History</button>
                     <div class="pool-options-menu">
                         <button class="pool-options-btn" onclick="togglePoolOptions(event)">
                             <span>⋮</span>
