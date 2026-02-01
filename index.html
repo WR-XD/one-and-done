@@ -1412,29 +1412,35 @@
             }
 
             .leaderboard-table th {
-                padding: 0.5rem 0.25rem;
-                font-size: 0.7rem;
+                padding: 0.5rem 0.2rem;
+                font-size: 0.65rem;
+                text-align: center;
+            }
+
+            .leaderboard-table th:nth-child(2) {
+                text-align: left;
             }
 
             .leaderboard-table td {
-                padding: 0.6rem 0.25rem;
+                padding: 0.6rem 0.2rem;
                 vertical-align: middle;
             }
 
-            /* Fixed column widths for leaderboard */
+            /* Fixed column widths for leaderboard - balanced for readability */
             .leaderboard-table th:nth-child(1),
-            .leaderboard-table td:nth-child(1) { width: 38px; } /* Pos */
+            .leaderboard-table td:nth-child(1) { width: 32px; text-align: center; } /* Pos */
             .leaderboard-table th:nth-child(2),
-            .leaderboard-table td:nth-child(2) { width: auto; } /* Player - takes remaining space */
+            .leaderboard-table td:nth-child(2) { width: auto; } /* Player - flexible */
             .leaderboard-table th:nth-child(3),
-            .leaderboard-table td:nth-child(3) { width: 42px; } /* Score */
+            .leaderboard-table td:nth-child(3) { width: 48px; text-align: center; } /* Score */
             .leaderboard-table th:nth-child(4),
-            .leaderboard-table td:nth-child(4) { width: 36px; } /* Today - narrower! */
+            .leaderboard-table td:nth-child(4) { width: 38px; text-align: center; } /* Today */
             .leaderboard-table th:nth-child(6),
-            .leaderboard-table td:nth-child(6) { width: 72px; } /* Projected $ */
+            .leaderboard-table td:nth-child(6) { width: 78px; text-align: right; padding-right: 0.5rem; } /* Projected $ */
 
             .leaderboard-table .pos-cell {
                 font-size: 0.9rem;
+                text-align: center;
             }
 
             .leaderboard-table .player-cell {
@@ -1453,12 +1459,17 @@
                 white-space: nowrap;
                 overflow: hidden;
                 text-overflow: ellipsis;
-                max-width: 80px;
             }
 
             .leaderboard-table .score-cell {
                 font-size: 0.95rem;
                 font-weight: 600;
+                text-align: center;
+            }
+
+            .leaderboard-table .earnings-cell {
+                font-size: 0.8rem;
+                text-align: right;
             }
 
             /* Pick tags - show as username badges below player name */
@@ -1538,20 +1549,22 @@
                 display: inline-block !important;
             }
 
-            /* Upcoming Schedule columns - show purse! */
-            #tab-history .leaderboard:last-of-type .leaderboard-table th:nth-child(1),
-            #tab-history .leaderboard:last-of-type .leaderboard-table td:nth-child(1) { width: 28px; } /* Week */
-            #tab-history .leaderboard:last-of-type .leaderboard-table th:nth-child(2),
-            #tab-history .leaderboard:last-of-type .leaderboard-table td:nth-child(2) { width: auto; } /* Tournament */
-            #tab-history .leaderboard:last-of-type .leaderboard-table th:nth-child(3),
-            #tab-history .leaderboard:last-of-type .leaderboard-table td:nth-child(3) { width: 70px; } /* Dates */
-            #tab-history .leaderboard:last-of-type .leaderboard-table th:nth-child(4),
-            #tab-history .leaderboard:last-of-type .leaderboard-table td:nth-child(4) { display: none; } /* Course - hide on mobile */
-            #tab-history .leaderboard:last-of-type .leaderboard-table th:nth-child(5),
-            #tab-history .leaderboard:last-of-type .leaderboard-table td:nth-child(5) { 
+            /* Upcoming Schedule columns - hide Course, show Purse properly */
+            #tab-history .leaderboard:nth-of-type(2) .leaderboard-table th:nth-child(1),
+            #tab-history .leaderboard:nth-of-type(2) .leaderboard-table td:nth-child(1) { width: 24px; text-align: center; } /* Week */
+            #tab-history .leaderboard:nth-of-type(2) .leaderboard-table th:nth-child(2),
+            #tab-history .leaderboard:nth-of-type(2) .leaderboard-table td:nth-child(2) { width: auto; } /* Tournament */
+            #tab-history .leaderboard:nth-of-type(2) .leaderboard-table th:nth-child(3),
+            #tab-history .leaderboard:nth-of-type(2) .leaderboard-table td:nth-child(3) { width: 72px; } /* Dates */
+            #tab-history .leaderboard:nth-of-type(2) .leaderboard-table th:nth-child(4),
+            #tab-history .leaderboard:nth-of-type(2) .leaderboard-table td:nth-child(4) { display: none !important; } /* Course - HIDE */
+            #tab-history .leaderboard:nth-of-type(2) .leaderboard-table th:nth-child(5),
+            #tab-history .leaderboard:nth-of-type(2) .leaderboard-table td:nth-child(5) { 
                 display: table-cell !important; 
-                width: 65px; 
-            } /* Purse - show! */
+                width: 70px;
+                text-align: right;
+                padding-right: 0.5rem;
+            } /* Purse */
 
             /* --- PLAYER SELECTION --- */
             .selection-header {
@@ -1735,6 +1748,10 @@
                 font-size: 0.75rem;
             }
 
+            .leaderboard-table th {
+                font-size: 0.6rem;
+            }
+
             .leaderboard-table .player-cell img {
                 width: 24px;
                 height: 24px;
@@ -1742,18 +1759,21 @@
 
             .leaderboard-table .player-cell span {
                 font-size: 0.75rem;
-                max-width: 65px;
             }
 
-            /* Even narrower columns on extra small screens */
+            /* Tighter columns on extra small screens */
             .leaderboard-table th:nth-child(1),
-            .leaderboard-table td:nth-child(1) { width: 32px; }
+            .leaderboard-table td:nth-child(1) { width: 28px; }
             .leaderboard-table th:nth-child(3),
-            .leaderboard-table td:nth-child(3) { width: 36px; }
+            .leaderboard-table td:nth-child(3) { width: 42px; }
             .leaderboard-table th:nth-child(4),
-            .leaderboard-table td:nth-child(4) { width: 30px; }
+            .leaderboard-table td:nth-child(4) { width: 32px; }
             .leaderboard-table th:nth-child(6),
-            .leaderboard-table td:nth-child(6) { width: 62px; }
+            .leaderboard-table td:nth-child(6) { width: 68px; }
+
+            .leaderboard-table .earnings-cell {
+                font-size: 0.7rem;
+            }
 
             .pick-tag {
                 font-size: 0.55rem;
@@ -1771,7 +1791,7 @@
 
             /* History table adjustments */
             #tab-history .leaderboard-table th:nth-child(1),
-            #tab-history .leaderboard-table td:nth-child(1) { width: 26px; }
+            #tab-history .leaderboard-table td:nth-child(1) { width: 24px; }
             #tab-history .leaderboard-table th:nth-child(4),
             #tab-history .leaderboard-table td:nth-child(4) { width: 58px; }
             #tab-history .leaderboard-table th:nth-child(5),
@@ -1780,6 +1800,12 @@
             #tab-history .player-cell span {
                 font-size: 0.7rem;
             }
+
+            /* Upcoming tournaments - tighter on small screens */
+            #tab-history .leaderboard:nth-of-type(2) .leaderboard-table th:nth-child(3),
+            #tab-history .leaderboard:nth-of-type(2) .leaderboard-table td:nth-child(3) { width: 62px; }
+            #tab-history .leaderboard:nth-of-type(2) .leaderboard-table th:nth-child(5),
+            #tab-history .leaderboard:nth-of-type(2) .leaderboard-table td:nth-child(5) { width: 60px; }
         }
 
         /* Loading State */
@@ -3671,9 +3697,10 @@
             const endMonth = new Date(t.endDate).toLocaleDateString('en-US', { month: 'short' });
             const startMonthName = new Date(t.startDate).toLocaleDateString('en-US', { month: 'short' });
             
+            // Compact date format without year: "Feb 12-15" or "Mar 28 - Apr 1"
             const dateStr = startMonthName === endMonth 
-                ? `${startMonth} - ${endDay}, 2026`
-                : `${startMonth} - ${endMonth} ${endDay}, 2026`;
+                ? `${startMonth}-${endDay}`
+                : `${startMonth} - ${endMonth} ${endDay}`;
             
             // Use different logo URL pattern for Champions Tour (s prefix) vs PGA Tour (R prefix)
             const isChampionsTour = t.logoCode && t.logoCode.toLowerCase().startsWith('s');
