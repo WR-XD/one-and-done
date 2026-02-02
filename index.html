@@ -4167,7 +4167,31 @@
             "farmers2026": "https://res.cloudinary.com/pgatour-prod/d_tournaments:logos:R000.png/tournaments/logos/R004.png",
             "atandt2026": "https://res.cloudinary.com/pgatour-prod/d_tournaments:logos:R000.png/tournaments/logos/R054.png",
             "wmphoenix2026": "https://res.cloudinary.com/pgatour-prod/d_tournaments:logos:R000.png/tournaments/logos/R003.png",
-            "genesis2026": "https://res.cloudinary.com/pgatour-prod/d_tournaments:logos:R000.png/tournaments/logos/R011.png"
+            "genesis2026": "https://res.cloudinary.com/pgatour-prod/d_tournaments:logos:R000.png/tournaments/logos/R011.png",
+            // Handle hyphenated IDs from database
+            "sony-2026": "https://res.cloudinary.com/pgatour-prod/d_tournaments:logos:R000.png/tournaments/logos/R006.png",
+            "amex-2026": "https://res.cloudinary.com/pgatour-prod/d_tournaments:logos:R000.png/tournaments/logos/R002.png",
+            "farmers-2026": "https://res.cloudinary.com/pgatour-prod/d_tournaments:logos:R000.png/tournaments/logos/R004.png",
+            "atandt-2026": "https://res.cloudinary.com/pgatour-prod/d_tournaments:logos:R000.png/tournaments/logos/R054.png",
+            "wmphoenix-2026": "https://res.cloudinary.com/pgatour-prod/d_tournaments:logos:R000.png/tournaments/logos/R003.png",
+            "genesis-2026": "https://res.cloudinary.com/pgatour-prod/d_tournaments:logos:R000.png/tournaments/logos/R011.png"
+        };
+        
+        // Tournament name lookup (handles both formats)
+        const tournamentNames = {
+            "sony2026": "Sony Open",
+            "amex2026": "The American Express",
+            "farmers2026": "Farmers Insurance Open",
+            "atandt2026": "AT&T Pebble Beach",
+            "wmphoenix2026": "WM Phoenix Open",
+            "genesis2026": "Genesis Invitational",
+            // Hyphenated versions
+            "sony-2026": "Sony Open",
+            "amex-2026": "The American Express", 
+            "farmers-2026": "Farmers Insurance Open",
+            "atandt-2026": "AT&T Pebble Beach",
+            "wmphoenix-2026": "WM Phoenix Open",
+            "genesis-2026": "Genesis Invitational"
         };
 
         // 2026 PGA Tour Schedule (upcoming tournaments)
@@ -6058,19 +6082,29 @@ See you on the course!`
                             name: s.current_week_pick.player_name
                         };
                         
-                        // Look in live leaderboard
-                        let leaderboardEntry = leaderboardData.find(l => 
-                            String(l.playerId) === String(s.current_week_pick.player_id)
-                        );
-                        if (!leaderboardEntry && s.current_week_pick.player_name) {
-                            leaderboardEntry = leaderboardData.find(l => 
-                                l.playerName && l.playerName.toLowerCase() === s.current_week_pick.player_name.toLowerCase()
+                        // Only look up position/earnings if ESPN is showing the same tournament
+                        // (not showing finished results from a previous tournament)
+                        const espnMatchesCurrentTournament = espnTournamentInfo && 
+                            espnTournamentInfo.name && 
+                            currentTournament && 
+                            currentTournament.name &&
+                            espnTournamentInfo.name.toLowerCase().includes(currentTournament.name.split(' ')[0].toLowerCase());
+                        
+                        if (espnMatchesCurrentTournament || !espnTournamentInfo?.isFinished) {
+                            // Look in live leaderboard
+                            let leaderboardEntry = leaderboardData.find(l => 
+                                String(l.playerId) === String(s.current_week_pick.player_id)
                             );
+                            if (!leaderboardEntry && s.current_week_pick.player_name) {
+                                leaderboardEntry = leaderboardData.find(l => 
+                                    l.playerName && l.playerName.toLowerCase() === s.current_week_pick.player_name.toLowerCase()
+                                );
+                            }
+                            currentWeekEarnings = leaderboardEntry ? leaderboardEntry.projectedEarnings : 0;
+                            playerPosition = leaderboardEntry ? leaderboardEntry.pos : null;
+                            // Get headshot from leaderboard if available
+                            playerHeadshot = leaderboardEntry?.headshot || null;
                         }
-                        currentWeekEarnings = leaderboardEntry ? leaderboardEntry.projectedEarnings : 0;
-                        playerPosition = leaderboardEntry ? leaderboardEntry.pos : null;
-                        // Get headshot from leaderboard if available
-                        playerHeadshot = leaderboardEntry?.headshot || null;
                     }
                     
                     return {
@@ -6129,20 +6163,30 @@ See you on the course!`
 
                     if (currentPick) {
                         currentPlayer = getPlayerById(currentPick.playerId);
-                        let leaderboardEntry = leaderboardData.find(l => String(l.playerId) === String(currentPick.playerId));
-                        if (!leaderboardEntry && currentPlayer) {
-                            leaderboardEntry = leaderboardData.find(l => 
-                                l.playerName && l.playerName.toLowerCase() === currentPlayer.name.toLowerCase()
-                            );
+                        
+                        // Only look up position/earnings if ESPN is showing the same tournament
+                        const espnMatchesCurrentTournament = espnTournamentInfo && 
+                            espnTournamentInfo.name && 
+                            currentTournament && 
+                            currentTournament.name &&
+                            espnTournamentInfo.name.toLowerCase().includes(currentTournament.name.split(' ')[0].toLowerCase());
+                        
+                        if (espnMatchesCurrentTournament || !espnTournamentInfo?.isFinished) {
+                            let leaderboardEntry = leaderboardData.find(l => String(l.playerId) === String(currentPick.playerId));
+                            if (!leaderboardEntry && currentPlayer) {
+                                leaderboardEntry = leaderboardData.find(l => 
+                                    l.playerName && l.playerName.toLowerCase() === currentPlayer.name.toLowerCase()
+                                );
+                            }
+                            if (!leaderboardEntry && currentPick.playerName) {
+                                leaderboardEntry = leaderboardData.find(l => 
+                                    l.playerName && l.playerName.toLowerCase() === currentPick.playerName.toLowerCase()
+                                );
+                            }
+                            currentWeekEarnings = leaderboardEntry ? leaderboardEntry.projectedEarnings : 0;
+                            playerPosition = leaderboardEntry ? leaderboardEntry.pos : null;
+                            playerHeadshot = leaderboardEntry?.headshot || null;
                         }
-                        if (!leaderboardEntry && currentPick.playerName) {
-                            leaderboardEntry = leaderboardData.find(l => 
-                                l.playerName && l.playerName.toLowerCase() === currentPick.playerName.toLowerCase()
-                            );
-                        }
-                        currentWeekEarnings = leaderboardEntry ? leaderboardEntry.projectedEarnings : 0;
-                        playerPosition = leaderboardEntry ? leaderboardEntry.pos : null;
-                        playerHeadshot = leaderboardEntry?.headshot || null;
                     }
 
                     return {
@@ -6198,7 +6242,10 @@ See you on the course!`
                                 <div class="weekly-pick">
                                     <img src="${standing.playerHeadshot || getPlayerHeadshot(standing.currentPlayer)}" alt="" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect fill=%22%23e5e7eb%22 width=%22100%22 height=%22100%22/></svg>'">
                                     <span>${standing.currentPlayer.name}</span>
-                                    <span style="color: var(--gold); font-size: 0.8rem; margin-left: auto; text-align: right;">${(standing.playerPosition && standing.playerPosition !== '-') ? standing.playerPosition : 'MC'} (${formatCurrency(standing.currentWeekEarnings)} proj)</span>
+                                    ${standing.playerPosition ? 
+                                        `<span style="color: var(--gold); font-size: 0.8rem; margin-left: auto; text-align: right;">${standing.playerPosition} (${formatCurrency(standing.currentWeekEarnings)} proj)</span>` :
+                                        ''
+                                    }
                                 </div>
                             ` : '<span style="color: var(--gray);">No pick yet</span>'}
                         </td>
@@ -6848,9 +6895,10 @@ See you on the course!`
                     
                     const isCurrentTournament = pick.tournamentId === currentTournament.id;
                     const tournamentLogo = tournamentLogos[pick.tournamentId] || '';
-                    // Get tournament name - fallback to current tournament if it matches, otherwise use ID
+                    // Get tournament name - fallback to lookup, then current tournament, then formatted ID
                     const tournamentName = pick.tournamentName || 
-                        (isCurrentTournament ? currentTournament.name : pick.tournamentId);
+                        tournamentNames[pick.tournamentId] ||
+                        (isCurrentTournament ? currentTournament.name : pick.tournamentId.replace(/-/g, ' ').replace(/(\d+)/, ' $1'));
                     
                     // Get player headshot - prefer leaderboard data, then player photo, then ESPN fallback
                     const playerHeadshot = leaderboardEntry?.headshot || player?.photo || getPlayerPhoto(pick.playerId);
@@ -6913,6 +6961,7 @@ See you on the course!`
                                         const leaderboardEntry = isCurrentTournament ? mockLeaderboard.find(l => String(l.playerId) === String(pick.playerId)) : null;
                                         const tournamentLogo = tournamentLogos[pick.tournamentId] || '';
                                         const tournamentName = pick.tournamentName || 
+                                            tournamentNames[pick.tournamentId] ||
                                             (isCurrentTournament ? currentTournament.name : pick.tournamentId);
                                         const shortName = tournamentName.split(' ').slice(0, 2).join(' ');
                                         
