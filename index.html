@@ -6216,7 +6216,9 @@ See you on the course!`
             }
             
             // Find the "hot" user - whoever had the best pick in the just-finished tournament
+            // Find the "ice" user(s) - whoever had the worst pick in the just-finished tournament
             let hotUserId = null;
+            let iceUserIds = [];
             if (justFinishedTournament && espnTournamentInfo?.isFinished) {
                 // Get picks for the just-finished tournament (handle both ID formats)
                 const justFinishedId = justFinishedTournament.id;
@@ -6274,7 +6276,7 @@ See you on the course!`
                 });
                 
                 if (finishedTournamentPicks.length > 0) {
-                    // Find the pick with highest earnings
+                    // Find the pick with highest earnings (hot/flame)
                     const bestPick = finishedTournamentPicks.reduce((best, pick) => {
                         const earnings = pick.earnings || pick.final_earnings || 0;
                         return earnings > (best.earnings || best.final_earnings || 0) ? pick : best;
@@ -6286,12 +6288,20 @@ See you on the course!`
                         hotUserId = bestPick.userId || bestPick.user_id;
                         console.log('Hot user:', hotUserId, 'with earnings:', bestEarnings);
                     }
+                    
+                    // Find the pick(s) with lowest earnings (ice/cold)
+                    const lowestEarnings = Math.min(...finishedTournamentPicks.map(p => p.earnings || p.final_earnings || 0));
+                    iceUserIds = finishedTournamentPicks
+                        .filter(p => (p.earnings || p.final_earnings || 0) === lowestEarnings)
+                        .map(p => p.userId || p.user_id);
+                    console.log('Ice users:', iceUserIds, 'with earnings:', lowestEarnings);
                 }
             }
             
             tbody.innerHTML = standings.map((standing, index) => {
                 const isCurrentUser = standing.user.id === store.currentUser.id;
                 const isHotUser = standing.user.id === hotUserId;
+                const isIceUser = iceUserIds.includes(standing.user.id);
                 const rankClass = index === 0 ? 'gold' : index === 1 ? 'silver' : index === 2 ? 'bronze' : '';
                 const profilePic = getUserProfilePicture(standing.user.id);
                 const userName = standing.user.name || 'Unknown';
@@ -6308,7 +6318,7 @@ See you on the course!`
                                      style="width: 32px; height: 32px; border-radius: 50%; object-fit: cover;"
                                      onclick="event.stopPropagation(); showProfileModalFromElement(this, '${userName.replace(/'/g, "\\'")}')"
                                      onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect fill=%22%23e5e7eb%22 width=%22100%22 height=%22100%22/></svg>'">
-                                <strong>${userName}</strong>${isHotUser ? ' 🔥' : ''}
+                                <strong>${userName}</strong>${isHotUser ? ' 🔥' : ''}${isIceUser && !isHotUser ? ' 🧊' : ''}
                                 ${isCurrentUser ? ' (You)' : ''}
                             </div>
                         </td>
