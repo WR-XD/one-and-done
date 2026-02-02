@@ -3991,6 +3991,52 @@
             return Math.round(purse * pct);
         }
 
+        // Calculate tie-adjusted earnings for all players in leaderboard
+        // For T players tied at position N: sum payouts for N through N+T-1, divide by T
+        function calculateTieAdjustedEarnings(leaderboard, purse) {
+            if (!leaderboard || leaderboard.length === 0 || !purse) return;
+            
+            // Group players by position (e.g., all "T2" players together)
+            const positionGroups = {};
+            leaderboard.forEach(player => {
+                const pos = player.pos;
+                if (!pos || pos === '-' || pos === 'WD' || pos === 'CUT' || pos === 'MC') {
+                    player.projectedEarnings = 0;
+                    return;
+                }
+                if (!positionGroups[pos]) {
+                    positionGroups[pos] = [];
+                }
+                positionGroups[pos].push(player);
+            });
+            
+            // Calculate tie-adjusted earnings for each group
+            Object.entries(positionGroups).forEach(([pos, players]) => {
+                const posNum = parseInt(pos.replace('T', ''));
+                if (isNaN(posNum) || posNum > 90) {
+                    players.forEach(p => p.projectedEarnings = 0);
+                    return;
+                }
+                
+                const numTied = players.length;
+                
+                // Sum payouts for positions posNum through posNum + numTied - 1
+                let totalPayout = 0;
+                for (let i = 0; i < numTied; i++) {
+                    const payoutPos = posNum + i;
+                    if (payoutPos <= 90) {
+                        totalPayout += (PURSE_PAYOUTS[payoutPos] || 0.0017);
+                    }
+                }
+                
+                // Each tied player gets equal share
+                const perPlayerPayout = totalPayout / numTied;
+                const earnings = Math.round(purse * perPlayerPayout);
+                
+                players.forEach(p => p.projectedEarnings = earnings);
+            });
+        }
+
         // Live leaderboard data from ESPN
         let liveLeaderboard = [];
         let espnDataLoaded = false;
@@ -4012,6 +4058,10 @@
                 const event = data.events[0];
                 const competition = event.competitions[0];
                 
+                // Check if tournament is finished
+                const tournamentStatus = competition.status?.type?.name || '';
+                const isFinished = tournamentStatus === 'STATUS_FINAL' || tournamentStatus === 'STATUS_FINISH';
+                
                 // Update tournament info
                 if (currentTournament) {
                     if (event.purse) currentTournament.purse = event.purse;
@@ -4026,6 +4076,9 @@
                 
                 // Sort by position
                 competitors.sort((a, b) => (a.sortOrder || 999) - (b.sortOrder || 999));
+                
+                // Track if ESPN provides actual earnings
+                let hasActualEarnings = false;
 
                 competitors.forEach(comp => {
                     const athlete = comp.athlete || {};
@@ -4045,8 +4098,6 @@
                     // Transform ESPN headshot URL to optimized size
                     let headshot = null;
                     if (athlete.headshot && athlete.headshot.href) {
-                        // ESPN URLs like: https://a.espncdn.com/i/headshots/golf/players/full/3448.png
-                        // Convert to combiner URL for better quality at small sizes
                         const originalUrl = athlete.headshot.href;
                         if (originalUrl.includes('a.espncdn.com/i/')) {
                             const path = originalUrl.replace('https://a.espncdn.com', '');
@@ -4055,19 +4106,34 @@
                             headshot = originalUrl;
                         }
                     }
+                    
+                    // Use ACTUAL earnings from ESPN if available (tournament finished)
+                    let earnings = 0;
+                    if (comp.earnings !== undefined && comp.earnings !== null) {
+                        earnings = Math.round(comp.earnings);
+                        hasActualEarnings = true;
+                    }
 
                     liveLeaderboard.push({
-                        playerId: athlete.id,
+                        playerId: athlete.id || comp.id,
                         playerName: athlete.displayName || 'Unknown',
                         pos: position,
                         score: scoreToPar ? scoreToPar.value : 0,
                         today: todayScore,
                         thru: status.displayThru || status.thru || '-',
-                        projectedEarnings: calculateProjectedEarnings(position, currentTournament?.purse || 0),
+                        projectedEarnings: earnings, // Will be recalculated if no actual earnings
                         headshot: headshot,
                         flag: athlete.flag ? athlete.flag.href : null
                     });
                 });
+
+                // If no actual earnings from ESPN, calculate tie-adjusted projected earnings
+                if (!hasActualEarnings) {
+                    calculateTieAdjustedEarnings(liveLeaderboard, currentTournament?.purse || 0);
+                    console.log('Using calculated projected earnings (tournament in progress)');
+                } else {
+                    console.log('Using actual ESPN earnings (tournament finished)');
+                }
 
                 espnDataLoaded = true;
                 console.log(`ESPN leaderboard loaded for ${currentPoolTour}:`, liveLeaderboard.length, 'players');
