@@ -6215,8 +6215,83 @@ See you on the course!`
                 return;
             }
             
+            // Find the "hot" user - whoever had the best pick in the just-finished tournament
+            let hotUserId = null;
+            if (justFinishedTournament && espnTournamentInfo?.isFinished) {
+                // Get picks for the just-finished tournament (handle both ID formats)
+                const justFinishedId = justFinishedTournament.id;
+                const justFinishedIdAlt = justFinishedId.includes('-') ? 
+                    justFinishedId.replace('-', '') : 
+                    justFinishedId.replace(/(\d+)$/, '-$1');
+                
+                // Ensure we have picks loaded for this tournament
+                let finishedTournamentPicks = store.picks.filter(p => 
+                    p.poolId === currentPoolId && 
+                    (p.tournamentId === justFinishedId || p.tournamentId === justFinishedIdAlt)
+                );
+                
+                // If no picks in store, try to fetch from database
+                if (finishedTournamentPicks.length === 0) {
+                    try {
+                        const { data: dbPicks } = await supabaseClient
+                            .from('picks')
+                            .select('*')
+                            .eq('pool_id', currentPoolId)
+                            .in('tournament_id', [justFinishedId, justFinishedIdAlt]);
+                        
+                        if (dbPicks) {
+                            dbPicks.forEach(pick => {
+                                if (!store.picks.find(p => p.id === pick.id)) {
+                                    store.picks.push({
+                                        id: pick.id,
+                                        poolId: pick.pool_id,
+                                        userId: pick.user_id,
+                                        tournamentId: pick.tournament_id,
+                                        playerId: pick.player_id,
+                                        playerName: pick.player_name,
+                                        tournamentName: pick.tournament_name,
+                                        earnings: pick.final_earnings || 0
+                                    });
+                                }
+                            });
+                            finishedTournamentPicks = dbPicks.map(p => ({
+                                ...p,
+                                poolId: p.pool_id,
+                                userId: p.user_id,
+                                tournamentId: p.tournament_id,
+                                earnings: p.final_earnings || 0
+                            }));
+                        }
+                    } catch (e) {
+                        console.error('Error fetching picks for hot streak:', e);
+                    }
+                }
+                
+                console.log('Hot streak check:', {
+                    justFinishedId,
+                    picksFound: finishedTournamentPicks.length,
+                    picks: finishedTournamentPicks.map(p => ({ user: p.userId || p.user_id, earnings: p.earnings || p.final_earnings }))
+                });
+                
+                if (finishedTournamentPicks.length > 0) {
+                    // Find the pick with highest earnings
+                    const bestPick = finishedTournamentPicks.reduce((best, pick) => {
+                        const earnings = pick.earnings || pick.final_earnings || 0;
+                        return earnings > (best.earnings || best.final_earnings || 0) ? pick : best;
+                    }, { earnings: 0 });
+                    
+                    // Only show flame if they actually earned something
+                    const bestEarnings = bestPick.earnings || bestPick.final_earnings || 0;
+                    if (bestEarnings > 0) {
+                        hotUserId = bestPick.userId || bestPick.user_id;
+                        console.log('Hot user:', hotUserId, 'with earnings:', bestEarnings);
+                    }
+                }
+            }
+            
             tbody.innerHTML = standings.map((standing, index) => {
                 const isCurrentUser = standing.user.id === store.currentUser.id;
+                const isHotUser = standing.user.id === hotUserId;
                 const rankClass = index === 0 ? 'gold' : index === 1 ? 'silver' : index === 2 ? 'bronze' : '';
                 const profilePic = getUserProfilePicture(standing.user.id);
                 const userName = standing.user.name || 'Unknown';
@@ -6233,7 +6308,7 @@ See you on the course!`
                                      style="width: 32px; height: 32px; border-radius: 50%; object-fit: cover;"
                                      onclick="event.stopPropagation(); showProfileModalFromElement(this, '${userName.replace(/'/g, "\\'")}')"
                                      onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect fill=%22%23e5e7eb%22 width=%22100%22 height=%22100%22/></svg>'">
-                                <strong>${userName}</strong>
+                                <strong>${userName}</strong>${isHotUser ? ' 🔥' : ''}
                                 ${isCurrentUser ? ' (You)' : ''}
                             </div>
                         </td>
