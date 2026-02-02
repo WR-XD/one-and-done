@@ -2525,6 +2525,13 @@
                         </div>
                     </div>
 
+                    <div id="results-banner" style="display: none; background: linear-gradient(135deg, var(--green-dark) 0%, var(--green-fairway) 100%); color: white; padding: 0.75rem 1rem; font-weight: 500; border-radius: 8px; margin-bottom: 1rem;">
+                        <div style="display: flex; align-items: center; justify-content: space-between;">
+                            <span>📊 <span id="results-banner-text">Final Results</span></span>
+                            <span style="font-size: 0.85rem; opacity: 0.9;">Official Earnings</span>
+                        </div>
+                    </div>
+
                     <table class="leaderboard-table">
                         <thead>
                             <tr>
@@ -4042,6 +4049,8 @@
         let espnDataLoaded = false;
 
         // Fetch live leaderboard from ESPN API
+        let espnTournamentInfo = null; // Store ESPN tournament details
+        
         async function fetchESPNLeaderboard() {
             try {
                 const apiUrl = getESPNApiUrl(currentPoolTour);
@@ -4061,6 +4070,14 @@
                 // Check if tournament is finished
                 const tournamentStatus = competition.status?.type?.name || '';
                 const isFinished = tournamentStatus === 'STATUS_FINAL' || tournamentStatus === 'STATUS_FINISH';
+                
+                // Store ESPN tournament info for display purposes
+                espnTournamentInfo = {
+                    name: event.name || event.shortName || 'Tournament',
+                    status: tournamentStatus,
+                    isFinished: isFinished,
+                    round: competition.status?.period || 4
+                };
                 
                 // Update tournament info
                 if (currentTournament) {
@@ -6198,17 +6215,8 @@ See you on the course!`
         }
 
         async function renderLeaderboard() {
-            // Determine what to show in header vs leaderboard
-            // Header: Always show the upcoming/current tournament info
-            // Leaderboard: Show just-finished results if available, otherwise upcoming
+            // Header always shows the upcoming/current tournament
             const headerTournament = upcomingTournament || currentTournament;
-            const displayTournament = getCurrentDisplayTournament();
-            
-            // Check if we're showing a just-finished tournament's results
-            const now = new Date();
-            const showingFinishedResults = justFinishedTournament && 
-                                           now < justFinishedTournament.showUntil && 
-                                           displayTournament === justFinishedTournament;
             
             if (!headerTournament) {
                 document.getElementById('leaderboard-body').innerHTML = `
@@ -6222,34 +6230,47 @@ See you on the course!`
             document.getElementById('tournament-dates').textContent = headerTournament.dates;
             document.getElementById('tournament-course').textContent = headerTournament.course;
             document.getElementById('tournament-logo').src = headerTournament.logo;
-            
-            // Update round display based on what we're actually showing
-            if (showingFinishedResults) {
-                document.getElementById('tournament-round').textContent = 'Final Results Below';
-            } else if (headerTournament.status === 'Complete') {
-                document.getElementById('tournament-round').textContent = 'Final';
-            } else {
-                document.getElementById('tournament-round').textContent = `Round ${headerTournament.round}`;
-            }
 
             // Always try to fetch ESPN data first
             await fetchESPNLeaderboard();
             
+            const now = new Date();
+            const hasLeaderboardData = espnDataLoaded && liveLeaderboard.length > 0;
+            
+            // Check if ESPN is showing finished results from a DIFFERENT tournament
+            const showingFinishedResults = hasLeaderboardData && 
+                                           espnTournamentInfo && 
+                                           espnTournamentInfo.isFinished &&
+                                           espnTournamentInfo.name !== headerTournament.name;
+            
+            // Debug logging
+            console.log('Banner logic:', {
+                hasLeaderboardData,
+                espnTournamentInfo,
+                headerTournamentName: headerTournament.name,
+                showingFinishedResults
+            });
+            
+            // Update round display based on what we're showing
+            if (showingFinishedResults) {
+                document.getElementById('tournament-round').textContent = 'Starts Soon';
+            } else if (espnTournamentInfo && hasLeaderboardData) {
+                document.getElementById('tournament-round').textContent = espnTournamentInfo.isFinished ? 'Final' : `Round ${espnTournamentInfo.round}`;
+            } else {
+                document.getElementById('tournament-round').textContent = `Round ${headerTournament.round}`;
+            }
+            
             // Check if tournament hasn't started yet AND no ESPN data available
             const tournamentStart = new Date(headerTournament.startTime);
             const tournamentNotStarted = now < tournamentStart;
-            const hasLeaderboardData = espnDataLoaded && liveLeaderboard.length > 0;
             
-            // If showing finished results, display a banner
-            let finishedBanner = '';
-            if (showingFinishedResults && hasLeaderboardData) {
-                finishedBanner = `
-                    <tr>
-                        <td colspan="6" style="background: var(--green-dark); color: white; padding: 0.75rem; text-align: center; font-weight: 500;">
-                            📊 Final Results: ${justFinishedTournament.name}
-                        </td>
-                    </tr>
-                `;
+            // Build the finished results banner
+            const resultsBanner = document.getElementById('results-banner');
+            if (showingFinishedResults) {
+                document.getElementById('results-banner-text').textContent = `Final Results: ${espnTournamentInfo.name}`;
+                resultsBanner.style.display = 'block';
+            } else {
+                resultsBanner.style.display = 'none';
             }
             
             if (tournamentNotStarted && !hasLeaderboardData) {
@@ -6282,11 +6303,9 @@ See you on the course!`
 
             // Use ESPN data if available, otherwise fall back to mock data
             const leaderboardData = espnDataLoaded && liveLeaderboard.length > 0 ? liveLeaderboard : mockLeaderboard;
-
-            // Update round display after ESPN fetch (if showing current tournament)
-            if (!showingFinishedResults) {
-                document.getElementById('tournament-round').textContent = headerTournament.status === 'Complete' ? 'Final' : `Round ${headerTournament.round}`;
-            }
+            
+            // For pick matching, use the tournament that matches the ESPN data
+            const displayTournament = getCurrentDisplayTournament();
 
             // Get the current pool
             const pool = store.pools.find(p => p.id === currentPoolId);
@@ -6408,8 +6427,8 @@ See you on the course!`
                 `;
             }).join('');
             
-            // Add the finished banner if showing results from just-finished tournament
-            tbody.innerHTML = finishedBanner + leaderboardRows;
+            // Add the leaderboard rows
+            tbody.innerHTML = leaderboardRows;
         }
 
         async function renderPlayerSelection() {
@@ -6910,7 +6929,7 @@ See you on the course!`
                                             <div style="background: #f9fafb; padding: 0.5rem 0.75rem; border-radius: 4px; display: flex; align-items: center; gap: 0.5rem; font-size: 0.85rem;">
                                                 ${tournamentLogo ? `<img src="${tournamentLogo}" style="width: 24px; height: 24px; object-fit: contain;" alt="">` : ''}
                                                 <span style="color: var(--gray);">${shortName}:</span>
-                                                <strong>${player ? player.name : 'Unknown'}</strong>
+                                                <strong>${player?.name !== 'Unknown Player' ? player.name : (pick.playerName || 'Unknown')}</strong>
                                                 ${isCurrentTournament && leaderboardEntry ? 
                                                     `<span style="color: var(--gold);">(${leaderboardEntry.pos})</span>` :
                                                     (pick.finish ? `<span style="color: var(--gray);">(${pick.finish})</span>` : '')
