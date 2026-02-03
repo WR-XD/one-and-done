@@ -2375,6 +2375,7 @@
                         <select id="pool-season" style="width: 100%; padding: 0.875rem 1rem; border: 2px solid #e5e7eb; font-size: 1rem;">
                             <option value="pga|2026">PGA Tour - 2026</option>
                             <option value="champions|2026">PGA Tour Champions - 2026</option>
+                            <option value="liv|2026">LIV Golf - 2026</option>
                         </select>
                     </div>
 
@@ -3768,12 +3769,137 @@
             }
         ];
 
+        // LIV Golf 2026 Schedule (72-hole events, no cut, ~57 players)
+        const liv2026Schedule = [
+            {
+                id: "liv-riyadh-2026",
+                espnId: "401807532",
+                name: "LIV Golf Riyadh",
+                startDate: "2026-02-04",
+                endDate: "2026-02-07",
+                course: "Riyadh Golf Club",
+                location: "Riyadh, Saudi Arabia",
+                purse: 30000000
+            },
+            {
+                id: "liv-adelaide-2026",
+                espnId: "401804701",
+                name: "LIV Golf Adelaide",
+                startDate: "2026-02-12",
+                endDate: "2026-02-15",
+                course: "The Grange Golf Club",
+                location: "Adelaide, Australia",
+                purse: 30000000
+            },
+            {
+                id: "liv-hongkong-2026",
+                espnId: "401824806",
+                name: "LIV Golf Hong Kong",
+                startDate: "2026-03-05",
+                endDate: "2026-03-08",
+                course: "Hong Kong Golf Club at Fanling",
+                location: "Hong Kong",
+                purse: 30000000
+            },
+            {
+                id: "liv-singapore-2026",
+                espnId: "401806356",
+                name: "LIV Golf Singapore",
+                startDate: "2026-03-12",
+                endDate: "2026-03-15",
+                course: "Sentosa Golf Club",
+                location: "Singapore",
+                purse: 30000000
+            },
+            {
+                id: "liv-southafrica-2026",
+                espnId: "401805587",
+                name: "LIV Golf South Africa",
+                startDate: "2026-03-19",
+                endDate: "2026-03-22",
+                course: "The Club at Steyn City",
+                location: "Midrand, South Africa",
+                purse: 30000000
+            },
+            {
+                id: "liv-mexico-2026",
+                espnId: "401805795",
+                name: "LIV Golf Mexico City",
+                startDate: "2026-04-16",
+                endDate: "2026-04-19",
+                course: "Club De Golf Chapultepec",
+                location: "Mexico City, Mexico",
+                purse: 30000000
+            },
+            {
+                id: "liv-virginia-2026",
+                espnId: "401808353",
+                name: "LIV Golf Virginia",
+                startDate: "2026-05-07",
+                endDate: "2026-05-10",
+                course: "Trump National Golf Club",
+                location: "Washington, DC",
+                purse: 30000000
+            },
+            {
+                id: "liv-andalucia-2026",
+                espnId: "401809165",
+                name: "LIV Golf Andalucía",
+                startDate: "2026-06-04",
+                endDate: "2026-06-07",
+                course: "Real Club Valderrama",
+                location: "Sotogrande, Spain",
+                purse: 30000000
+            },
+            {
+                id: "liv-louisiana-2026",
+                espnId: "401817380",
+                name: "LIV Golf Louisiana",
+                startDate: "2026-06-25",
+                endDate: "2026-06-28",
+                course: "Bayou Oaks at City Park",
+                location: "New Orleans, LA",
+                purse: 30000000
+            },
+            {
+                id: "liv-uk-2026",
+                espnId: "401804745",
+                name: "LIV Golf United Kingdom",
+                startDate: "2026-07-23",
+                endDate: "2026-07-26",
+                course: "JCB Golf and Country Club",
+                location: "Rocester, England",
+                purse: 30000000
+            },
+            {
+                id: "liv-indianapolis-2026",
+                espnId: "401811430",
+                name: "LIV Golf Indianapolis",
+                startDate: "2026-08-20",
+                endDate: "2026-08-23",
+                course: "The Club at Chatham Hills",
+                location: "Westfield, IN",
+                purse: 30000000
+            }
+            // Note: Team Championship (Michigan) excluded - different format
+        ];
+
         // Get schedule for a specific tour (defaults to 'pga')
         function getScheduleForTour(tour) {
             if (tour === 'champions') {
                 return champions2026Schedule;
             }
+            if (tour === 'liv') {
+                return liv2026Schedule;
+            }
             return pga2026Schedule; // Default fallback for existing pools
+        }
+        
+        // Get display name for a tour
+        function getTourDisplayName(tour) {
+            if (tour === 'champions') return 'PGA Tour Champions';
+            if (tour === 'liv') return 'LIV Golf';
+            return 'PGA Tour';
         }
 
         function formatTournament(t) {
@@ -3788,11 +3914,15 @@
                 ? `${startMonth}-${endDay}`
                 : `${startMonth} - ${endMonth} ${endDay}`;
             
-            // Use different logo URL pattern for Champions Tour (s prefix) vs PGA Tour (R prefix)
-            const isChampionsTour = t.logoCode && t.logoCode.toLowerCase().startsWith('s');
-            const logoUrl = isChampionsTour
-                ? `https://res.cloudinary.com/pgatour-prod/image/upload/dpr_2.0,q_auto/c_scale,w_120/v1/tournaments/logos/${t.logoCode.toLowerCase()}`
-                : `https://res.cloudinary.com/pgatour-prod/image/upload/dpr_2.0,q_auto/c_scale,w_120/v1/tournaments/logos/${t.logoCode.toLowerCase()}`;
+            // Handle logo URL - LIV tournaments don't have logoCode
+            let logoUrl = null;
+            if (t.logoCode) {
+                // Use different logo URL pattern for Champions Tour (s prefix) vs PGA Tour (R prefix)
+                const isChampionsTour = t.logoCode.toLowerCase().startsWith('s');
+                logoUrl = isChampionsTour
+                    ? `https://res.cloudinary.com/pgatour-prod/image/upload/dpr_2.0,q_auto/c_scale,w_120/v1/tournaments/logos/${t.logoCode.toLowerCase()}`
+                    : `https://res.cloudinary.com/pgatour-prod/image/upload/dpr_2.0,q_auto/c_scale,w_120/v1/tournaments/logos/${t.logoCode.toLowerCase()}`;
+            }
             
             return {
                 ...t,
@@ -3970,11 +4100,15 @@
         // ESPN API configuration
         const ESPN_API_URL = 'https://site.web.api.espn.com/apis/site/v2/sports/golf/leaderboard?league=pga';
         const ESPN_CHAMPIONS_API_URL = 'https://site.web.api.espn.com/apis/site/v2/sports/golf/leaderboard?league=champions-tour';
+        const ESPN_LIV_API_URL = 'https://site.web.api.espn.com/apis/site/v2/sports/golf/leaderboard?league=liv';
         
         // Get ESPN API URL for the pool's tour
         function getESPNApiUrl(tour) {
             if (tour === 'champions') {
                 return ESPN_CHAMPIONS_API_URL;
+            }
+            if (tour === 'liv') {
+                return ESPN_LIV_API_URL;
             }
             return ESPN_API_URL; // Default to PGA
         }
@@ -4206,7 +4340,19 @@
             "farmers-2026": "Farmers Insurance Open",
             "atandt-2026": "AT&T Pebble Beach",
             "wmphoenix-2026": "WM Phoenix Open",
-            "genesis-2026": "Genesis Invitational"
+            "genesis-2026": "Genesis Invitational",
+            // LIV Golf 2026
+            "liv-riyadh-2026": "LIV Golf Riyadh",
+            "liv-adelaide-2026": "LIV Golf Adelaide",
+            "liv-hongkong-2026": "LIV Golf Hong Kong",
+            "liv-singapore-2026": "LIV Golf Singapore",
+            "liv-southafrica-2026": "LIV Golf South Africa",
+            "liv-mexico-2026": "LIV Golf Mexico City",
+            "liv-virginia-2026": "LIV Golf Virginia",
+            "liv-andalucia-2026": "LIV Golf Andalucía",
+            "liv-louisiana-2026": "LIV Golf Louisiana",
+            "liv-uk-2026": "LIV Golf United Kingdom",
+            "liv-indianapolis-2026": "LIV Golf Indianapolis"
         };
 
         // 2026 PGA Tour Schedule (upcoming tournaments)
@@ -5058,7 +5204,7 @@
 
                 // Get tour name and schedule for this pool
                 const poolTour = pool.tour || 'pga';
-                const tourName = poolTour === 'champions' ? 'PGA Tour Champions' : 'PGA Tour';
+                const tourName = getTourDisplayName(poolTour);
                 const poolSchedule = getScheduleForTour(poolTour);
                 const year = pool.season.includes('-') ? pool.season.split('-')[1] : pool.season;
                 
@@ -6044,7 +6190,7 @@ See you on the course!`
             document.getElementById('pool-title').textContent = pool.name;
             
             // Show tour and season (e.g., "PGA Tour - 2026" or "PGA Tour Champions - 2026")
-            const tourName = pool.tour === 'champions' ? 'PGA Tour Champions' : 'PGA Tour';
+            const tourName = getTourDisplayName(pool.tour);
             // Extract just the year (handles both "2026" and "2025-2026" formats)
             const year = pool.season.includes('-') ? pool.season.split('-')[1] : pool.season;
             document.getElementById('pool-season-display').textContent = `${tourName} - ${year}`;
