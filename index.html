@@ -3465,7 +3465,12 @@
             showUntil.setDate(showUntil.getDate() + 1); // Tuesday after
             showUntil.setUTCHours(7, 0, 0, 0); // Until Tuesday 7am UK
             
-            return { start, end, pickWindowOpen, showUntil };
+            // Emojis should show until next tournament starts
+            const emojiShowUntil = new Date(end);
+            emojiShowUntil.setDate(emojiShowUntil.getDate() + 4); // Thursday after
+            emojiShowUntil.setUTCHours(7, 0, 0, 0); // Until Thursday 7am UK
+            
+            return { start, end, pickWindowOpen, showUntil, emojiShowUntil };
         }
 
         // PGA Tour Champions 2026 Schedule
@@ -3803,6 +3808,7 @@
                 endTime: dates.end,
                 pickWindowOpen: dates.pickWindowOpen,
                 showUntil: dates.showUntil,
+                emojiShowUntil: dates.emojiShowUntil,
                 round: 0,
                 status: "Upcoming"
             };
@@ -3813,6 +3819,7 @@
             const schedule = getScheduleForTour(tour);
             
             let justFinished = null;
+            let emojiTournament = null; // For showing hot/ice emojis (lasts until Thursday)
             let current = null;
             let upcoming = null;
             let next = null;
@@ -3821,9 +3828,14 @@
                 const t = formatTournament(schedule[i]);
                 const dates = getTournamentDates(schedule[i]);
                 
-                // Just finished: ended but still within show window
+                // Just finished: ended but still within show window (until Tuesday)
                 if (now > dates.end && now < dates.showUntil) {
                     justFinished = { ...t, status: "Complete", round: 4 };
+                }
+                
+                // Emoji tournament: ended but still within emoji window (until Thursday)
+                if (now > dates.end && now < dates.emojiShowUntil) {
+                    emojiTournament = { ...t, status: "Complete", round: 4 };
                 }
                 
                 // Current/Upcoming: tournament is happening or about to start
@@ -3857,13 +3869,14 @@
                 upcoming = current;
             }
             
-            return { justFinished, current, upcoming, next };
+            return { justFinished, emojiTournament, current, upcoming, next };
         }
 
         // Get current tournament state (default to PGA Tour for backwards compatibility)
         let currentPoolTour = 'pga'; // Track current pool's tour
         let tournamentState = getCurrentTournaments('pga');
         let justFinishedTournament = tournamentState.justFinished;
+        let emojiTournament = tournamentState.emojiTournament; // For hot/ice emojis (lasts until Thursday)
         let upcomingTournament = tournamentState.upcoming || tournamentState.current;
         let nextTournament = tournamentState.next;
         let currentTournament = upcomingTournament;
@@ -3872,12 +3885,14 @@
         function updateTournamentStateForPool() {
             tournamentState = getCurrentTournaments(currentPoolTour);
             justFinishedTournament = tournamentState.justFinished;
+            emojiTournament = tournamentState.emojiTournament;
             upcomingTournament = tournamentState.upcoming || tournamentState.current;
             nextTournament = tournamentState.next;
             currentTournament = upcomingTournament;
             
             console.log(`Tournament State for ${currentPoolTour}:`, {
                 justFinished: justFinishedTournament?.name,
+                emojiTournament: emojiTournament?.name,
                 upcoming: upcomingTournament?.name,
                 next: nextTournament?.name
             });
@@ -6219,17 +6234,17 @@ See you on the course!`
             // Find the "ice" user(s) - whoever had the worst pick in the just-finished tournament
             let hotUserId = null;
             let iceUserIds = [];
-            if (justFinishedTournament && espnTournamentInfo?.isFinished) {
-                // Get picks for the just-finished tournament (handle both ID formats)
-                const justFinishedId = justFinishedTournament.id;
-                const justFinishedIdAlt = justFinishedId.includes('-') ? 
-                    justFinishedId.replace('-', '') : 
-                    justFinishedId.replace(/(\d+)$/, '-$1');
+            if (emojiTournament) {
+                // Get picks for the emoji tournament (handle both ID formats)
+                const emojiTournamentId = emojiTournament.id;
+                const emojiTournamentIdAlt = emojiTournamentId.includes('-') ? 
+                    emojiTournamentId.replace('-', '') : 
+                    emojiTournamentId.replace(/(\d+)$/, '-$1');
                 
                 // Ensure we have picks loaded for this tournament
                 let finishedTournamentPicks = store.picks.filter(p => 
                     p.poolId === currentPoolId && 
-                    (p.tournamentId === justFinishedId || p.tournamentId === justFinishedIdAlt)
+                    (p.tournamentId === emojiTournamentId || p.tournamentId === emojiTournamentIdAlt)
                 );
                 
                 // If no picks in store, try to fetch from database
@@ -6239,7 +6254,7 @@ See you on the course!`
                             .from('picks')
                             .select('*')
                             .eq('pool_id', currentPoolId)
-                            .in('tournament_id', [justFinishedId, justFinishedIdAlt]);
+                            .in('tournament_id', [emojiTournamentId, emojiTournamentIdAlt]);
                         
                         if (dbPicks) {
                             dbPicks.forEach(pick => {
@@ -6269,32 +6284,37 @@ See you on the course!`
                     }
                 }
                 
-                console.log('Hot streak check:', {
-                    justFinishedId,
+                console.log('Hot/Ice emoji check:', {
+                    emojiTournamentId,
                     picksFound: finishedTournamentPicks.length,
                     picks: finishedTournamentPicks.map(p => ({ user: p.userId || p.user_id, earnings: p.earnings || p.final_earnings }))
                 });
                 
                 if (finishedTournamentPicks.length > 0) {
-                    // Find the pick with highest earnings (hot/flame)
-                    const bestPick = finishedTournamentPicks.reduce((best, pick) => {
-                        const earnings = pick.earnings || pick.final_earnings || 0;
-                        return earnings > (best.earnings || best.final_earnings || 0) ? pick : best;
-                    }, { earnings: 0 });
+                    // Check if tournament has been finalized (at least one pick has earnings)
+                    const hasBeenFinalized = finishedTournamentPicks.some(p => (p.earnings || p.final_earnings || 0) > 0);
                     
-                    // Only show flame if they actually earned something
-                    const bestEarnings = bestPick.earnings || bestPick.final_earnings || 0;
-                    if (bestEarnings > 0) {
-                        hotUserId = bestPick.userId || bestPick.user_id;
-                        console.log('Hot user:', hotUserId, 'with earnings:', bestEarnings);
+                    if (hasBeenFinalized) {
+                        // Find the pick with highest earnings (hot/flame)
+                        const bestPick = finishedTournamentPicks.reduce((best, pick) => {
+                            const earnings = pick.earnings || pick.final_earnings || 0;
+                            return earnings > (best.earnings || best.final_earnings || 0) ? pick : best;
+                        }, { earnings: 0 });
+                        
+                        // Only show flame if they actually earned something
+                        const bestEarnings = bestPick.earnings || bestPick.final_earnings || 0;
+                        if (bestEarnings > 0) {
+                            hotUserId = bestPick.userId || bestPick.user_id;
+                            console.log('Hot user:', hotUserId, 'with earnings:', bestEarnings);
+                        }
+                        
+                        // Find the pick(s) with lowest earnings (ice/cold)
+                        const lowestEarnings = Math.min(...finishedTournamentPicks.map(p => p.earnings || p.final_earnings || 0));
+                        iceUserIds = finishedTournamentPicks
+                            .filter(p => (p.earnings || p.final_earnings || 0) === lowestEarnings)
+                            .map(p => p.userId || p.user_id);
+                        console.log('Ice users:', iceUserIds, 'with earnings:', lowestEarnings);
                     }
-                    
-                    // Find the pick(s) with lowest earnings (ice/cold)
-                    const lowestEarnings = Math.min(...finishedTournamentPicks.map(p => p.earnings || p.final_earnings || 0));
-                    iceUserIds = finishedTournamentPicks
-                        .filter(p => (p.earnings || p.final_earnings || 0) === lowestEarnings)
-                        .map(p => p.userId || p.user_id);
-                    console.log('Ice users:', iceUserIds, 'with earnings:', lowestEarnings);
                 }
             }
             
