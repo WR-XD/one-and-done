@@ -6492,12 +6492,49 @@ See you on the course!`
                         l.playerName && l.playerName.toLowerCase() === player.name.toLowerCase()
                     );
                 }
+                
+                // Try to find player in tournament field for headshot
+                const playerName = player?.name || userPick.playerName;
+                const fieldPlayer = tournamentField.find(p => 
+                    p.name && playerName && p.name.toLowerCase() === playerName.toLowerCase()
+                );
 
                 myPickSection.style.display = 'flex';
-                const photoUrl = leaderboardEntry?.headshot || player?.photo || getPlayerPhoto(userPick.playerId);
+                // Headshot priority: leaderboard > field player > ESPN CDN > PGA Tour CDN
+                let photoUrl = leaderboardEntry?.headshot;
+                if (!photoUrl && fieldPlayer) {
+                    photoUrl = fieldPlayer.headshot_url || getPlayerPhoto(fieldPlayer.id);
+                }
+                if (!photoUrl && player?.photo) {
+                    photoUrl = player.photo;
+                }
+                if (!photoUrl) {
+                    photoUrl = getPlayerPhoto(userPick.playerId);
+                }
+                console.log('My Pick photo debug:', {
+                    playerId: userPick.playerId,
+                    fieldPlayerId: fieldPlayer?.id,
+                    playerName: playerName,
+                    photoUrl: photoUrl,
+                    hasLeaderboardEntry: !!leaderboardEntry,
+                    hasFieldPlayer: !!fieldPlayer
+                });
                 document.getElementById('my-pick-photo').src = photoUrl;
+                const pickPlayerId = fieldPlayer?.id || userPick.playerId;
                 document.getElementById('my-pick-photo').onerror = function() {
-                    this.src = 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect fill="%23e5e7eb" width="100" height="100"/></svg>';
+                    // Track which fallback we've tried
+                    if (!this.dataset.fallbackTried) {
+                        // Try PGA Tour CDN as fallback
+                        this.dataset.fallbackTried = 'pga';
+                        this.src = `https://pga-tour-res.cloudinary.com/image/upload/c_thumb,g_face,z_0.7,q_auto,f_auto,dpr_2.0,w_80,h_80/headshots_${pickPlayerId}`;
+                    } else if (this.dataset.fallbackTried === 'pga') {
+                        // Try ESPN CDN directly
+                        this.dataset.fallbackTried = 'espn';
+                        this.src = `https://a.espncdn.com/combiner/i?img=/i/headshots/golf/players/full/${pickPlayerId}.png&w=96&h=96&scale=crop&cquality=80`;
+                    } else {
+                        // All fallbacks failed, use placeholder
+                        this.src = 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect fill="%23e5e7eb" width="100" height="100"/></svg>';
+                    }
                 };
                 document.getElementById('my-pick-name').textContent = player?.name || userPick.playerName || 'Unknown';
                 document.getElementById('my-pick-position').textContent = leaderboardEntry ? leaderboardEntry.pos : 'N/A';
