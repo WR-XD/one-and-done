@@ -4906,7 +4906,9 @@
                                 playerId: pick.player_id,
                                 playerName: pick.player_name,
                                 tournamentName: pick.tournament_name,
-                                earnings: pick.final_earnings || 0
+                                earnings: pick.final_earnings || 0,
+                                finish: pick.finish_position || null,
+                                timestamp: pick.created_at || pick.updated_at
                             };
                             
                             const existingIndex = store.picks.findIndex(
@@ -6161,7 +6163,8 @@ See you on the course!`
                                     playerId: pick.player_id,
                                     playerName: pick.player_name,
                                     tournamentName: pick.tournament_name,
-                                    earnings: pick.final_earnings || 0
+                                    earnings: pick.final_earnings || 0,
+                                    finish: pick.finish_position || null
                                 });
                             }
                         });
@@ -6273,7 +6276,8 @@ See you on the course!`
                                         playerId: pick.player_id,
                                         playerName: pick.player_name,
                                         tournamentName: pick.tournament_name,
-                                        earnings: pick.final_earnings || 0
+                                        earnings: pick.final_earnings || 0,
+                                        finish: pick.finish_position || null
                                     });
                                 }
                             });
@@ -6282,7 +6286,8 @@ See you on the course!`
                                 poolId: p.pool_id,
                                 userId: p.user_id,
                                 tournamentId: p.tournament_id,
-                                earnings: p.final_earnings || 0
+                                earnings: p.final_earnings || 0,
+                                finish: p.finish_position || null
                             }));
                         }
                     } catch (e) {
@@ -6480,11 +6485,31 @@ See you on the course!`
                 p.userId === store.currentUser.id && 
                 p.tournamentId === yourPickTournament.id
             );
+            
+            // Check if user has a pick for the LEADERBOARD tournament (for "YOU" tag on leaderboard)
+            // Handle both ID formats: "farmers2026" and "farmers-2026"
+            const leaderboardTournamentIdAlt = leaderboardTournament.id.includes('-') ? 
+                leaderboardTournament.id.replace('-', '') : 
+                leaderboardTournament.id.replace(/(\d+)$/, '-$1');
+            
+            const userLeaderboardPick = store.picks.find(
+                p => p.poolId === currentPoolId && 
+                p.userId === store.currentUser.id && 
+                (p.tournamentId === leaderboardTournament.id || p.tournamentId === leaderboardTournamentIdAlt)
+            );
 
             // Get all pool members' picks for the LEADERBOARD tournament (for friend tags)
             const poolPicks = store.picks.filter(
-                p => p.poolId === currentPoolId && p.tournamentId === leaderboardTournament.id
+                p => p.poolId === currentPoolId && 
+                (p.tournamentId === leaderboardTournament.id || p.tournamentId === leaderboardTournamentIdAlt)
             );
+            
+            console.log('Leaderboard pick matching:', {
+                leaderboardTournamentId: leaderboardTournament.id,
+                leaderboardTournamentIdAlt,
+                userLeaderboardPick: userLeaderboardPick?.playerName,
+                poolPicksCount: poolPicks.length
+            });
 
             // Create a color index map for friends
             const friendColorMap = {};
@@ -6575,9 +6600,9 @@ See you on the course!`
                 const playerPhoto = entry.headshot || player?.photo || getPlayerPhoto(entry.playerId);
 
                 // Check if this is user's pick (by ID or name match)
-                const isMyPick = userPick && (
-                    String(userPick.playerId) === String(entry.playerId) ||
-                    (player && getPlayerById(userPick.playerId)?.name.toLowerCase() === playerName.toLowerCase())
+                const isMyPick = userLeaderboardPick && (
+                    String(userLeaderboardPick.playerId) === String(entry.playerId) ||
+                    (player && getPlayerById(userLeaderboardPick.playerId)?.name.toLowerCase() === playerName.toLowerCase())
                 );
                 
                 // Check if any pool members picked this player
@@ -7021,8 +7046,24 @@ See you on the course!`
             
             // Get user's picks
             const userPicks = store.picks
-                .filter(p => p.poolId === currentPoolId && p.userId === store.currentUser.id)
-                .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+                .filter(p => p.poolId === currentPoolId && p.userId === store.currentUser.id);
+            
+            // Sort by tournament order (most recent first)
+            // Use schedule to determine order
+            const schedule = getScheduleForTour(currentPoolTour);
+            const tournamentOrder = {};
+            schedule.forEach((t, idx) => {
+                tournamentOrder[t.id] = idx;
+                // Also add hyphenated version
+                const hyphenatedId = t.id.replace(/(\d+)$/, '-$1');
+                tournamentOrder[hyphenatedId] = idx;
+            });
+            
+            userPicks.sort((a, b) => {
+                const orderA = tournamentOrder[a.tournamentId] ?? 999;
+                const orderB = tournamentOrder[b.tournamentId] ?? 999;
+                return orderB - orderA; // Most recent (higher index) first
+            });
 
             const tbody = document.getElementById('history-body');
 
@@ -7073,9 +7114,12 @@ See you on the course!`
                         playerHeadshot = player?.photo || getPlayerPhoto(pickPlayerId);
                     }
 
+                    // Get week number - picks are sorted most recent first, so reverse the index
+                    const weekNum = userPicks.length - index;
+
                     return `
                         <tr>
-                            <td>${userPicks.length - index}</td>
+                            <td>${weekNum}</td>
                             <td>
                                 <div class="player-cell">
                                     ${tournamentLogo ? `<img src="${tournamentLogo}" class="tournament-logo-small" alt="" onerror="this.style.display='none'">` : ''}
