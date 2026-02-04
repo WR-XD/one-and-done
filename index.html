@@ -2906,11 +2906,11 @@
         // Default pool logos - official tour logos
         const DEFAULT_POOL_LOGO = "https://res.cloudinary.com/pgatour-prod/tours/web-logos/pga-tour-logo.svg";
         
-        // LIV Golf default pool logo
-        const DEFAULT_LIV_LOGO = "https://upload.wikimedia.org/wikipedia/commons/4/48/LIV_golf_logo.svg";
+        // LIV Golf default pool logo (inline SVG)
+        const DEFAULT_LIV_LOGO = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 160 28'%3E%3Cpath d='M34.814.615H32.74l-5.688 26.898h2.075zM0 15.985l1.576 1.998L5.186.615h-.845c-.693 0-1.267.421-1.423 1.152zm2.421 3.074 1.654 2.075L8.415.614H6.342zm2.537 3.227 1.613 2.037L11.605.616H9.53zm2.537 3.227 1.613 1.997h8.263c.537 0 .96-.384 1.076-.883l.23-1.114H9.533l.269-1.192h9.105a30 30 0 0 0 .422-1.96h-9.146l.269-1.191h9.145c.116-.653.269-1.308.422-1.998h-9.146l.231-1.151h9.146l.153-.73c.153-.653-.346-1.23-1.037-1.23h-7.838l2.998-14.18c.153-.73-.346-1.266-1.036-1.266h-.73l-5.264 24.9zm13.449.73c-.153.73.346 1.267 1.038 1.267h.73L28.396.615h-.846c-.692 0-1.267.421-1.422 1.152L20.94 26.243zm2.92 1.267h2.113L31.625.615H29.55l-5.686 26.898zm6.416 0h.846c.692 0 1.267-.424 1.422-1.152l5.187-24.476c.153-.73-.346-1.267-1.037-1.267h-.73L30.28 27.513zm5.187-1.267c-.154.73.346 1.267 1.036 1.267h.73L42.921.615h-.845c-.693 0-1.268.421-1.423 1.152zm2.92 1.267H40.5L46.148.615h-2.075l-5.688 26.898zm3.19 0h2.074L49.337.615h-2.075l-5.686 26.898zm3.226 0h2.612c.5 0 1.23-.384 1.729-.883l24.9-24.745c.653-.615.653-1.267 0-1.267h-1.46L47.147 25.937l.421-1.997L70.933.615h-2.69L48.301 20.557l.384-1.844L66.552.615H63.9L49.453 15.1l.421-1.922L62.287.615h-1.77c-.536 0-1.266.346-1.766.845l-8.184 8.378 1.69-7.954c.154-.73-.346-1.267-1.036-1.267h-.73l-5.688 26.898zM71.701 14.1c0 7.8 6.225 14.026 14.064 14.026 6.686 0 12.181-4.225 13.68-10.067 1.69 5.842 7.07 10.067 13.486 10.067s11.798-4.188 13.487-9.991a14.05 14.05 0 0 0 13.295 9.376h3.152v-8.915h-3.152c-2.92 0-5.186-2.228-5.186-5.148V.615h-8.877v7.377C123.384 3.227 118.579 0 112.931 0c-6.494 0-11.911 4.303-13.564 10.26h-13.45v7.07h3.92c-.999 1.152-2.421 1.923-4.072 1.923-2.921 0-5.187-2.266-5.187-5.187 0-2.92 2.266-5.186 5.187-5.186a5.25 5.25 0 0 1 2.19.499l4.34-7.8C90.337.541 88.146.001 85.766.001 77.926.002 71.7 6.227 71.7 14.104m36.044-.038c0-2.92 2.265-5.186 5.186-5.186s5.186 2.265 5.186 5.186-2.265 5.187-5.186 5.187-5.186-2.266-5.186-5.187m36.502 13.449h8.878v-6.34h6.303V14.14h-6.263c.231-2.652 2.421-4.649 5.148-4.649h3.152V.615h-3.152c-7.838 0-14.063 6.225-14.063 14.026v12.872z' fill='%23000'/%3E%3C/svg%3E";
         
         // Champions Tour default pool logo
-        const DEFAULT_CHAMPIONS_LOGO = "https://res.cloudinary.com/pgatour-prod/tours/web-logos/pga-tour-champions-logo.svg";
+        const DEFAULT_CHAMPIONS_LOGO = "https://res.cloudinary.com/pgatour-prod/w_3.0,c_scale/tours/web-logos/champions-tour-logo.png";
         
         // Get default logo based on tour
         function getDefaultPoolLogo(tour) {
@@ -4591,11 +4591,11 @@
             "liv-singapore-2026": "https://images.livgolf.com/image/private/t_ratio1_1-size60-f_webp-c_fill/prd/wuhxhp2sut57kjfctohe",
             "liv-southafrica-2026": "https://images.livgolf.com/image/private/t_ratio1_1-size60-f_webp-c_fill/v1769094838/prd/oj20ndnsxola5jywfczj",
             "liv-mexico-2026": "https://images.livgolf.com/image/private/t_ratio1_1-size60-f_webp-c_fill/prd/r9slom6vzq1ca1k1s0zz",
-            "liv-virginia-2026": "https://upload.wikimedia.org/wikipedia/commons/4/48/LIV_golf_logo.svg",
+            "liv-virginia-2026": null,
             "liv-andalucia-2026": "https://images.livgolf.com/image/private/t_ratio1_1-size60-f_webp-c_fill/prd/ckrjsaz3aahvjeupyacp",
             "liv-louisiana-2026": "https://images.livgolf.com/image/private/t_ratio1_1-size60-f_webp-c_fill/v1763672445/prd/oszzlzu8bdbosno7ho3f",
-            "liv-uk-2026": "https://upload.wikimedia.org/wikipedia/commons/4/48/LIV_golf_logo.svg",
-            "liv-newyork-2026": "https://upload.wikimedia.org/wikipedia/commons/4/48/LIV_golf_logo.svg",
+            "liv-uk-2026": null,
+            "liv-newyork-2026": null,
             "liv-indianapolis-2026": "https://images.livgolf.com/image/private/t_ratio1_1-size60-f_webp-c_fill/v1769459214/prd/lgkubuo4livlbw88cvsp"
         };
         
@@ -7653,10 +7653,10 @@ See you on the course!`
                     
                     // For LIV tournaments, use circular badge logo plus name
                     const isLivTournament = pick.tournamentId.startsWith('liv-');
-                    const livFallbackLogo = "https://upload.wikimedia.org/wikipedia/commons/4/48/LIV_golf_logo.svg";
+                    const livFallbackLogo = DEFAULT_LIV_LOGO;
                     const tournamentDisplay = isLivTournament
                         ? `<div class="player-cell">
-                            <img src="${tournamentLogo || livFallbackLogo}" class="tournament-logo-liv" alt="" onerror="this.src='${livFallbackLogo}'">
+                            <img src="${tournamentLogo || livFallbackLogo}" class="tournament-logo-liv" alt="" onerror="this.style.display='none'">
                             <span>${tournamentName}</span>
                            </div>`
                         : `<div class="player-cell">
@@ -7779,17 +7779,16 @@ See you on the course!`
             scheduleBody.innerHTML = upcomingFromSchedule.map(tournament => {
                 // For LIV tournaments, use the high-quality badge from tournamentLogos
                 const isLivTournament = tournament.id.startsWith('liv-');
-                const livFallbackLogo = "https://upload.wikimedia.org/wikipedia/commons/4/48/LIV_golf_logo.svg";
+                const livFallbackLogo = DEFAULT_LIV_LOGO;
                 const logoUrl = isLivTournament ? (tournamentLogos[tournament.id] || livFallbackLogo) : tournament.logo;
                 const logoClass = isLivTournament ? 'tournament-logo-liv' : 'tournament-logo-small';
-                const onErrorHandler = isLivTournament ? `this.src='${livFallbackLogo}'` : "this.style.display='none'";
                 
                 return `
                     <tr>
                         <td>${tournament.week}</td>
                         <td>
                             <div class="player-cell">
-                                <img src="${logoUrl}" class="${logoClass}" alt="" onerror="${onErrorHandler}">
+                                <img src="${logoUrl}" class="${logoClass}" alt="" onerror="this.style.display='none'">
                                 <strong>${tournament.name}</strong>
                             </div>
                         </td>
