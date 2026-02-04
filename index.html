@@ -3972,12 +3972,87 @@
         
         // LIV Golf 2026 Player Field (57 players - 52 team players + 5 wildcards)
         // ESPN IDs from ESPN LIV coverage
+        // DataGolf ID to LIV Team mapping
+        const livTeamMapping = {
+            // 4 Aces GC
+            12422: "4 Aces GC",      // Dustin Johnson
+            13944: "4 Aces GC",      // Thomas Pieters
+            14181: "4 Aces GC",      // Thomas Detry
+            15274: "4 Aces GC",      // Miguel Tabuena (temp replacement)
+            // Cleeks GC
+            8117: "Cleeks GC",       // Martin Kaymer
+            6516: "Cleeks GC",       // Richard Bland
+            14196: "Cleeks GC",      // Adrian Meronk
+            20730: "Cleeks GC",      // Victor Perez
+            // Crushers GC
+            19841: "Crushers GC",    // Bryson DeChambeau
+            7108: "Crushers GC",     // Paul Casey
+            6892: "Crushers GC",     // Charles Howell III
+            12669: "Crushers GC",    // Anirban Lahiri
+            // Fireballs GC
+            5689: "Fireballs GC",    // Sergio Garcia
+            28473: "Fireballs GC",   // Jose Luis Ballester
+            28984: "Fireballs GC",   // David Puig
+            30428: "Fireballs GC",   // Luis Masaveu
+            // HyFlyers GC
+            14013: "HyFlyers GC",    // Cameron Tringale
+            33755: "HyFlyers GC",    // Michael La Sasso
+            11019: "HyFlyers GC",    // Brendan Steele
+            18662: "HyFlyers GC",    // Ollie Schniederjans (temp replacement)
+            // Korean GC
+            14459: "Korean GC",      // Byeong Hun An
+            11826: "Korean GC",      // Danny Lee
+            20780: "Korean GC",      // Minkyu Kim
+            16160: "Korean GC",      // Younghan Song
+            // Legion XIII
+            19195: "Legion XIII",    // Jon Rahm
+            14796: "Legion XIII",    // Tyrrell Hatton
+            30463: "Legion XIII",    // Caleb Surratt
+            22322: "Legion XIII",    // Tom McKibbin
+            // Majesticks GC
+            1435: "Majesticks GC",   // Ian Poulter
+            19866: "Majesticks GC",  // Sam Horsfield
+            14795: "Majesticks GC",  // Laurie Canter
+            27258: "Majesticks GC",  // Ben Schmidt (temp replacement)
+            // RangeGoats GC
+            7334: "RangeGoats GC",   // Bubba Watson
+            25919: "RangeGoats GC",  // Matthew Wolff
+            11357: "RangeGoats GC",  // Peter Uihlein
+            14373: "RangeGoats GC",  // Ben Campbell
+            // Ripper GC
+            15856: "Ripper GC",      // Cameron Smith
+            7649: "Ripper GC",       // Marc Leishman
+            17064: "Ripper GC",      // Lucas Herbert
+            24200: "Ripper GC",      // Elvis Smylie
+            // Smash GC
+            18580: "Smash GC",       // Talor Gooch
+            7548: "Smash GC",        // Graeme McDowell
+            12337: "Smash GC",       // Jason Kokrak
+            16602: "Smash GC",       // Harold Varner III
+            // Southern Guards
+            7672: "Southern Guards", // Louis Oosthuizen
+            7398: "Southern Guards", // Charl Schwartzel
+            14424: "Southern Guards",// Dean Burmester
+            11952: "Southern Guards",// Branden Grace
+            // Torque GC
+            18079: "Torque GC",      // Joaquin Niemann
+            20770: "Torque GC",      // Sebastian Munoz
+            18238: "Torque GC",      // Abraham Ancer
+            14735: "Torque GC",      // Carlos Ortiz
+            // Wildcards
+            11641: "Wildcard",       // Anthony Kim
+            12413: "Wildcard",       // Richard T Lee
+            16231: "Wildcard",       // Bjorn Hellgren
+            14559: "Wildcard",       // Scott Vincent
+            12637: "Wildcard"        // Yosuke Asaji
+        };
+
         const livPlayerField = [
             // 4 Aces GC
             { id: "3448", name: "Dustin Johnson", country: "USA", team: "4 Aces GC" },
             { id: "9031", name: "Thomas Pieters", country: "BEL", team: "4 Aces GC" },
             { id: "10259", name: "Thomas Detry", country: "BEL", team: "4 Aces GC" },
-            { id: "10184", name: "Patrick Reed", country: "USA", team: "4 Aces GC" },
+            { id: "4686095", name: "Miguel Tabuena", country: "PHI", team: "4 Aces GC" },
             // Cleeks GC
             { id: "3670", name: "Martin Kaymer", country: "GER", team: "Cleeks GC" },
             { id: "1441", name: "Richard Bland", country: "ENG", team: "Cleeks GC" },
@@ -3998,6 +4073,7 @@
             { id: "4645", name: "Cameron Tringale", country: "USA", team: "HyFlyers GC" },
             { id: "4686091", name: "Michael La Sasso", country: "ARG", team: "HyFlyers GC" },
             { id: "3596", name: "Brendan Steele", country: "USA", team: "HyFlyers GC" },
+            { id: "9527", name: "Ollie Schniederjans", country: "USA", team: "HyFlyers GC" }, // Reserve (Mickelson replacement)
             // Korean Golf Club
             { id: "5285", name: "Byeong Hun An", country: "KOR", team: "Korean GC" },
             { id: "3950", name: "Danny Lee", country: "NZL", team: "Korean GC" },
@@ -4013,6 +4089,7 @@
             { id: "619", name: "Ian Poulter", country: "ENG", team: "Majesticks GC" },
             { id: "10049", name: "Sam Horsfield", country: "ENG", team: "Majesticks GC" },
             { id: "10418", name: "Laurie Canter", country: "ENG", team: "Majesticks GC" },
+            { id: "4686096", name: "Ben Schmidt", country: "ENG", team: "Majesticks GC" }, // Reserve (Westwood injury replacement)
             // RangeGoats GC
             { id: "780", name: "Bubba Watson", country: "USA", team: "RangeGoats GC" },
             { id: "4412121", name: "Matthew Wolff", country: "USA", team: "RangeGoats GC" },
@@ -4670,15 +4747,53 @@
 
         // Fetch tournament field from Supabase
         async function fetchTournamentField(tournamentId, tour = 'pga') {
-            // For LIV Golf, use the hardcoded player list
+            // For LIV Golf, fetch from DataGolf API
             if (tour === 'liv') {
-                console.log('Using LIV Golf player field');
+                console.log('Fetching LIV Golf field from DataGolf API');
+                try {
+                    const response = await fetch('https://feeds.datagolf.com/preds/pre-tournament?tour=alt&file_format=json&key=92ca1f66aca56167b4f6e780a6de');
+                    const data = await response.json();
+                    
+                    if (data && data.baseline && data.baseline.length > 0) {
+                        console.log(`Loaded ${data.baseline.length} players from DataGolf API`);
+                        
+                        // Map players with team info from our lookup
+                        tournamentField = data.baseline.map((p, idx) => {
+                            // Convert "Last, First" to "First Last"
+                            let name = p.player_name || '';
+                            if (name.includes(',')) {
+                                const parts = name.split(',').map(s => s.trim());
+                                name = `${parts[1]} ${parts[0]}`;
+                            }
+                            
+                            // Look up team from our mapping
+                            const team = livTeamMapping[p.dg_id] || 'Wildcard';
+                            
+                            return {
+                                id: String(p.dg_id),
+                                name: name,
+                                country: p.country || '',
+                                team: team,
+                                rank: idx + 1, // Use win probability order as rank
+                                winProb: p.win,
+                                headshot: null // Will use fallback
+                            };
+                        });
+                        fieldLoaded = true;
+                        return;
+                    }
+                } catch (err) {
+                    console.error('Error fetching from DataGolf API:', err);
+                }
+                
+                // Fallback to hardcoded list
+                console.log('Using fallback LIV Golf player field');
                 tournamentField = livPlayerField.map(p => ({
                     id: p.id,
                     name: p.name,
                     country: p.country,
-                    team: p.team, // LIV team name
-                    rank: livPlayerField.indexOf(p) + 1, // Use roster order as "rank"
+                    team: p.team,
+                    rank: livPlayerField.indexOf(p) + 1,
                     headshot: `https://a.espncdn.com/combiner/i?img=/i/headshots/golf/players/full/${p.id}.png&w=80&h=58&scale=crop`
                 }));
                 fieldLoaded = true;
