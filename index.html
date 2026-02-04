@@ -713,6 +713,44 @@
         .inline-confirm-btn:hover {
             background: #b8982f;
         }
+        
+        .btn-remove-pick {
+            background: transparent;
+            color: var(--red);
+            border: 1px solid var(--red);
+            padding: 0.35rem 0.75rem;
+            font-family: 'Oswald', sans-serif;
+            font-size: 0.75rem;
+            font-weight: 500;
+            text-transform: uppercase;
+            cursor: pointer;
+            border-radius: 4px;
+            transition: all 0.2s;
+        }
+        
+        .btn-remove-pick:hover {
+            background: var(--red);
+            color: white;
+        }
+        
+        .inline-remove-btn {
+            background: transparent;
+            color: #dc2626;
+            border: 1px solid #dc2626;
+            padding: 0.4rem 0.75rem;
+            font-family: 'Oswald', sans-serif;
+            font-size: 0.8rem;
+            font-weight: 500;
+            text-transform: uppercase;
+            cursor: pointer;
+            border-radius: 4px;
+            margin-left: 0.5rem;
+        }
+        
+        .inline-remove-btn:hover {
+            background: #dc2626;
+            color: white;
+        }
 
         .confirm-selection {
             padding: 1.5rem 2rem;
@@ -2580,8 +2618,15 @@
                     </div>
 
                     <div id="current-pick-display" class="current-pick" style="display: none;">
-                        <strong>Current Selection:</strong>
-                        <span id="selected-player-name">None</span>
+                        <div style="display: flex; align-items: center; justify-content: space-between; width: 100%;">
+                            <div>
+                                <strong>Current Selection:</strong>
+                                <span id="selected-player-name">None</span>
+                            </div>
+                            <button id="remove-pick-btn" class="btn-remove-pick" onclick="removePick()" style="display: none;">
+                                Remove Pick
+                            </button>
+                        </div>
                     </div>
 
                     <div class="search-filter">
@@ -4456,19 +4501,19 @@
             "atandt-2026": "https://res.cloudinary.com/pgatour-prod/d_tournaments:logos:R000.png/tournaments/logos/R054.png",
             "wmphoenix-2026": "https://res.cloudinary.com/pgatour-prod/d_tournaments:logos:R000.png/tournaments/logos/R003.png",
             "genesis-2026": "https://res.cloudinary.com/pgatour-prod/d_tournaments:logos:R000.png/tournaments/logos/R011.png",
-            // LIV Golf 2026 (circular badges - include tournament name)
-            "liv-riyadh-2026": "https://images.livgolf.com/image/private/t_w_120-f_webp-c_scale/v1766425652/prd/assets/2026%20Event%20Logos%20(New%20Brand)/01_RoshnGroup_Riyadh_Localized_Lockup_2026_Primary-Rev_wrmurj.png",
-            "liv-adelaide-2026": "https://images.livgolf.com/image/private/t_w_120-f_webp-c_scale/v1766426630/prd/assets/assets/LIV%20Logos/02_ADELAIDE_Localized_Lockup_2026_Primary-Rev_l36mtm.png",
-            "liv-hongkong-2026": "https://images.livgolf.com/image/private/t_w_120-f_webp-c_scale/v1766426783/prd/assets/assets/LIV%20Logos/03_HONG_KONG_Localized_Lockup_2026_Primary-Rev_gfz6qn.png",
-            "liv-singapore-2026": "https://images.livgolf.com/image/private/t_w_120-f_webp-c_scale/v1768928651/prd/assets/04_SINGAPORE_Localized_Lockup_2026_Primary-Rev_ozfvpt.png",
-            "liv-southafrica-2026": "https://images.livgolf.com/image/private/t_w_120-f_webp-c_scale/v1766426968/prd/assets/assets/LIV%20Logos/05_SOUTH_AFRICA_Localized_Lockup_2026_Primary-Rev_wnzjhz.png",
-            "liv-mexico-2026": "https://images.livgolf.com/image/private/t_w_120-f_webp-c_scale/v1766427036/prd/assets/assets/LIV%20Logos/06_MEXICO_CITY_Localized_Lockup_2026_Primary-Rev_qzl9tm.png",
-            "liv-virginia-2026": "https://images.livgolf.com/image/private/t_w_120-f_webp-c_scale/v1769793290/prd/assets/assets/LIV%20Logos/07_VIRGINIA_Localized_Lockup_2026_Primary-Rev_z8cqvn.png",
-            "liv-andalucia-2026": "https://images.livgolf.com/image/private/t_w_120-f_webp-c_scale/v1766427162/prd/assets/assets/LIV%20Logos/09_ANDALUCIA_Localized_Lockup_2026_Primary-Rev_xkqjzf.png",
-            "liv-louisiana-2026": "https://images.livgolf.com/image/private/t_w_120-f_webp-c_scale/v1766427234/prd/assets/assets/LIV%20Logos/10_LOUISIANA_Localized_Lockup_2026_Primary-Rev_vpvxje.png",
-            "liv-uk-2026": "https://images.livgolf.com/image/private/t_w_120-f_webp-c_scale/v1766427261/prd/assets/assets/LIV%20Logos/11_UK_Localized_Lockup_2026_Primary-Rev_v2tygq.png",
-            "liv-newyork-2026": "https://images.livgolf.com/image/private/t_w_120-f_webp-c_scale/v1769173152/prd/assets/assets/LIV%20Logos/12_NEW_YORK_Localized_Lockup_2026_Primary-Rev_abcdef.png",
-            "liv-indianapolis-2026": "https://images.livgolf.com/image/private/t_w_120-f_webp-c_scale/v1766167359/prd/assets/new-event-logos/13_INDIANAPOLIS_Localized_Lockup_2026_Primary-Rev_xqj0kl.png"
+            // LIV Golf 2026 (circular event badges)
+            "liv-riyadh-2026": "https://images.livgolf.com/image/private/t_w_120-f_webp-c_scale/prd/raqryuvyckprnzelsuw3",
+            "liv-adelaide-2026": "https://images.livgolf.com/image/private/t_w_120-f_webp-c_scale/prd/dikpwqj1vsje1flavnps",
+            "liv-hongkong-2026": "https://images.livgolf.com/image/private/t_w_120-f_webp-c_scale/prd/bpqx1nfe1xw8f9lpod4p",
+            "liv-singapore-2026": "https://images.livgolf.com/image/private/t_w_120-f_webp-c_scale/prd/r6moehmdiybcmzxbpicb",
+            "liv-southafrica-2026": "https://images.livgolf.com/image/private/t_w_120-f_webp-c_scale/prd/ozq5otyv2tajrbsvibaw",
+            "liv-mexico-2026": "https://images.livgolf.com/image/private/t_w_120-f_webp-c_scale/prd/gwwddrm2fhxnnxgdehe7",
+            "liv-virginia-2026": "https://images.livgolf.com/image/private/t_w_120-f_webp-c_scale/prd/rmqmwfo3gbgxz4bxi18q",
+            "liv-andalucia-2026": "https://images.livgolf.com/image/private/t_w_120-f_webp-c_scale/prd/jkusmkeaut0ejmf1zvny",
+            "liv-louisiana-2026": "https://images.livgolf.com/image/private/t_w_120-f_webp-c_scale/prd/cvj3faipjdnpmpga4zcy",
+            "liv-uk-2026": "https://images.livgolf.com/image/private/t_w_120-f_webp-c_scale/prd/wmkbbwevhum3lo9u5hd0",
+            "liv-newyork-2026": "https://images.livgolf.com/image/private/t_w_120-f_webp-c_scale/prd/oswfxnkikwqvcqydt5wz",
+            "liv-indianapolis-2026": "https://images.livgolf.com/image/private/t_w_120-f_webp-c_scale/prd/whqykay3ksd0w2rslekj"
         };
         
         // Tournament name lookup (handles both formats)
@@ -7064,6 +7109,9 @@ See you on the course!`
                 currentPickDisplay.style.display = 'flex';
                 document.getElementById('selected-player-name').textContent = player.name;
                 
+                // Show remove button (only available when picks aren't locked)
+                document.getElementById('remove-pick-btn').style.display = 'inline-block';
+                
                 document.getElementById('confirm-pick-btn').style.display = 'block';
                 document.getElementById('confirm-pick-btn').textContent = 'UPDATE PICK';
                 document.getElementById('confirm-pick-btn').disabled = true; // Disabled until they select someone different
@@ -7073,6 +7121,7 @@ See you on the course!`
             } else {
                 // SCENARIO 5: Pick window open, no pick yet - can pick
                 document.getElementById('current-pick-display').style.display = 'none';
+                document.getElementById('remove-pick-btn').style.display = 'none';
                 document.getElementById('confirm-pick-btn').style.display = 'block';
                 document.getElementById('confirm-pick-btn').textContent = 'CONFIRM PICK';
             }
@@ -7168,6 +7217,9 @@ See you on the course!`
                 // Determine button text based on whether updating existing pick
                 const confirmBtnText = isCurrentPick ? 'Current' : (existingPick ? 'Update' : 'Confirm');
                 const showConfirmBtn = isSelected && !isDisabled && !isCurrentPick;
+                
+                // Show remove button only on current pick when tournament hasn't started
+                const showRemoveBtn = isCurrentPick && !tournamentStarted;
 
                 return `
                     <div class="player-item ${isDisabled ? 'disabled' : ''} ${isSelected ? 'selected' : ''} ${isCurrentPick ? 'current-pick' : ''}"
@@ -7181,8 +7233,9 @@ See you on the course!`
                         ${isUsed ? '<span class="used-badge">Already Used</span>' : ''}
                         ${isTakenByOther ? `<span class="used-badge" style="background: #ef4444;">Picked by ${takenByName}</span>` : ''}
                         ${isCurrentPick ? '<span class="current-badge">Current Pick</span>' : ''}
+                        ${showRemoveBtn ? `<button class="inline-remove-btn" onclick="event.stopPropagation(); removePick();">Remove</button>` : ''}
                         ${showConfirmBtn ? `<button class="inline-confirm-btn" onclick="event.stopPropagation(); confirmPick();">${confirmBtnText}</button>` : ''}
-                        ${!isSelected ? `<div class="player-rank">
+                        ${!isSelected && !isCurrentPick ? `<div class="player-rank">
                             ${tournamentStarted ? `
                                 <strong>${currentPos}</strong>
                                 <span>${currentScore}</span>
@@ -7347,6 +7400,63 @@ See you on the course!`
                 switchPoolTab('leaderboard');
             } catch (error) {
                 showToast(error.message || 'Failed to save pick', true);
+            }
+        }
+
+        async function removePick() {
+            // Double-check tournament hasn't started
+            if (hasTournamentStarted()) {
+                showToast('Tournament has already started - picks are locked!', true);
+                renderPlayerSelection();
+                return;
+            }
+
+            // Find existing pick
+            const existingPick = store.picks.find(
+                p => p.poolId === currentPoolId && 
+                p.userId === store.currentUser.id && 
+                p.tournamentId === currentTournament.id
+            );
+
+            if (!existingPick) {
+                showToast('No pick to remove', true);
+                return;
+            }
+
+            // Confirm removal
+            if (!confirm('Are you sure you want to remove your pick? You can make a new pick until the tournament starts.')) {
+                return;
+            }
+
+            try {
+                if (supabaseClient) {
+                    // Delete from Supabase
+                    const { error } = await supabaseClient
+                        .from('picks')
+                        .delete()
+                        .eq('pool_id', currentPoolId)
+                        .eq('user_id', store.currentUser.id)
+                        .eq('tournament_id', currentTournament.id);
+                    
+                    if (error) throw error;
+                }
+
+                // Remove from local store
+                const pickIndex = store.picks.findIndex(
+                    p => p.poolId === currentPoolId && 
+                    p.userId === store.currentUser.id && 
+                    p.tournamentId === currentTournament.id
+                );
+                
+                if (pickIndex !== -1) {
+                    store.picks.splice(pickIndex, 1);
+                }
+
+                selectedPlayerId = null;
+                showToast('Pick removed successfully');
+                renderPlayerSelection();
+            } catch (error) {
+                showToast(error.message || 'Failed to remove pick', true);
             }
         }
 
