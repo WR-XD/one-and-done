@@ -4435,7 +4435,13 @@
         // Calculate tie-adjusted earnings for all players in leaderboard
         // For T players tied at position N: sum payouts for N through N+T-1, divide by T
         function calculateTieAdjustedEarnings(leaderboard, purse, tour = 'pga') {
-            if (!leaderboard || leaderboard.length === 0 || !purse) return;
+            if (!leaderboard || leaderboard.length === 0) return;
+            if (!purse || purse <= 0) {
+                console.warn('No purse value for earnings calculation');
+                // Set all earnings to 0 if no purse
+                leaderboard.forEach(p => p.projectedEarnings = 0);
+                return;
+            }
             
             const payoutTable = getPayoutTable(tour);
             const maxPos = tour === 'liv' ? 57 : 90;
@@ -4519,7 +4525,11 @@
                 
                 // Update tournament info
                 if (currentTournament) {
-                    if (event.purse) currentTournament.purse = event.purse;
+                    // Only update purse from ESPN if it's provided AND non-zero
+                    // Otherwise keep our schedule-defined purse
+                    if (event.purse && event.purse > 0) {
+                        currentTournament.purse = event.purse;
+                    }
                     if (competition.status && competition.status.period) {
                         currentTournament.round = competition.status.period;
                     }
@@ -4584,8 +4594,18 @@
 
                 // If no actual earnings from ESPN, calculate tie-adjusted projected earnings
                 if (!hasActualEarnings) {
-                    calculateTieAdjustedEarnings(liveLeaderboard, currentTournament?.purse || 0, currentPoolTour);
+                    const purse = currentTournament?.purse || 0;
+                    console.log(`Calculating projected earnings for ${currentPoolTour} tour, purse: ${purse}`);
+                    calculateTieAdjustedEarnings(liveLeaderboard, purse, currentPoolTour);
                     console.log('Using calculated projected earnings (tournament in progress)');
+                    // Log sample earnings for debugging
+                    if (liveLeaderboard.length > 0) {
+                        console.log('Sample projected earnings:', liveLeaderboard.slice(0, 3).map(p => ({
+                            name: p.playerName,
+                            pos: p.pos,
+                            earnings: p.projectedEarnings
+                        })));
+                    }
                 } else {
                     console.log('Using actual ESPN earnings (tournament finished)');
                 }
@@ -5078,6 +5098,9 @@
         }
 
         function formatCurrency(amount) {
+            if (amount === undefined || amount === null || isNaN(amount)) {
+                return '$0';
+            }
             return new Intl.NumberFormat('en-US', {
                 style: 'currency',
                 currency: 'USD',
@@ -6609,13 +6632,20 @@ See you on the course!`
                         
                         // Only look up position/earnings if ESPN is showing the same tournament
                         // (not showing finished results from a previous tournament)
+                        const currentTournamentFirstWord = currentTournament?.name?.split(' ')[0]?.toLowerCase() || '';
                         const espnMatchesCurrentTournament = espnTournamentInfo && 
                             espnTournamentInfo.name && 
                             currentTournament && 
                             currentTournament.name &&
-                            espnTournamentInfo.name.toLowerCase().includes(currentTournament.name.split(' ')[0].toLowerCase());
+                            (espnTournamentInfo.name.toLowerCase().includes(currentTournamentFirstWord) ||
+                             currentTournament.name.toLowerCase().includes(espnTournamentInfo.name.split(' ')[0]?.toLowerCase() || ''));
                         
-                        if (espnMatchesCurrentTournament || !espnTournamentInfo?.isFinished) {
+                        // For LIV and in-progress tournaments, always try to look up earnings
+                        const shouldLookupEarnings = espnMatchesCurrentTournament || 
+                            !espnTournamentInfo?.isFinished ||
+                            currentPoolTour === 'liv';
+                        
+                        if (shouldLookupEarnings) {
                             // Look in live leaderboard
                             let leaderboardEntry = leaderboardData.find(l => 
                                 String(l.playerId) === String(s.current_week_pick.player_id)
@@ -6691,13 +6721,20 @@ See you on the course!`
                         currentPlayer = getPlayerById(currentPick.playerId);
                         
                         // Only look up position/earnings if ESPN is showing the same tournament
+                        const currentTournamentFirstWord = currentTournament?.name?.split(' ')[0]?.toLowerCase() || '';
                         const espnMatchesCurrentTournament = espnTournamentInfo && 
                             espnTournamentInfo.name && 
                             currentTournament && 
                             currentTournament.name &&
-                            espnTournamentInfo.name.toLowerCase().includes(currentTournament.name.split(' ')[0].toLowerCase());
+                            (espnTournamentInfo.name.toLowerCase().includes(currentTournamentFirstWord) ||
+                             currentTournament.name.toLowerCase().includes(espnTournamentInfo.name.split(' ')[0]?.toLowerCase() || ''));
                         
-                        if (espnMatchesCurrentTournament || !espnTournamentInfo?.isFinished) {
+                        // For LIV and in-progress tournaments, always try to look up earnings
+                        const shouldLookupEarnings = espnMatchesCurrentTournament || 
+                            !espnTournamentInfo?.isFinished ||
+                            currentPoolTour === 'liv';
+                        
+                        if (shouldLookupEarnings) {
                             let leaderboardEntry = leaderboardData.find(l => String(l.playerId) === String(currentPick.playerId));
                             if (!leaderboardEntry && currentPlayer) {
                                 leaderboardEntry = leaderboardData.find(l => 
