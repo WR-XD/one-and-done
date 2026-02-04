@@ -694,6 +694,25 @@
             border: 2px solid var(--gold);
             background: rgba(196, 167, 71, 0.1);
         }
+        
+        .inline-confirm-btn {
+            background: var(--gold);
+            color: var(--green-deep);
+            border: none;
+            padding: 0.5rem 1rem;
+            font-family: 'Oswald', sans-serif;
+            font-size: 0.85rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            cursor: pointer;
+            border-radius: 4px;
+            white-space: nowrap;
+            margin-left: 0.5rem;
+        }
+        
+        .inline-confirm-btn:hover {
+            background: #b8982f;
+        }
 
         .confirm-selection {
             padding: 1.5rem 2rem;
@@ -741,11 +760,10 @@
         }
         
         .tournament-logo-liv {
-            height: 28px;
-            width: auto;
-            max-width: 140px;
+            width: 40px;
+            height: 40px;
             object-fit: contain;
-            border-radius: 4px;
+            border-radius: 50%;
         }
 
         .leaderboard-header h2 {
@@ -2574,7 +2592,8 @@
                         <!-- Players will be rendered here -->
                     </div>
 
-                    <div class="confirm-selection">
+                    <!-- Bottom confirm section hidden - now using inline buttons -->
+                    <div class="confirm-selection" style="display: none;">
                         <div id="pick-warning" style="color: var(--gray);">
                             Select a player to lock in your pick for this week
                         </div>
@@ -4437,18 +4456,19 @@
             "atandt-2026": "https://res.cloudinary.com/pgatour-prod/d_tournaments:logos:R000.png/tournaments/logos/R054.png",
             "wmphoenix-2026": "https://res.cloudinary.com/pgatour-prod/d_tournaments:logos:R000.png/tournaments/logos/R003.png",
             "genesis-2026": "https://res.cloudinary.com/pgatour-prod/d_tournaments:logos:R000.png/tournaments/logos/R011.png",
-            // LIV Golf 2026 (logos include tournament name)
-            "liv-riyadh-2026": "https://images.livgolf.com/image/private/t_w_420-f_webp-c_scale/v1766426449/prd/assets/assets/LIV%20Logos/01_RoshnGroup_Riyadh_Localized_Lockup_2026_Horizontal_nq79dq.jpg",
-            "liv-adelaide-2026": "https://images.livgolf.com/image/private/t_w_420-f_webp-c_scale/v1766426576/prd/assets/assets/LIV%20Logos/02_ADELAIDE_Localized_Lockup_2026_Horizontal_ctf7hc.jpg",
-            "liv-hongkong-2026": "https://images.livgolf.com/image/private/t_w_420-f_webp-c_scale/v1766426783/prd/assets/assets/LIV%20Logos/03_HONG_KONG_Localized_Lockup_2026_Horizontal_xhqllb.jpg",
-            "liv-singapore-2026": "https://images.livgolf.com/image/private/t_w_420-f_webp-c_scale/v1768928651/prd/assets/04_SINGAPORE_Localized_Lockup_2026_Horizontal_ikytyt.jpg",
-            "liv-southafrica-2026": "https://images.livgolf.com/image/private/t_w_420-f_webp-c_scale/v1766426968/prd/assets/assets/LIV%20Logos/05_SOUTH_AFRICA_Localized_Lockup_2026_Horizontal_vhxydw.jpg",
-            "liv-mexico-2026": "https://images.livgolf.com/image/private/t_w_420-f_webp-c_scale/v1766427036/prd/assets/assets/LIV%20Logos/06_MEXICO_CITY_Localized_Lockup_2026_Horizontal_ryv3lw.jpg",
-            "liv-virginia-2026": "https://images.livgolf.com/image/private/t_w_420-f_webp-c_scale/v1769793290/prd/assets/assets/LIV%20Logos/07_VIRGINIA_Localized_Lockup_2026_Horizontal_bcux1q.jpg",
-            "liv-andalucia-2026": "https://images.livgolf.com/image/private/t_w_420-f_webp-c_scale/v1766427162/prd/assets/assets/LIV%20Logos/09_ANDALUCIA_Localized_Lockup_2026_Horizontal_dy31la.jpg",
-            "liv-louisiana-2026": "https://images.livgolf.com/image/private/t_w_420-f_webp-c_scale/v1766427234/prd/assets/assets/LIV%20Logos/10_LOUISIANA_Localized_Lockup_2026_Horizontal_jzjp1q.jpg",
-            "liv-uk-2026": "https://images.livgolf.com/image/private/t_w_420-f_webp-c_scale/v1766427261/prd/assets/assets/LIV%20Logos/11_UK_Localized_Lockup_2026_Horizontal_c74bz3.jpg",
-            "liv-indianapolis-2026": "https://images.livgolf.com/image/private/t_w_420-f_webp-c_scale/v1766167359/prd/assets/new-event-logos/13_INDIANAPOLIS_Localized_Lockup_2026_Horizontal_h3mysm.jpg"
+            // LIV Golf 2026 (circular badges - include tournament name)
+            "liv-riyadh-2026": "https://images.livgolf.com/image/private/t_w_120-f_webp-c_scale/v1766425652/prd/assets/2026%20Event%20Logos%20(New%20Brand)/01_RoshnGroup_Riyadh_Localized_Lockup_2026_Primary-Rev_wrmurj.png",
+            "liv-adelaide-2026": "https://images.livgolf.com/image/private/t_w_120-f_webp-c_scale/v1766426630/prd/assets/assets/LIV%20Logos/02_ADELAIDE_Localized_Lockup_2026_Primary-Rev_l36mtm.png",
+            "liv-hongkong-2026": "https://images.livgolf.com/image/private/t_w_120-f_webp-c_scale/v1766426783/prd/assets/assets/LIV%20Logos/03_HONG_KONG_Localized_Lockup_2026_Primary-Rev_gfz6qn.png",
+            "liv-singapore-2026": "https://images.livgolf.com/image/private/t_w_120-f_webp-c_scale/v1768928651/prd/assets/04_SINGAPORE_Localized_Lockup_2026_Primary-Rev_ozfvpt.png",
+            "liv-southafrica-2026": "https://images.livgolf.com/image/private/t_w_120-f_webp-c_scale/v1766426968/prd/assets/assets/LIV%20Logos/05_SOUTH_AFRICA_Localized_Lockup_2026_Primary-Rev_wnzjhz.png",
+            "liv-mexico-2026": "https://images.livgolf.com/image/private/t_w_120-f_webp-c_scale/v1766427036/prd/assets/assets/LIV%20Logos/06_MEXICO_CITY_Localized_Lockup_2026_Primary-Rev_qzl9tm.png",
+            "liv-virginia-2026": "https://images.livgolf.com/image/private/t_w_120-f_webp-c_scale/v1769793290/prd/assets/assets/LIV%20Logos/07_VIRGINIA_Localized_Lockup_2026_Primary-Rev_z8cqvn.png",
+            "liv-andalucia-2026": "https://images.livgolf.com/image/private/t_w_120-f_webp-c_scale/v1766427162/prd/assets/assets/LIV%20Logos/09_ANDALUCIA_Localized_Lockup_2026_Primary-Rev_xkqjzf.png",
+            "liv-louisiana-2026": "https://images.livgolf.com/image/private/t_w_120-f_webp-c_scale/v1766427234/prd/assets/assets/LIV%20Logos/10_LOUISIANA_Localized_Lockup_2026_Primary-Rev_vpvxje.png",
+            "liv-uk-2026": "https://images.livgolf.com/image/private/t_w_120-f_webp-c_scale/v1766427261/prd/assets/assets/LIV%20Logos/11_UK_Localized_Lockup_2026_Primary-Rev_v2tygq.png",
+            "liv-newyork-2026": "https://images.livgolf.com/image/private/t_w_120-f_webp-c_scale/v1769173152/prd/assets/assets/LIV%20Logos/12_NEW_YORK_Localized_Lockup_2026_Primary-Rev_abcdef.png",
+            "liv-indianapolis-2026": "https://images.livgolf.com/image/private/t_w_120-f_webp-c_scale/v1766167359/prd/assets/new-event-logos/13_INDIANAPOLIS_Localized_Lockup_2026_Primary-Rev_xqj0kl.png"
         };
         
         // Tournament name lookup (handles both formats)
@@ -7144,6 +7164,10 @@ See you on the course!`
                 
                 // Find who picked this player (for unique picks pools)
                 const takenByName = pickedByMap[String(player.id)] || '';
+                
+                // Determine button text based on whether updating existing pick
+                const confirmBtnText = isCurrentPick ? 'Current' : (existingPick ? 'Update' : 'Confirm');
+                const showConfirmBtn = isSelected && !isDisabled && !isCurrentPick;
 
                 return `
                     <div class="player-item ${isDisabled ? 'disabled' : ''} ${isSelected ? 'selected' : ''} ${isCurrentPick ? 'current-pick' : ''}"
@@ -7157,14 +7181,15 @@ See you on the course!`
                         ${isUsed ? '<span class="used-badge">Already Used</span>' : ''}
                         ${isTakenByOther ? `<span class="used-badge" style="background: #ef4444;">Picked by ${takenByName}</span>` : ''}
                         ${isCurrentPick ? '<span class="current-badge">Current Pick</span>' : ''}
-                        <div class="player-rank">
+                        ${showConfirmBtn ? `<button class="inline-confirm-btn" onclick="event.stopPropagation(); confirmPick();">${confirmBtnText}</button>` : ''}
+                        ${!isSelected ? `<div class="player-rank">
                             ${tournamentStarted ? `
                                 <strong>${currentPos}</strong>
                                 <span>${currentScore}</span>
                             ` : `
                                 <span style="color: var(--gray); font-size: 0.8rem;">Not started</span>
                             `}
-                        </div>
+                        </div>` : ''}
                     </div>
                 `;
             }).join('');
@@ -7401,10 +7426,13 @@ See you on the course!`
                     // Get week number - picks are sorted most recent first, so reverse the index
                     const weekNum = userPicks.length - index;
                     
-                    // For LIV tournaments, the logo includes the name so we don't need text
+                    // For LIV tournaments, use circular badge logo plus name
                     const isLivTournament = pick.tournamentId.startsWith('liv-');
                     const tournamentDisplay = isLivTournament && tournamentLogo
-                        ? `<img src="${tournamentLogo}" class="tournament-logo-liv" alt="${tournamentName}" onerror="this.outerHTML='<span>${tournamentName}</span>'">`
+                        ? `<div class="player-cell">
+                            <img src="${tournamentLogo}" class="tournament-logo-liv" alt="" onerror="this.style.display='none'">
+                            <span>${tournamentName}</span>
+                           </div>`
                         : `<div class="player-cell">
                             ${tournamentLogo ? `<img src="${tournamentLogo}" class="tournament-logo-small" alt="" onerror="this.style.display='none'">` : ''}
                             <span>${tournamentName}</span>
