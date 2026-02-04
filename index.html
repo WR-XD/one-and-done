@@ -4572,9 +4572,9 @@
                         }
                     }
                     
-                    // Use ACTUAL earnings from ESPN if available (tournament finished)
+                    // Use ACTUAL earnings from ESPN if available AND meaningful (tournament finished)
                     let earnings = 0;
-                    if (comp.earnings !== undefined && comp.earnings !== null) {
+                    if (comp.earnings !== undefined && comp.earnings !== null && comp.earnings > 0) {
                         earnings = Math.round(comp.earnings);
                         hasActualEarnings = true;
                     }
@@ -4592,12 +4592,16 @@
                     });
                 });
 
-                // If no actual earnings from ESPN, calculate tie-adjusted projected earnings
-                if (!hasActualEarnings) {
+                // Validate hasActualEarnings - need at least some players with non-zero earnings
+                const playersWithEarnings = liveLeaderboard.filter(p => p.projectedEarnings > 0).length;
+                const meaningfulEarnings = hasActualEarnings && playersWithEarnings >= 3;
+                
+                // If no actual meaningful earnings from ESPN, calculate tie-adjusted projected earnings
+                if (!meaningfulEarnings) {
                     const purse = currentTournament?.purse || 0;
                     console.log(`Calculating projected earnings for ${currentPoolTour} tour, purse: ${purse}`);
                     calculateTieAdjustedEarnings(liveLeaderboard, purse, currentPoolTour);
-                    console.log('Using calculated projected earnings (tournament in progress)');
+                    console.log('Using calculated projected earnings (tournament in progress or ESPN earnings invalid)');
                     // Log sample earnings for debugging
                     if (liveLeaderboard.length > 0) {
                         console.log('Sample projected earnings:', liveLeaderboard.slice(0, 3).map(p => ({
@@ -4607,7 +4611,7 @@
                         })));
                     }
                 } else {
-                    console.log('Using actual ESPN earnings (tournament finished)');
+                    console.log(`Using actual ESPN earnings (tournament finished, ${playersWithEarnings} players with earnings)`);
                 }
 
                 espnDataLoaded = true;
