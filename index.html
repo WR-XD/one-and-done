@@ -4526,8 +4526,8 @@
                 // Update tournament info
                 if (currentTournament) {
                     // Only update purse from ESPN if it's provided AND non-zero
-                    // Otherwise keep our schedule-defined purse
-                    if (event.purse && event.purse > 0) {
+                    // BUT NOT for LIV - ESPN reports total purse ($30M) but we need individual purse ($20M)
+                    if (event.purse && event.purse > 0 && currentPoolTour !== 'liv') {
                         currentTournament.purse = event.purse;
                     }
                     if (competition.status && competition.status.period) {
