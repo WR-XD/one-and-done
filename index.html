@@ -999,9 +999,11 @@
         .pool-image-container img {
             width: 55px;
             height: 55px;
-            border-radius: 50%;
-            object-fit: cover;
-            border: 2px solid var(--gold);
+            border-radius: 6px;
+            object-fit: contain;
+            background: white;
+            padding: 4px;
+            border: 1px solid #e5e7eb;
         }
 
         .pool-total {
@@ -2477,7 +2479,7 @@
                         <p style="color: var(--gray); font-size: 0.85rem; margin-bottom: 0.5rem;">This will be shown on your pool card</p>
                         <div style="display: flex; align-items: center; gap: 1rem;">
                             <img id="create-pool-image-preview" src="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='50' fill='%23C4A747'/><text x='50' y='62' text-anchor='middle' font-size='45'>⛳</text></svg>" 
-                                 style="width: 60px; height: 60px; border-radius: 50%; object-fit: cover; border: 2px solid #e5e7eb;">
+                                 style="width: 60px; height: 60px; border-radius: 6px; object-fit: contain; background: white; padding: 4px; border: 1px solid #e5e7eb;">
                             <div style="flex: 1;">
                                 <input type="file" id="create-pool-image-input" accept="image/*" onchange="previewCreatePoolImage(event)" style="display: none;">
                                 <button type="button" class="btn btn-secondary" onclick="document.getElementById('create-pool-image-input').click()" style="padding: 0.5rem 1rem; font-size: 0.9rem;">
@@ -2869,7 +2871,7 @@
             <div class="modal-body">
                 <div style="text-align: center; margin-bottom: 1.5rem;">
                     <img id="pool-image-preview" src="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='50' fill='%23C4A747'/><text x='50' y='62' text-anchor='middle' font-size='45'>⛳</text></svg>" 
-                         style="width: 120px; height: 120px; border-radius: 50%; object-fit: cover; border: 3px solid var(--gold); margin-bottom: 1rem;">
+                         style="width: 120px; height: 120px; border-radius: 8px; object-fit: contain; background: white; padding: 8px; border: 1px solid #e5e7eb; margin-bottom: 1rem;">
                     <p style="color: var(--gray); font-size: 0.9rem;">This image will appear on your pool card and standings</p>
                 </div>
                 
@@ -5546,7 +5548,7 @@
                                 <h3>${pool.name}</h3>
                                 <p>${tourName} ${year}</p>
                             </div>
-                            <img src="${pool.poolImage || getDefaultPoolLogo(poolTour)}" alt="Pool Image" style="width: 50px; height: 50px; border-radius: 50%; object-fit: cover; border: 2px solid var(--gold);">
+                            <img src="${pool.poolImage || getDefaultPoolLogo(poolTour)}" alt="Pool Image" style="width: 50px; height: 50px; border-radius: 6px; object-fit: contain; background: white; padding: 4px; border: 1px solid #e5e7eb;">
                         </div>
                         <div class="tournament-body">
                             <div class="tournament-stat">
