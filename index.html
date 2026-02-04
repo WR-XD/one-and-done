@@ -791,12 +791,11 @@
         }
         
         .tournament-logo-liv {
-            width: 45px;
-            height: 45px;
+            width: 36px;
+            height: 36px;
             object-fit: cover;
             object-position: center;
             border-radius: 50%;
-            margin: -8px 0;
         }
 
         .leaderboard-header h2 {
@@ -1617,6 +1616,15 @@
                 flex-shrink: 0;
                 vertical-align: middle;
             }
+            
+            #tab-history .tournament-logo-liv {
+                width: 24px;
+                height: 24px;
+                display: inline-block !important;
+                flex-shrink: 0;
+                vertical-align: middle;
+                border-radius: 50%;
+            }
 
             #tab-history .player-cell {
                 gap: 0.3rem;
@@ -1637,6 +1645,14 @@
                 height: 18px;
                 display: inline-block !important;
                 vertical-align: middle;
+            }
+            
+            #schedule-body .tournament-logo-liv {
+                width: 20px;
+                height: 20px;
+                display: inline-block !important;
+                vertical-align: middle;
+                border-radius: 50%;
             }
 
             /* Upcoming Schedule columns - KEEP Course, fit everything */
@@ -4562,11 +4578,11 @@
             "liv-singapore-2026": "https://images.livgolf.com/image/private/t_ratio1_1-size60-f_webp-c_fill/prd/wuhxhp2sut57kjfctohe",
             "liv-southafrica-2026": "https://images.livgolf.com/image/private/t_ratio1_1-size60-f_webp-c_fill/v1769094838/prd/oj20ndnsxola5jywfczj",
             "liv-mexico-2026": "https://images.livgolf.com/image/private/t_ratio1_1-size60-f_webp-c_fill/prd/r9slom6vzq1ca1k1s0zz",
-            "liv-virginia-2026": "https://images.livgolf.com/liv-golf/image/private/t_q_good/v1734689517/prd/assets/assets/liv-logo-light_vozmay.svg",
+            "liv-virginia-2026": "https://upload.wikimedia.org/wikipedia/commons/4/48/LIV_golf_logo.svg",
             "liv-andalucia-2026": "https://images.livgolf.com/image/private/t_ratio1_1-size60-f_webp-c_fill/prd/ckrjsaz3aahvjeupyacp",
             "liv-louisiana-2026": "https://images.livgolf.com/image/private/t_ratio1_1-size60-f_webp-c_fill/v1763672445/prd/oszzlzu8bdbosno7ho3f",
-            "liv-uk-2026": "https://images.livgolf.com/liv-golf/image/private/t_q_good/v1734689517/prd/assets/assets/liv-logo-light_vozmay.svg",
-            "liv-newyork-2026": "https://images.livgolf.com/liv-golf/image/private/t_q_good/v1734689517/prd/assets/assets/liv-logo-light_vozmay.svg",
+            "liv-uk-2026": "https://upload.wikimedia.org/wikipedia/commons/4/48/LIV_golf_logo.svg",
+            "liv-newyork-2026": "https://upload.wikimedia.org/wikipedia/commons/4/48/LIV_golf_logo.svg",
             "liv-indianapolis-2026": "https://images.livgolf.com/image/private/t_ratio1_1-size60-f_webp-c_fill/v1769459214/prd/lgkubuo4livlbw88cvsp"
         };
         
@@ -7621,7 +7637,7 @@ See you on the course!`
                     
                     // For LIV tournaments, use circular badge logo plus name
                     const isLivTournament = pick.tournamentId.startsWith('liv-');
-                    const livFallbackLogo = "https://images.livgolf.com/liv-golf/image/private/t_q_good/v1734689517/prd/assets/assets/liv-logo-light_vozmay.svg";
+                    const livFallbackLogo = "https://upload.wikimedia.org/wikipedia/commons/4/48/LIV_golf_logo.svg";
                     const tournamentDisplay = isLivTournament
                         ? `<div class="player-cell">
                             <img src="${tournamentLogo || livFallbackLogo}" class="tournament-logo-liv" alt="" onerror="this.src='${livFallbackLogo}'">
@@ -7747,7 +7763,7 @@ See you on the course!`
             scheduleBody.innerHTML = upcomingFromSchedule.map(tournament => {
                 // For LIV tournaments, use the high-quality badge from tournamentLogos
                 const isLivTournament = tournament.id.startsWith('liv-');
-                const livFallbackLogo = "https://images.livgolf.com/liv-golf/image/private/t_q_good/v1734689517/prd/assets/assets/liv-logo-light_vozmay.svg";
+                const livFallbackLogo = "https://upload.wikimedia.org/wikipedia/commons/4/48/LIV_golf_logo.svg";
                 const logoUrl = isLivTournament ? (tournamentLogos[tournament.id] || livFallbackLogo) : tournament.logo;
                 const logoClass = isLivTournament ? 'tournament-logo-liv' : 'tournament-logo-small';
                 const onErrorHandler = isLivTournament ? `this.src='${livFallbackLogo}'` : "this.style.display='none'";
