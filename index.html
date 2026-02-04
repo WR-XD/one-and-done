@@ -3865,6 +3865,89 @@
             }
         ];
 
+        // Schwab Cup Rankings for Champions Tour (2025 final + 2026 early season)
+        // Used for sorting players in the Make Pick screen
+        const schwabCupRankings = {
+            "20229": 1,   // Stewart Cink
+            "20848": 2,   // Ángel Cabrera
+            "20157": 3,   // Retief Goosen
+            "10944": 4,   // Thomas Bjørn
+            "06522": 5,   // Ernie Els
+            "6522": 5,    // Ernie Els (alternate ID format)
+            "21731": 6,   // Freddie Jacobson
+            "19825": 7,   // Darren Clarke
+            "01226": 8,   // Fred Couples
+            "1226": 8,    // Fred Couples (alternate)
+            "06004": 9,   // Stephen Ames
+            "6004": 9,    // Stephen Ames (alternate)
+            "01666": 10,  // Bernhard Langer
+            "1666": 10,   // Bernhard Langer (alternate)
+            "30750": 11,  // Tommy Gainey
+            "20472": 12,  // Alex Cejka
+            "19958": 13,  // Miguel Angel Jiménez
+            "06567": 14,  // Vijay Singh
+            "6567": 14,   // Vijay Singh (alternate)
+            "09011": 15,  // David Duval
+            "9011": 15,   // David Duval (alternate)
+            "08075": 16,  // Jerry Kelly
+            "8075": 16,   // Jerry Kelly (alternate)
+            "26289": 17,  // Boo Weekley
+            "10423": 18,  // Mike Weir
+            "24663": 19,  // Y.E. Yang
+            "07457": 20,  // Steve Flesch
+            "7457": 20,   // Steve Flesch (alternate)
+            "22075": 21,  // Ricardo Gonzalez
+            "20569": 22,  // Richard Green
+            "02206": 23,  // David Toms
+            "2206": 23,   // David Toms (alternate)
+            "01457": 24,  // Jay Haas
+            "1457": 24,   // Jay Haas (alternate)
+            "23175": 25,  // Tim O'Neal
+            "06036": 26,  // Scott Dunlap
+            "6036": 26,   // Scott Dunlap (alternate)
+            "06621": 27,  // Joe Durant
+            "6621": 27,   // Joe Durant (alternate)
+            "20771": 28,  // Steven Alker
+            "21633": 29,  // Steve Allan
+            "24357": 30,  // K.J. Choi
+            "10860": 31,  // Justin Leonard
+            "01706": 32,  // Davis Love III
+            "1706": 32,   // Davis Love III (alternate)
+            "01797": 33,  // Rocco Mediate
+            "1797": 33,   // Rocco Mediate (alternate)
+            "10809": 34,  // Jim Furyk
+            "10585": 35,  // Scott McCarron
+            "20099": 36,  // Doug Barron
+            "06693": 37,  // Ken Tanigawa
+            "6693": 37,   // Ken Tanigawa (alternate)
+            "11127": 38,  // Stephen Dodd
+            "01928": 39,  // Corey Pavin
+            "1928": 39,   // Corey Pavin (alternate)
+            "01677": 40,  // Tom Lehman
+            "1677": 40,   // Tom Lehman (alternate)
+            "01139": 41,  // Olin Browne
+            "1139": 41,   // Olin Browne (alternate)
+            "01381": 42,  // Fred Funk
+            "1381": 42,   // Fred Funk (alternate)
+            "10378": 43,  // Steve Stricker
+            "03418": 44,  // Padraig Harrington
+            "3418": 44,   // Padraig Harrington (alternate)
+            "10244": 45,  // Stuart Appleby
+            "20574": 46,  // Robert Karlsson
+            "01686": 47,  // Billy Mayfair
+            "1686": 47,   // Billy Mayfair (alternate)
+            "05251": 48,  // John Daly
+            "5251": 48,   // John Daly (alternate)
+            "01883": 49,  // Kenny Perry
+            "1883": 49,   // Kenny Perry (alternate)
+            "08794": 50   // Rod Pampling
+        };
+        
+        // Get Schwab Cup rank for a player
+        function getSchwabCupRank(playerId) {
+            return schwabCupRankings[String(playerId)] || 999;
+        }
+
         // LIV Golf 2026 Schedule (72-hole events, no cut, ~57 players)
         const liv2026Schedule = [
             {
@@ -7340,10 +7423,20 @@ See you on the course!`
             const pool = store.pools.find(p => p.id === currentPoolId);
             
             // Use tournament field (players in THIS WEEK'S tournament)
-            // Filter by search term, then sort by world ranking
+            // Filter by search term, then sort by world ranking (or Schwab Cup for Champions Tour)
             const filtered = tournamentField
                 .filter(p => p.name.toLowerCase().includes(searchTerm.toLowerCase()))
-                .sort((a, b) => (a.rank || 999) - (b.rank || 999)); // Sort by rank, unranked at bottom
+                .sort((a, b) => {
+                    // For Champions Tour, use Schwab Cup rankings
+                    if (currentPoolTour === 'champions') {
+                        const rankA = getSchwabCupRank(a.id);
+                        const rankB = getSchwabCupRank(b.id);
+                        return rankA - rankB;
+                    }
+                    // For LIV, use win probability rank from DataGolf
+                    // For PGA Tour, use OWGR
+                    return (a.rank || 999) - (b.rank || 999);
+                });
 
             // Check if tournament has started - only show leaderboard data if it has
             const tournamentStarted = new Date() >= currentTournament.startTime;
@@ -7403,11 +7496,22 @@ See you on the course!`
                     }
                 }
 
-                // Show world ranking or team for LIV
-                const worldRank = player.rank ? `#${player.rank}` : '-';
-                const playerSubline = player.team 
-                    ? `${player.country} • ${player.team}`
-                    : `${player.country} • OWGR ${worldRank}`;
+                // Show world ranking or team for LIV, Schwab Cup for Champions
+                let playerSubline;
+                if (player.team) {
+                    // LIV Golf - show team
+                    playerSubline = `${player.country} • ${player.team}`;
+                } else if (currentPoolTour === 'champions') {
+                    // Champions Tour - show Schwab Cup rank
+                    const schwabRank = getSchwabCupRank(player.id);
+                    playerSubline = schwabRank < 999 
+                        ? `${player.country} • Schwab Cup #${schwabRank}`
+                        : `${player.country}`;
+                } else {
+                    // PGA Tour - show OWGR
+                    const worldRank = player.rank ? `#${player.rank}` : '-';
+                    playerSubline = `${player.country} • OWGR ${worldRank}`;
+                }
                 
                 // Get headshot - prefer Supabase data, fallback to PGA Tour CDN
                 const headshotUrl = player.headshot || getPlayerHeadshot(player);
