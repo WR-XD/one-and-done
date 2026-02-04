@@ -4469,6 +4469,14 @@
                     return;
                 }
                 
+                // HYBRID RULE: 1st place always gets full winner's share (playoff decides winner)
+                // All other positions use tie-split logic
+                if (posNum === 1) {
+                    const earnings = Math.round(purse * payoutTable[1]);
+                    players.forEach(p => p.projectedEarnings = earnings);
+                    return;
+                }
+                
                 const numTied = players.length;
                 
                 // Sum payouts for positions posNum through posNum + numTied - 1
