@@ -4048,79 +4048,64 @@
         };
 
         const livPlayerField = [
-            // 4 Aces GC
-            { id: "3448", name: "Dustin Johnson", country: "USA", team: "4 Aces GC" },
-            { id: "9031", name: "Thomas Pieters", country: "BEL", team: "4 Aces GC" },
-            { id: "10259", name: "Thomas Detry", country: "BEL", team: "4 Aces GC" },
-            { id: "4686095", name: "Miguel Tabuena", country: "PHI", team: "4 Aces GC" },
-            // Cleeks GC
-            { id: "3670", name: "Martin Kaymer", country: "GER", team: "Cleeks GC" },
-            { id: "1441", name: "Richard Bland", country: "ENG", team: "Cleeks GC" },
-            { id: "10839", name: "Adrian Meronk", country: "POL", team: "Cleeks GC" },
-            { id: "9353", name: "Victor Perez", country: "FRA", team: "Cleeks GC" },
-            // Crushers GC
-            { id: "10046", name: "Bryson DeChambeau", country: "USA", team: "Crushers GC" },
-            { id: "72", name: "Paul Casey", country: "ENG", team: "Crushers GC" },
-            { id: "208", name: "Charles Howell III", country: "USA", team: "Crushers GC" },
-            { id: "4989", name: "Anirban Lahiri", country: "IND", team: "Crushers GC" },
-            // Fireballs GC
-            { id: "158", name: "Sergio Garcia", country: "ESP", team: "Fireballs GC" },
-            { id: "4686092", name: "Jose Luis Ballester", country: "ESP", team: "Fireballs GC" },
-            { id: "4895429", name: "David Puig", country: "ESP", team: "Fireballs GC" },
-            { id: "5104245", name: "Luis Masaveu", country: "ESP", team: "Fireballs GC" },
-            // HyFlyers GC
-            { id: "308", name: "Phil Mickelson", country: "USA", team: "HyFlyers GC" },
-            { id: "4645", name: "Cameron Tringale", country: "USA", team: "HyFlyers GC" },
-            { id: "4686091", name: "Michael La Sasso", country: "ARG", team: "HyFlyers GC" },
-            { id: "3596", name: "Brendan Steele", country: "USA", team: "HyFlyers GC" },
-            { id: "9527", name: "Ollie Schniederjans", country: "USA", team: "HyFlyers GC" }, // Reserve (Mickelson replacement)
-            // Korean Golf Club
-            { id: "5285", name: "Byeong Hun An", country: "KOR", team: "Korean GC" },
-            { id: "3950", name: "Danny Lee", country: "NZL", team: "Korean GC" },
-            { id: "4686093", name: "Minkyu Kim", country: "KOR", team: "Korean GC" },
-            { id: "9192", name: "Younghan Song", country: "KOR", team: "Korean GC" },
-            // Legion XIII
+            // Sorted by DataGolf win probability for LIV Riyadh 2026
             { id: "9780", name: "Jon Rahm", country: "ESP", team: "Legion XIII" },
+            { id: "10046", name: "Bryson DeChambeau", country: "USA", team: "Crushers GC" },
+            { id: "4895429", name: "David Puig", country: "ESP", team: "Fireballs GC" },
             { id: "5553", name: "Tyrrell Hatton", country: "ENG", team: "Legion XIII" },
-            { id: "5110034", name: "Caleb Surratt", country: "USA", team: "Legion XIII" },
             { id: "4348444", name: "Tom McKibbin", country: "NIR", team: "Legion XIII" },
-            // Majesticks GC
-            { id: "455", name: "Lee Westwood", country: "ENG", team: "Majesticks GC" },
-            { id: "619", name: "Ian Poulter", country: "ENG", team: "Majesticks GC" },
-            { id: "10049", name: "Sam Horsfield", country: "ENG", team: "Majesticks GC" },
-            { id: "10418", name: "Laurie Canter", country: "ENG", team: "Majesticks GC" },
-            { id: "4686096", name: "Ben Schmidt", country: "ENG", team: "Majesticks GC" }, // Reserve (Westwood injury replacement)
-            // RangeGoats GC
-            { id: "780", name: "Bubba Watson", country: "USA", team: "RangeGoats GC" },
-            { id: "4412121", name: "Matthew Wolff", country: "USA", team: "RangeGoats GC" },
-            { id: "1674", name: "Peter Uihlein", country: "USA", team: "RangeGoats GC" },
-            { id: "7011", name: "Ben Campbell", country: "NZL", team: "RangeGoats GC" },
-            // Ripper GC
-            { id: "9131", name: "Cameron Smith", country: "AUS", team: "Ripper GC" },
-            { id: "3351", name: "Marc Leishman", country: "AUS", team: "Ripper GC" },
-            { id: "10343", name: "Lucas Herbert", country: "AUS", team: "Ripper GC" },
-            { id: "4686269", name: "Elvis Smylie", country: "AUS", team: "Ripper GC" },
-            // Smash GC
-            { id: "9513", name: "Talor Gooch", country: "USA", team: "Smash GC" },
-            { id: "301", name: "Graeme McDowell", country: "NIR", team: "Smash GC" },
-            { id: "3317", name: "Jason Kokrak", country: "USA", team: "Smash GC" },
-            { id: "6991", name: "Harold Varner III", country: "USA", team: "Smash GC" },
-            // Southern Guards (formerly Stinger)
-            { id: "1293", name: "Louis Oosthuizen", country: "RSA", team: "Southern Guards" },
-            { id: "1097", name: "Charl Schwartzel", country: "RSA", team: "Southern Guards" },
-            { id: "5830", name: "Dean Burmester", country: "RSA", team: "Southern Guards" },
-            { id: "4383", name: "Branden Grace", country: "RSA", team: "Southern Guards" },
-            // Torque GC
+            { id: "5285", name: "Byeong Hun An", country: "KOR", team: "Korean GC" },
             { id: "11099", name: "Joaquin Niemann", country: "CHI", team: "Torque GC" },
-            { id: "10404", name: "Sebastian Munoz", country: "COL", team: "Torque GC" },
-            { id: "9261", name: "Abraham Ancer", country: "MEX", team: "Torque GC" },
+            { id: "10259", name: "Thomas Detry", country: "BEL", team: "4 Aces GC" },
+            { id: "158", name: "Sergio Garcia", country: "ESP", team: "Fireballs GC" },
             { id: "5532", name: "Carlos Ortiz", country: "MEX", team: "Torque GC" },
-            // Wildcards
-            { id: "1745", name: "Anthony Kim", country: "USA", team: "Wildcard" },
+            { id: "4686092", name: "Jose Luis Ballester", country: "ESP", team: "Fireballs GC" },
+            { id: "10404", name: "Sebastian Munoz", country: "COL", team: "Torque GC" },
+            { id: "780", name: "Bubba Watson", country: "USA", team: "RangeGoats GC" },
+            { id: "4383", name: "Branden Grace", country: "RSA", team: "Southern Guards" },
+            { id: "208", name: "Charles Howell III", country: "USA", team: "Crushers GC" },
+            { id: "9353", name: "Victor Perez", country: "FRA", team: "Cleeks GC" },
+            { id: "3351", name: "Marc Leishman", country: "AUS", team: "Ripper GC" },
+            { id: "9131", name: "Cameron Smith", country: "AUS", team: "Ripper GC" },
+            { id: "1293", name: "Louis Oosthuizen", country: "RSA", team: "Southern Guards" },
+            { id: "10343", name: "Lucas Herbert", country: "AUS", team: "Ripper GC" },
+            { id: "4645", name: "Cameron Tringale", country: "USA", team: "HyFlyers GC" },
+            { id: "5110034", name: "Caleb Surratt", country: "USA", team: "Legion XIII" },
+            { id: "9031", name: "Thomas Pieters", country: "BEL", team: "4 Aces GC" },
+            { id: "5830", name: "Dean Burmester", country: "RSA", team: "Southern Guards" },
+            { id: "9261", name: "Abraham Ancer", country: "MEX", team: "Torque GC" },
+            { id: "10418", name: "Laurie Canter", country: "ENG", team: "Majesticks GC" },
+            { id: "3448", name: "Dustin Johnson", country: "USA", team: "4 Aces GC" },
+            { id: "4686269", name: "Elvis Smylie", country: "AUS", team: "Ripper GC" },
+            { id: "1097", name: "Charl Schwartzel", country: "RSA", team: "Southern Guards" },
             { id: "4364379", name: "Richard T Lee", country: "CAN", team: "Wildcard" },
-            { id: "4686088", name: "Bjorn Hellgren", country: "SWE", team: "Wildcard" },
+            { id: "9513", name: "Talor Gooch", country: "USA", team: "Smash GC" },
+            { id: "72", name: "Paul Casey", country: "ENG", team: "Crushers GC" },
             { id: "9799", name: "Scott Vincent", country: "ZIM", team: "Wildcard" },
-            { id: "4686090", name: "Yosuke Asaji", country: "JPN", team: "Wildcard" }
+            { id: "4989", name: "Anirban Lahiri", country: "IND", team: "Crushers GC" },
+            { id: "3317", name: "Jason Kokrak", country: "USA", team: "Smash GC" },
+            { id: "4686095", name: "Miguel Tabuena", country: "PHI", team: "4 Aces GC" },
+            { id: "6991", name: "Harold Varner III", country: "USA", team: "Smash GC" },
+            { id: "4686096", name: "Ben Schmidt", country: "ENG", team: "Majesticks GC" },
+            { id: "10839", name: "Adrian Meronk", country: "POL", team: "Cleeks GC" },
+            { id: "1674", name: "Peter Uihlein", country: "USA", team: "RangeGoats GC" },
+            { id: "1441", name: "Richard Bland", country: "ENG", team: "Cleeks GC" },
+            { id: "3596", name: "Brendan Steele", country: "USA", team: "HyFlyers GC" },
+            { id: "9192", name: "Younghan Song", country: "KOR", team: "Korean GC" },
+            { id: "4686088", name: "Bjorn Hellgren", country: "SWE", team: "Wildcard" },
+            { id: "5104245", name: "Luis Masaveu", country: "ESP", team: "Fireballs GC" },
+            { id: "4412121", name: "Matthew Wolff", country: "USA", team: "RangeGoats GC" },
+            { id: "301", name: "Graeme McDowell", country: "NIR", team: "Smash GC" },
+            { id: "10049", name: "Sam Horsfield", country: "ENG", team: "Majesticks GC" },
+            { id: "4686091", name: "Michael La Sasso", country: "ARG", team: "HyFlyers GC" },
+            { id: "3670", name: "Martin Kaymer", country: "GER", team: "Cleeks GC" },
+            { id: "9527", name: "Ollie Schniederjans", country: "USA", team: "HyFlyers GC" },
+            { id: "619", name: "Ian Poulter", country: "ENG", team: "Majesticks GC" },
+            { id: "4686090", name: "Yosuke Asaji", country: "JPN", team: "Wildcard" },
+            { id: "4686093", name: "Minkyu Kim", country: "KOR", team: "Korean GC" },
+            { id: "7011", name: "Ben Campbell", country: "NZL", team: "RangeGoats GC" },
+            { id: "1745", name: "Anthony Kim", country: "USA", team: "Wildcard" },
+            { id: "3950", name: "Danny Lee", country: "NZL", team: "Korean GC" }
         ];
 
         // Get schedule for a specific tour (defaults to 'pga')
