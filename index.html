@@ -2903,8 +2903,21 @@
             invites: []
         };
 
-        // Default pool logo - gold circle with golf flag (matches site logo)
-        const DEFAULT_POOL_LOGO = "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='50' fill='%23C4A747'/><text x='50' y='62' text-anchor='middle' font-size='45'>⛳</text></svg>";
+        // Default pool logos - official tour logos
+        const DEFAULT_POOL_LOGO = "https://res.cloudinary.com/pgatour-prod/tours/web-logos/pga-tour-logo.svg";
+        
+        // LIV Golf default pool logo
+        const DEFAULT_LIV_LOGO = "https://upload.wikimedia.org/wikipedia/commons/4/48/LIV_golf_logo.svg";
+        
+        // Champions Tour default pool logo
+        const DEFAULT_CHAMPIONS_LOGO = "https://res.cloudinary.com/pgatour-prod/tours/web-logos/pga-tour-champions-logo.svg";
+        
+        // Get default logo based on tour
+        function getDefaultPoolLogo(tour) {
+            if (tour === 'liv') return DEFAULT_LIV_LOGO;
+            if (tour === 'champions') return DEFAULT_CHAMPIONS_LOGO;
+            return DEFAULT_POOL_LOGO;
+        }
 
         // ==================== SUPABASE CONFIGURATION ====================
         const SUPABASE_URL = 'https://ttwtifdhlaijdswhehve.supabase.co';
@@ -5533,7 +5546,7 @@
                                 <h3>${pool.name}</h3>
                                 <p>${tourName} ${year}</p>
                             </div>
-                            <img src="${pool.poolImage || DEFAULT_POOL_LOGO}" alt="Pool Image" style="width: 50px; height: 50px; border-radius: 50%; object-fit: cover; border: 2px solid var(--gold);">
+                            <img src="${pool.poolImage || getDefaultPoolLogo(poolTour)}" alt="Pool Image" style="width: 50px; height: 50px; border-radius: 50%; object-fit: cover; border: 2px solid var(--gold);">
                         </div>
                         <div class="tournament-body">
                             <div class="tournament-stat">
@@ -5852,7 +5865,7 @@
                 openPoolImageModal();
             } else {
                 // Non-creator can view expanded
-                const imgSrc = pool.poolImage || DEFAULT_POOL_LOGO;
+                const imgSrc = pool.poolImage || getDefaultPoolLogo(pool.tour);
                 showProfileModal(imgSrc, pool.name);
             }
         }
@@ -5875,7 +5888,7 @@
                 preview.src = pool.poolImage;
                 removeBtn.style.display = 'inline-block';
             } else {
-                preview.src = DEFAULT_POOL_LOGO;
+                preview.src = getDefaultPoolLogo(pool.tour);
                 removeBtn.style.display = 'none';
             }
             
@@ -5945,7 +5958,8 @@
         
         function removeCreatePoolImage() {
             createPoolImage = null;
-            document.getElementById('create-pool-image-preview').src = DEFAULT_POOL_LOGO;
+            const selectedTour = document.getElementById('pool-tour')?.value || 'pga';
+            document.getElementById('create-pool-image-preview').src = getDefaultPoolLogo(selectedTour);
             document.getElementById('remove-create-pool-image-btn').style.display = 'none';
             document.getElementById('create-pool-image-input').value = '';
         }
@@ -5953,7 +5967,8 @@
         function resetCreatePoolForm() {
             document.getElementById('pool-name').value = '';
             createPoolImage = null;
-            document.getElementById('create-pool-image-preview').src = DEFAULT_POOL_LOGO;
+            const selectedTour = document.getElementById('pool-tour')?.value || 'pga';
+            document.getElementById('create-pool-image-preview').src = getDefaultPoolLogo(selectedTour);
             document.getElementById('remove-create-pool-image-btn').style.display = 'none';
             document.getElementById('create-pool-image-input').value = '';
             document.getElementById('invite-list').innerHTML = '';
@@ -5978,7 +5993,8 @@
         
         function removePoolImage() {
             pendingPoolImage = null;
-            document.getElementById('pool-image-preview').src = DEFAULT_POOL_LOGO;
+            const pool = store.pools.find(p => p.id === currentPoolId);
+            document.getElementById('pool-image-preview').src = getDefaultPoolLogo(pool?.tour);
             document.getElementById('remove-pool-image-btn').style.display = 'none';
         }
         
@@ -6029,7 +6045,7 @@
             if (pool.poolImage) {
                 imgDisplay.src = pool.poolImage;
             } else {
-                imgDisplay.src = DEFAULT_POOL_LOGO;
+                imgDisplay.src = getDefaultPoolLogo(pool.tour);
             }
             
             // Clickable for everyone (creators edit, others view expanded)
