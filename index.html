@@ -4776,6 +4776,23 @@
             "liv-indianapolis-2026": "LIV Golf Indianapolis"
         };
 
+// Auto-populate tournamentNames from all schedules so history always shows official names
+        pga2026Schedule.forEach(t => {
+            if (!tournamentNames[t.id]) {
+                tournamentNames[t.id] = t.name;
+            }
+        });
+        champions2026Schedule.forEach(t => {
+            if (!tournamentNames[t.id]) {
+                tournamentNames[t.id] = t.name;
+            }
+        });
+        liv2026Schedule.forEach(t => {
+            if (!tournamentNames[t.id]) {
+                tournamentNames[t.id] = t.name;
+            }
+        });
+
         // 2026 PGA Tour Schedule (upcoming tournaments)
         const upcomingSchedule = [
             {
