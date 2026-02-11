@@ -6890,100 +6890,139 @@ See you on the course!`
                 return;
             }
             
-            // Find the "hot" user - whoever had the best pick in the just-finished tournament
-            // Find the "ice" user(s) - whoever had the worst pick in the just-finished tournament
-            let hotUserId = null;
-            let iceUserIds = [];
+            // ==================== STREAK DETECTION ====================
+            // Walk backwards through finalized tournaments to find consecutive
+            // best/worst finish streaks for each user
+            // 1 week = single emoji, 2 = double, 3 = triple, 4+ = emoji + "x4"
+            let hotStreaks = {}; // userId -> consecutive "best pick" count
+            let iceStreaks = {}; // userId -> consecutive "worst pick" count
+            
             if (emojiTournament) {
-                // Get picks for the emoji tournament (handle both ID formats)
-                const emojiTournamentId = emojiTournament.id;
-                const emojiTournamentIdAlt = emojiTournamentId.includes('-') ? 
-                    emojiTournamentId.replace('-', '') : 
-                    emojiTournamentId.replace(/(\d+)$/, '-$1');
+                const schedule = getScheduleForTour(currentPoolTour);
+                const emojiIdx = schedule.findIndex(t => t.id === emojiTournament.id);
                 
-                // Ensure we have picks loaded for this tournament
-                let finishedTournamentPicks = store.picks.filter(p => 
-                    p.poolId === currentPoolId && 
-                    (p.tournamentId === emojiTournamentId || p.tournamentId === emojiTournamentIdAlt)
-                );
-                
-                // If no picks in store, try to fetch from database
-                if (finishedTournamentPicks.length === 0) {
-                    try {
-                        const { data: dbPicks } = await supabaseClient
-                            .from('picks')
-                            .select('*')
-                            .eq('pool_id', currentPoolId)
-                            .in('tournament_id', [emojiTournamentId, emojiTournamentIdAlt]);
-                        
-                        if (dbPicks) {
-                            dbPicks.forEach(pick => {
-                                if (!store.picks.find(p => p.id === pick.id)) {
-                                    store.picks.push({
-                                        id: pick.id,
-                                        poolId: pick.pool_id,
-                                        userId: pick.user_id,
-                                        tournamentId: pick.tournament_id,
-                                        playerId: pick.player_id,
-                                        playerName: pick.player_name,
-                                        tournamentName: pick.tournament_name,
-                                        earnings: pick.final_earnings || 0,
-                                        finish: pick.finish_position || null
-                                    });
-                                }
-                            });
-                            finishedTournamentPicks = dbPicks.map(p => ({
-                                ...p,
-                                poolId: p.pool_id,
-                                userId: p.user_id,
-                                tournamentId: p.tournament_id,
-                                earnings: p.final_earnings || 0,
-                                finish: p.finish_position || null
-                            }));
-                        }
-                    } catch (e) {
-                        console.error('Error fetching picks for hot streak:', e);
-                    }
-                }
-                
-                console.log('Hot/Ice emoji check:', {
-                    emojiTournamentId,
-                    picksFound: finishedTournamentPicks.length,
-                    picks: finishedTournamentPicks.map(p => ({ user: p.userId || p.user_id, earnings: p.earnings || p.final_earnings }))
-                });
-                
-                if (finishedTournamentPicks.length > 0) {
-                    // Check if tournament has been finalized (at least one pick has earnings)
-                    const hasBeenFinalized = finishedTournamentPicks.some(p => (p.earnings || p.final_earnings || 0) > 0);
+                if (emojiIdx >= 0) {
+                    let hotStreakBroken = {};
+                    let iceStreakBroken = {};
                     
-                    if (hasBeenFinalized) {
-                        // Find the pick with highest earnings (hot/flame)
-                        const bestPick = finishedTournamentPicks.reduce((best, pick) => {
-                            const earnings = pick.earnings || pick.final_earnings || 0;
-                            return earnings > (best.earnings || best.final_earnings || 0) ? pick : best;
-                        }, { earnings: 0 });
+                    for (let i = emojiIdx; i >= 0; i--) {
+                        const t = schedule[i];
+                        const tId = t.id;
+                        const tIdAlt = tId.includes('-') ? tId.replace('-', '') : tId.replace(/(\d+)$/, '-$1');
                         
-                        // Only show flame if they actually earned something
-                        const bestEarnings = bestPick.earnings || bestPick.final_earnings || 0;
-                        if (bestEarnings > 0) {
-                            hotUserId = bestPick.userId || bestPick.user_id;
-                            console.log('Hot user:', hotUserId, 'with earnings:', bestEarnings);
+                        // Get picks for this tournament from store
+                        let tournamentPicks = store.picks.filter(p => 
+                            p.poolId === currentPoolId && 
+                            (p.tournamentId === tId || p.tournamentId === tIdAlt)
+                        );
+                        
+                        // If no picks in store for most recent tournament, try to fetch from database
+                        if (tournamentPicks.length === 0 && i === emojiIdx) {
+                            try {
+                                const { data: dbPicks } = await supabaseClient
+                                    .from('picks')
+                                    .select('*')
+                                    .eq('pool_id', currentPoolId)
+                                    .in('tournament_id', [tId, tIdAlt]);
+                                
+                                if (dbPicks) {
+                                    dbPicks.forEach(pick => {
+                                        if (!store.picks.find(p => p.id === pick.id)) {
+                                            store.picks.push({
+                                                id: pick.id,
+                                                poolId: pick.pool_id,
+                                                userId: pick.user_id,
+                                                tournamentId: pick.tournament_id,
+                                                playerId: pick.player_id,
+                                                playerName: pick.player_name,
+                                                tournamentName: pick.tournament_name,
+                                                earnings: pick.final_earnings || 0,
+                                                finish: pick.finish_position || null
+                                            });
+                                        }
+                                    });
+                                    tournamentPicks = dbPicks.map(p => ({
+                                        ...p,
+                                        poolId: p.pool_id,
+                                        userId: p.user_id,
+                                        tournamentId: p.tournament_id,
+                                        earnings: p.final_earnings || 0,
+                                        finish: p.finish_position || null
+                                    }));
+                                }
+                            } catch (e) {
+                                console.error('Error fetching picks for streak detection:', e);
+                            }
                         }
                         
-                        // Find the pick(s) with lowest earnings (ice/cold)
-                        const lowestEarnings = Math.min(...finishedTournamentPicks.map(p => p.earnings || p.final_earnings || 0));
-                        iceUserIds = finishedTournamentPicks
-                            .filter(p => (p.earnings || p.final_earnings || 0) === lowestEarnings)
+                        // Need at least 2 picks and at least one finalized to compare
+                        if (tournamentPicks.length < 2) continue;
+                        const hasBeenFinalized = tournamentPicks.some(p => (p.earnings || p.final_earnings || 0) > 0);
+                        if (!hasBeenFinalized) continue;
+                        
+                        const bestEarnings = Math.max(...tournamentPicks.map(p => p.earnings || p.final_earnings || 0));
+                        const worstEarnings = Math.min(...tournamentPicks.map(p => p.earnings || p.final_earnings || 0));
+                        
+                        if (bestEarnings <= 0) continue;
+                        
+                        const bestUserIds = tournamentPicks
+                            .filter(p => (p.earnings || p.final_earnings || 0) === bestEarnings)
                             .map(p => p.userId || p.user_id);
-                        console.log('Ice users:', iceUserIds, 'with earnings:', lowestEarnings);
+                        
+                        const worstUserIds = tournamentPicks
+                            .filter(p => (p.earnings || p.final_earnings || 0) === worstEarnings)
+                            .map(p => p.userId || p.user_id);
+                        
+                        // Extend hot streaks for users who were best AND haven't been broken yet
+                        bestUserIds.forEach(uid => {
+                            if (!hotStreakBroken[uid]) {
+                                hotStreaks[uid] = (hotStreaks[uid] || 0) + 1;
+                            }
+                        });
+                        // Break hot streak for everyone who WASN'T the best this week
+                        tournamentPicks.forEach(p => {
+                            const uid = p.userId || p.user_id;
+                            if (!bestUserIds.includes(uid)) {
+                                hotStreakBroken[uid] = true;
+                            }
+                        });
+                        
+                        // Extend ice streaks for users who were worst AND haven't been broken yet
+                        worstUserIds.forEach(uid => {
+                            if (!iceStreakBroken[uid]) {
+                                iceStreaks[uid] = (iceStreaks[uid] || 0) + 1;
+                            }
+                        });
+                        // Break ice streak for everyone who WASN'T the worst this week
+                        tournamentPicks.forEach(p => {
+                            const uid = p.userId || p.user_id;
+                            if (!worstUserIds.includes(uid)) {
+                                iceStreakBroken[uid] = true;
+                            }
+                        });
+                        
+                        // Stop if all streaks are resolved
+                        const allHotBroken = pool.members.every(m => hotStreakBroken[m] || hotStreaks[m]);
+                        const allIceBroken = pool.members.every(m => iceStreakBroken[m] || iceStreaks[m]);
+                        if (allHotBroken && allIceBroken) break;
                     }
                 }
+                
+                console.log('Hot streaks:', hotStreaks);
+                console.log('Ice streaks:', iceStreaks);
+            }
+            
+            // Format streak emoji: 1=🔥, 2=🔥🔥, 3=🔥🔥🔥, 4+=🔥x4
+            function formatStreakEmoji(emoji, count) {
+                if (!count || count <= 0) return '';
+                if (count === 1) return ' ' + emoji;
+                if (count === 2) return ' ' + emoji + emoji;
+                if (count === 3) return ' ' + emoji + emoji + emoji;
+                return ' ' + emoji + 'x' + count;
             }
             
             tbody.innerHTML = standings.map((standing, index) => {
                 const isCurrentUser = standing.user.id === store.currentUser.id;
-                const isHotUser = standing.user.id === hotUserId;
-                const isIceUser = iceUserIds.includes(standing.user.id);
                 const rankClass = index === 0 ? 'gold' : index === 1 ? 'silver' : index === 2 ? 'bronze' : '';
                 const profilePic = getUserProfilePicture(standing.user.id);
                 const userName = standing.user.name || 'Unknown';
@@ -7000,7 +7039,7 @@ See you on the course!`
                                      style="width: 32px; height: 32px; border-radius: 50%; object-fit: cover;"
                                      onclick="event.stopPropagation(); showProfileModalFromElement(this, '${userName.replace(/'/g, "\\'")}')"
                                      onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect fill=%22%23e5e7eb%22 width=%22100%22 height=%22100%22/></svg>'">
-                                <strong>${userName}</strong>${isHotUser ? ' 🔥' : ''}${isIceUser && !isHotUser ? ' 🧊' : ''}
+                                <strong>${userName}</strong>${formatStreakEmoji('🔥', hotStreaks[standing.user.id])}${!hotStreaks[standing.user.id] ? formatStreakEmoji('🧊', iceStreaks[standing.user.id]) : ''}
                                 ${isCurrentUser ? ' (You)' : ''}
                             </div>
                         </td>
