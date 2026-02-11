@@ -2946,6 +2946,54 @@
 
         // Helper function to retry Supabase operations that fail with AbortError
         async function supabaseRetry(operation, maxRetries = 3) {
+
+        // ==================== API PROXY ====================
+        // All data operations go through the edge function to hide database schema
+        const API_URL = SUPABASE_URL + '/functions/v1/api';
+        
+        async function callAPI(action, params = {}) {
+            let token = null;
+            try {
+                const session = await supabaseClient.auth.getSession();
+                token = session.data.session?.access_token;
+            } catch (e) {
+                // No session available
+            }
+
+            const response = await fetch(API_URL, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+                },
+                body: JSON.stringify({ action, ...params })
+            });
+
+            const result = await response.json();
+            if (!response.ok || result.error) {
+                throw new Error(result.error || `API call failed: ${action}`);
+            }
+            return result;
+        }
+
+        // Retry wrapper for callAPI
+        async function callAPIRetry(action, params = {}, maxRetries = 3) {
+            for (let i = 0; i < maxRetries; i++) {
+                try {
+                    return await callAPI(action, params);
+                } catch (error) {
+                    if (i < maxRetries - 1 && (error.message?.includes('AbortError') || error.message?.includes('fetch'))) {
+                        console.log(`API retry ${i + 1}/${maxRetries} for ${action}...`);
+                        await new Promise(r => setTimeout(r, 500));
+                        continue;
+                    }
+                    throw error;
+                }
+            }
+        }
+
+        // Helper function to retry Supabase operations that fail with AbortError (legacy - being migrated)
+        async function supabaseRetry(operation, maxRetries = 3) {
             for (let i = 0; i < maxRetries; i++) {
                 try {
                     const result = await operation();
@@ -3005,123 +3053,41 @@
 
         // ==================== SUPABASE POOL FUNCTIONS ====================
         async function supabaseCreatePool(name, season) {
-            if (!supabaseClient) throw new Error('Supabase not initialized');
-            const user = await supabaseGetCurrentUser();
             const inviteCode = Math.random().toString(36).substring(2, 8).toUpperCase();
-            
-            const { data: pool, error } = await supabaseClient
-                .from('pools')
-                .insert({
-                    name,
-                    season,
-                    invite_code: inviteCode,
-                    created_by: user.id
-                })
-                .select()
-                .single();
-            
-            if (error) throw error;
-            
-            // Add creator as member
-            await supabaseClient
-                .from('pool_members')
-                .insert({ pool_id: pool.id, user_id: user.id });
-            
-            return pool;
+            const result = await callAPI('create-pool', { name, season, inviteCode });
+            return result.data;
         }
 
         async function supabaseJoinPool(inviteCode) {
-            if (!supabaseClient) throw new Error('Supabase not initialized');
-            const user = await supabaseGetCurrentUser();
-            
-            const { data: pool, error: poolError } = await supabaseClient
-                .from('pools')
-                .select('id')
-                .eq('invite_code', inviteCode.toUpperCase())
-                .single();
-            
-            if (poolError) throw new Error('Invalid invite code');
-            
-            const { error } = await supabaseClient
-                .from('pool_members')
-                .insert({ pool_id: pool.id, user_id: user.id });
-            
-            if (error) throw error;
-            return pool;
+            const result = await callAPI('join-pool', { inviteCode });
+            return result.data;
         }
 
         async function supabaseGetUserPools() {
-            if (!supabaseClient) return [];
             const user = await supabaseGetCurrentUser();
             if (!user) return [];
-            
-            const { data, error } = await supabaseClient
-                .from('pool_members')
-                .select('pool:pools(*)')
-                .eq('user_id', user.id);
-            
-            if (error) throw error;
-            return data.map(pm => pm.pool);
+            const result = await callAPI('get-pools');
+            return result.data;
         }
 
         // ==================== SUPABASE PICK FUNCTIONS ====================
         async function supabaseMakePick(poolId, tournamentId, playerId, playerName) {
-            if (!supabaseClient) throw new Error('Supabase not initialized');
-            const user = await supabaseGetCurrentUser();
-            
-            // Check if player already used this season
-            const { data: usedCheck } = await supabaseClient
-                .from('used_players')
-                .select('id')
-                .eq('pool_id', poolId)
-                .eq('user_id', user.id)
-                .eq('player_id', playerId)
-                .eq('season', '2025-2026')
-                .single();
-            
-            if (usedCheck) {
-                throw new Error('You have already used this player this season');
-            }
-            
-            const { data, error } = await supabaseClient
-                .from('picks')
-                .upsert({
-                    pool_id: poolId,
-                    user_id: user.id,
-                    tournament_id: tournamentId,
-                    player_id: playerId,
-                    player_name: playerName
-                }, {
-                    onConflict: 'pool_id,user_id,tournament_id'
-                })
-                .select()
-                .single();
-            
-            if (error) throw error;
-            return data;
+            const result = await callAPI('make-pick', { poolId, tournamentId, playerId, playerName });
+            return result.data;
         }
 
         async function supabaseGetUserPicks(poolId) {
-            if (!supabaseClient) return [];
             const user = await supabaseGetCurrentUser();
             if (!user) return [];
-            
-            const { data, error } = await supabaseClient
-                .from('picks')
-                .select('*')
-                .eq('pool_id', poolId)
-                .eq('user_id', user.id)
-                .order('picked_at', { ascending: false });
-            
-            if (error) throw error;
-            return data;
+            const result = await callAPI('get-user-picks', { poolIds: [poolId] });
+            return result.data;
         }
 
         async function supabaseGetPoolStandings(poolId) {
+            // Keep using RPC for now as standings involve complex queries
             if (!supabaseClient) return [];
             const { data, error } = await supabaseClient
                 .rpc('get_pool_standings', { p_pool_id: poolId });
-            
             if (error) throw error;
             return data;
         }
@@ -4987,16 +4953,13 @@
 
             try {
                 console.log(`Fetching field for tournament: ${tournamentId}`);
-                const { data, error } = await supabaseClient
-                    .from('tournament_field')
-                    .select('*')
-                    .eq('tournament_id', tournamentId)
-                    .order('owgr', { ascending: true, nullsFirst: false });
+                const result = await callAPI('get-tournament-field', { tournamentId });
+                const data = result.data;
 
-                if (error) {
-                    console.error('Error fetching field:', error);
+                if (!data || data.length === 0) {
+                    console.error('No field data returned');
                     tournamentField = fallbackField;
-                } else if (data && data.length > 0) {
+                } else if (data.length > 0) {
                     console.log(`Loaded ${data.length} players from Supabase`);
                     tournamentField = data.map(p => {
                         // Fix player name - convert "Last, First" to "First Last"
@@ -5440,74 +5403,55 @@
             console.log('Loading data for user:', store.currentUser.id);
             
             try {
-                // Load user's pool memberships
-                const { data: poolMembers, error: poolError } = await supabaseRetry(() =>
-                    supabaseClient
-                        .from('pool_members')
-                        .select('pool_id')
-                        .eq('user_id', store.currentUser.id)
-                );
+                // Load user's pools via API
+                const poolsResult = await callAPIRetry('get-pools');
+                const pools = poolsResult.data;
                 
-                if (poolError) {
-                    console.error('Error loading pool members:', poolError);
-                } else if (poolMembers && poolMembers.length > 0) {
-                    console.log('Found pool memberships:', poolMembers.length);
+                if (pools && pools.length > 0) {
+                    console.log('Found pool memberships:', pools.length);
                     
-                    // Load the actual pools
-                    const poolIds = poolMembers.map(pm => pm.pool_id);
-                    const { data: pools, error: poolsError } = await supabaseRetry(() =>
-                        supabaseClient
-                            .from('pools')
-                            .select('*')
-                            .in('id', poolIds)
+                    // OPTIMIZED: Batch load all members for all pools in parallel
+                    const memberPromises = pools.map(dbPool => 
+                        loadPoolMembersOptimized(dbPool.id)
                     );
+                    const allMembersResults = await Promise.all(memberPromises);
                     
-                    if (poolsError) {
-                        console.error('Error loading pools:', poolsError);
-                    } else if (pools) {
-                        // OPTIMIZED: Batch load all members for all pools in parallel
-                        const memberPromises = pools.map(dbPool => 
-                            loadPoolMembersOptimized(dbPool.id)
-                        );
-                        const allMembersResults = await Promise.all(memberPromises);
+                    pools.forEach((dbPool, index) => {
+                        const members = allMembersResults[index] || [];
+                        const memberIds = members.map(m => m.user_id);
                         
-                        pools.forEach((dbPool, index) => {
-                            const members = allMembersResults[index] || [];
-                            const memberIds = members.map(m => m.user_id);
-                            
-                            // Add members to store.users (already have profiles from batch query)
-                            members.forEach(member => {
-                                if (!store.users.find(u => u.id === member.user_id)) {
-                                    store.users.push({
-                                        id: member.user_id,
-                                        name: member.user_name || 'Player',
-                                        email: member.user_email || '',
-                                        profilePicture: member.profile_picture || null
-                                    });
-                                }
-                            });
-                            
-                            const pool = {
-                                id: dbPool.id,
-                                name: dbPool.name,
-                                season: dbPool.season,
-                                tour: dbPool.tour || 'pga',
-                                inviteCode: dbPool.invite_code,
-                                createdBy: dbPool.created_by,
-                                members: memberIds,
-                                uniquePicks: dbPool.unique_picks || false,
-                                poolImage: dbPool.pool_image || null
-                            };
-                            
-                            const existingIndex = store.pools.findIndex(p => p.id === pool.id);
-                            if (existingIndex >= 0) {
-                                store.pools[existingIndex] = pool;
-                            } else {
-                                store.pools.push(pool);
+                        // Add members to store.users (already have profiles from batch query)
+                        members.forEach(member => {
+                            if (!store.users.find(u => u.id === member.user_id)) {
+                                store.users.push({
+                                    id: member.user_id,
+                                    name: member.user_name || 'Player',
+                                    email: member.user_email || '',
+                                    profilePicture: member.profile_picture || null
+                                });
                             }
                         });
-                        console.log('Loaded pools:', store.pools.length);
-                    }
+                        
+                        const pool = {
+                            id: dbPool.id,
+                            name: dbPool.name,
+                            season: dbPool.season,
+                            tour: dbPool.tour || 'pga',
+                            inviteCode: dbPool.invite_code,
+                            createdBy: dbPool.created_by,
+                            members: memberIds,
+                            uniquePicks: dbPool.unique_picks || false,
+                            poolImage: dbPool.pool_image || null
+                        };
+                        
+                        const existingIndex = store.pools.findIndex(p => p.id === pool.id);
+                        if (existingIndex >= 0) {
+                            store.pools[existingIndex] = pool;
+                        } else {
+                            store.pools.push(pool);
+                        }
+                    });
+                    console.log('Loaded pools:', store.pools.length);
                 } else {
                     console.log('No pool memberships found');
                 }
@@ -5520,17 +5464,10 @@
                     
                 if (poolIds.length > 0) {
                     console.log('Loading picks for current user');
-                    const { data: userPicks, error: picksError } = await supabaseRetry(() =>
-                        supabaseClient
-                            .from('picks')
-                            .select('*')
-                            .in('pool_id', poolIds)
-                            .eq('user_id', store.currentUser.id)
-                    );
+                    const picksResult = await callAPIRetry('get-user-picks', { poolIds });
+                    const userPicks = picksResult.data;
                     
-                    if (picksError) {
-                        console.error('Error loading picks:', picksError);
-                    } else if (userPicks) {
+                    if (userPicks) {
                         userPicks.forEach(pick => {
                             const pickData = {
                                 id: pick.id,
@@ -5571,37 +5508,8 @@
         // OPTIMIZED: Batch load pool members with profiles
         async function loadPoolMembersOptimized(poolId) {
             try {
-                // Try using the optimized SQL function first
-                const { data, error } = await supabaseClient
-                    .rpc('get_pool_members_with_profiles', { p_pool_id: poolId });
-                
-                if (!error && data) {
-                    return data;
-                }
-                
-                // Fallback: manual query if function doesn't exist
-                const { data: members } = await supabaseClient
-                    .from('pool_members')
-                    .select('user_id')
-                    .eq('pool_id', poolId);
-                
-                if (!members || members.length === 0) return [];
-                
-                const memberIds = members.map(m => m.user_id);
-                const { data: profiles } = await supabaseClient
-                    .from('profiles')
-                    .select('*')
-                    .in('id', memberIds);
-                
-                return members.map(m => {
-                    const profile = profiles?.find(p => p.id === m.user_id);
-                    return {
-                        user_id: m.user_id,
-                        user_name: profile?.name || profile?.username || 'Player',
-                        user_email: profile?.email || '',
-                        profile_picture: profile?.profile_picture || null
-                    };
-                });
+                const result = await callAPI('get-pool-members', { poolId });
+                return result.data || [];
             } catch (err) {
                 console.error('Error loading pool members:', err);
                 return [];
@@ -5611,7 +5519,7 @@
         // OPTIMIZED: Get standings using server-side calculation
         async function getPoolStandingsOptimized(poolId) {
             try {
-                // Try using the optimized SQL function first
+                // Still uses RPC for complex standings calculation
                 const { data, error } = await supabaseClient
                     .rpc('get_pool_standings', { p_pool_id: poolId });
                 
@@ -5619,9 +5527,8 @@
                     return data;
                 }
                 
-                // Fallback: load all picks for this pool and calculate client-side
                 console.log('Falling back to client-side standings calculation');
-                return null; // Will use existing client-side logic
+                return null;
             } catch (err) {
                 console.error('Error getting standings:', err);
                 return null;
@@ -5631,25 +5538,8 @@
         // OPTIMIZED: Get tournament picks for unique picks check
         async function getTournamentPicksOptimized(poolId, tournamentId) {
             try {
-                // Try using the optimized SQL function first
-                const { data, error } = await supabaseClient
-                    .rpc('get_tournament_picks', { 
-                        p_pool_id: poolId, 
-                        p_tournament_id: tournamentId 
-                    });
-                
-                if (!error && data) {
-                    return data;
-                }
-                
-                // Fallback: manual query
-                const { data: picks } = await supabaseClient
-                    .from('picks')
-                    .select('user_id, player_id, player_name')
-                    .eq('pool_id', poolId)
-                    .eq('tournament_id', tournamentId);
-                
-                return picks || [];
+                const result = await callAPI('get-pool-picks', { poolId, tournamentId });
+                return result.data || [];
             } catch (err) {
                 console.error('Error getting tournament picks:', err);
                 return [];
@@ -5922,17 +5812,11 @@
             // Save to Supabase profiles table
             if (supabaseClient) {
                 try {
-                    const { error } = await supabaseClient
-                        .from('profiles')
-                        .upsert({
-                            id: store.currentUser.id,
-                            name: store.currentUser.name,
-                            email: store.currentUser.email,
-                            profile_picture: pendingProfilePicture
-                        });
-                    if (error) {
-                        console.error('Error saving profile picture to Supabase:', error);
-                    }
+                    await callAPI('update-profile', {
+                        name: store.currentUser.name,
+                        email: store.currentUser.email,
+                        profilePicture: pendingProfilePicture
+                    });
                 } catch (err) {
                     console.error('Error saving profile picture:', err);
                 }
@@ -5962,13 +5846,7 @@
             // Remove from Supabase
             if (supabaseClient) {
                 try {
-                    const { error } = await supabaseClient
-                        .from('profiles')
-                        .update({ profile_picture: null })
-                        .eq('id', store.currentUser.id);
-                    if (error) {
-                        console.error('Error removing profile picture from Supabase:', error);
-                    }
+                    await callAPI('remove-profile-picture');
                 } catch (err) {
                     console.error('Error removing profile picture:', err);
                 }
@@ -6172,13 +6050,10 @@
             try {
                 // Save to Supabase
                 if (supabaseClient) {
-                    const { error } = await supabaseClient
-                        .from('pools')
-                        .update({ pool_image: pendingPoolImage })
-                        .eq('id', currentPoolId);
-                    
-                    if (error) {
-                        console.error('Error saving pool image:', error);
+                    try {
+                        await callAPI('update-pool-image', { poolId: currentPoolId, poolImage: pendingPoolImage });
+                    } catch (apiErr) {
+                        console.error('Error saving pool image:', apiErr);
                         showToast('Failed to save pool image', true);
                         return;
                     }
@@ -6288,47 +6163,17 @@
                 let pool;
                 
                 if (supabaseClient && store.currentUser) {
-                    // Create pool in Supabase
+                    // Create pool via API
                     const inviteCode = Math.random().toString(36).substring(2, 8).toUpperCase();
                     
-                    console.log('Inserting pool to Supabase...');
-                    const { data: newPool, error: poolError } = await supabaseRetry(() =>
-                        supabaseClient
-                            .from('pools')
-                            .insert({
-                                name: name,
-                                season: season,
-                                tour: tour,
-                                invite_code: inviteCode,
-                                created_by: store.currentUser.id,
-                                unique_picks: uniquePicks,
-                                pool_image: createPoolImage
-                            })
-                            .select()
-                            .single()
-                    );
-                    
-                    if (poolError) {
-                        console.error('Pool creation error:', poolError);
-                        throw poolError;
-                    }
+                    console.log('Creating pool via API...');
+                    const result = await callAPI('create-pool', {
+                        name, season, tour, inviteCode,
+                        uniquePicks, poolImage: createPoolImage
+                    });
+                    const newPool = result.data;
                     
                     console.log('Pool created:', newPool);
-                    
-                    // Add creator as member
-                    console.log('Adding member...');
-                    const { error: memberError } = await supabaseRetry(() =>
-                        supabaseClient
-                            .from('pool_members')
-                            .insert({ pool_id: newPool.id, user_id: store.currentUser.id })
-                    );
-                    
-                    if (memberError) {
-                        console.error('Member add error:', memberError);
-                        throw memberError;
-                    }
-                    
-                    console.log('Member added');
                     
                     pool = {
                         id: newPool.id,
@@ -6488,31 +6333,7 @@ See you on the course!`
             try {
                 // Remove from Supabase if connected
                 if (supabaseClient) {
-                    // Delete user's picks for this pool
-                    const { error: picksError } = await supabaseRetry(() =>
-                        supabaseClient
-                            .from('picks')
-                            .delete()
-                            .eq('pool_id', poolToLeave)
-                            .eq('user_id', store.currentUser.id)
-                    );
-                    
-                    if (picksError) {
-                        console.error('Error deleting picks:', picksError);
-                    }
-
-                    // Remove user from pool members
-                    const { error: memberError } = await supabaseRetry(() =>
-                        supabaseClient
-                            .from('pool_members')
-                            .delete()
-                            .eq('pool_id', poolToLeave)
-                            .eq('user_id', store.currentUser.id)
-                    );
-                    
-                    if (memberError) {
-                        console.error('Error removing from pool:', memberError);
-                    }
+                    await callAPI('leave-pool', { poolId: poolToLeave });
                 }
 
                 // Remove from local store
@@ -6561,41 +6382,7 @@ See you on the course!`
             try {
                 if (supabaseClient) {
                     // Delete all picks for this pool
-                    const { error: picksError } = await supabaseRetry(() =>
-                        supabaseClient
-                            .from('picks')
-                            .delete()
-                            .eq('pool_id', poolToDelete)
-                    );
-                    
-                    if (picksError) {
-                        console.error('Error deleting picks:', picksError);
-                    }
-
-                    // Delete all pool members
-                    const { error: membersError } = await supabaseRetry(() =>
-                        supabaseClient
-                            .from('pool_members')
-                            .delete()
-                            .eq('pool_id', poolToDelete)
-                    );
-                    
-                    if (membersError) {
-                        console.error('Error deleting members:', membersError);
-                    }
-
-                    // Delete the pool itself
-                    const { error: poolError } = await supabaseRetry(() =>
-                        supabaseClient
-                            .from('pools')
-                            .delete()
-                            .eq('id', poolToDelete)
-                    );
-                    
-                    if (poolError) {
-                        console.error('Error deleting pool:', poolError);
-                        throw poolError;
-                    }
+                    await callAPI('delete-pool', { poolId: poolToDelete });
                 }
 
                 // Remove from local store
@@ -6791,27 +6578,29 @@ See you on the course!`
                 const poolPicks = store.picks.filter(p => p.poolId === currentPoolId);
                 if (poolPicks.length === 0 || poolPicks.every(p => p.userId === store.currentUser.id)) {
                     // Need to load other users' picks
-                    const { data: allPicks } = await supabaseClient
-                        .from('picks')
-                        .select('*')
-                        .eq('pool_id', currentPoolId);
+                    try {
+                        const result = await callAPI('get-all-pool-picks', { poolId: currentPoolId });
+                        const allPicks = result.data;
                     
-                    if (allPicks) {
-                        allPicks.forEach(pick => {
-                            if (!store.picks.find(p => p.id === pick.id)) {
-                                store.picks.push({
-                                    id: pick.id,
-                                    poolId: pick.pool_id,
-                                    userId: pick.user_id,
-                                    tournamentId: pick.tournament_id,
-                                    playerId: pick.player_id,
-                                    playerName: pick.player_name,
-                                    tournamentName: pick.tournament_name,
-                                    earnings: pick.final_earnings || 0,
-                                    finish: pick.finish_position || null
-                                });
-                            }
-                        });
+                        if (allPicks) {
+                            allPicks.forEach(pick => {
+                                if (!store.picks.find(p => p.id === pick.id)) {
+                                    store.picks.push({
+                                        id: pick.id,
+                                        poolId: pick.pool_id,
+                                        userId: pick.user_id,
+                                        tournamentId: pick.tournament_id,
+                                        playerId: pick.player_id,
+                                        playerName: pick.player_name,
+                                        tournamentName: pick.tournament_name,
+                                        earnings: pick.final_earnings || 0,
+                                        finish: pick.finish_position || null
+                                    });
+                                }
+                            });
+                        }
+                    } catch (e) {
+                        console.error('Error loading pool picks:', e);
                     }
                 }
                 
@@ -6907,10 +6696,8 @@ See you on the course!`
                     
                     // Bulk-fetch ALL picks for this pool so streak lookback works
                     try {
-                        const { data: allPoolPicks, error: bulkError } = await supabaseClient
-                            .from('picks')
-                            .select('*')
-                            .eq('pool_id', currentPoolId);
+                        const result = await callAPI('get-all-pool-picks', { poolId: currentPoolId });
+                        const allPoolPicks = result.data;
                         
                         if (allPoolPicks) {
                             allPoolPicks.forEach(pick => {
@@ -7713,22 +7500,14 @@ See you on the course!`
 
             try {
                 if (supabaseClient) {
-                    // Save pick to Supabase
-                    const { data, error } = await supabaseClient
-                        .from('picks')
-                        .upsert({
-                            pool_id: currentPoolId,
-                            user_id: store.currentUser.id,
-                            tournament_id: currentTournament.id,
-                            player_id: String(selectedPlayerId),
-                            player_name: player.name
-                        }, {
-                            onConflict: 'pool_id,user_id,tournament_id'
-                        })
-                        .select()
-                        .single();
-                    
-                    if (error) throw error;
+                    // Save pick via API
+                    const result = await callAPI('make-pick', {
+                        poolId: currentPoolId,
+                        tournamentId: currentTournament.id,
+                        playerId: String(selectedPlayerId),
+                        playerName: player.name
+                    });
+                    const data = result.data;
                     
                     // Update local store
                     const existingPickIndex = store.picks.findIndex(
@@ -7812,15 +7591,11 @@ See you on the course!`
 
             try {
                 if (supabaseClient) {
-                    // Delete from Supabase
-                    const { error } = await supabaseClient
-                        .from('picks')
-                        .delete()
-                        .eq('pool_id', currentPoolId)
-                        .eq('user_id', store.currentUser.id)
-                        .eq('tournament_id', currentTournament.id);
-                    
-                    if (error) throw error;
+                    // Delete pick via API
+                    await callAPI('delete-pick', {
+                        poolId: currentPoolId,
+                        tournamentId: currentTournament.id
+                    });
                 }
 
                 // Remove from local store
@@ -8114,43 +7889,16 @@ See you on the course!`
             }
             
             try {
-                // Find pool by invite code
-                const { data: pool, error: poolError } = await supabaseClient
-                    .from('pools')
-                    .select('*')
-                    .eq('invite_code', code)
-                    .single();
+                // Join pool via API
+                const result = await callAPI('join-pool', { inviteCode: code });
                 
-                if (poolError || !pool) {
-                    errorEl.textContent = 'Invalid invite code. Please check and try again.';
-                    errorEl.style.display = 'block';
-                    return;
-                }
-                
-                // Check if already a member
-                const { data: existingMember } = await supabaseClient
-                    .from('pool_members')
-                    .select('*')
-                    .eq('pool_id', pool.id)
-                    .eq('user_id', store.currentUser.id)
-                    .single();
-                
-                if (existingMember) {
+                if (result.alreadyMember) {
                     errorEl.textContent = 'You are already a member of this pool';
                     errorEl.style.display = 'block';
                     return;
                 }
                 
-                // Join the pool
-                const { error: joinError } = await supabaseClient
-                    .from('pool_members')
-                    .insert({
-                        pool_id: pool.id,
-                        user_id: store.currentUser.id
-                    });
-                
-                if (joinError) throw joinError;
-                
+                const pool = result.data;
                 closeModal('join-pool-modal');
                 showToast(`Successfully joined ${pool.name}!`);
                 
@@ -8160,7 +7908,10 @@ See you on the course!`
                 
             } catch (error) {
                 console.error('Join pool error:', error);
-                errorEl.textContent = 'Failed to join pool. Please try again.';
+                const msg = error.message?.includes('Invalid invite code') 
+                    ? 'Invalid invite code. Please check and try again.'
+                    : 'Failed to join pool. Please try again.';
+                errorEl.textContent = msg;
                 errorEl.style.display = 'block';
             }
         }
@@ -8218,17 +7969,15 @@ See you on the course!`
 
                 // Store invite in database
                 if (supabaseClient) {
-                    await supabaseRetry(() =>
-                        supabaseClient
-                            .from('invites')
-                            .insert({
-                                pool_id: pool.id,
-                                email: email,
-                                invite_code: pool.inviteCode,
-                                invited_by: store.currentUser.id,
-                                status: 'sent'
-                            })
-                    );
+                    try {
+                        await callAPI('save-invite', {
+                            poolId: pool.id,
+                            email: email,
+                            inviteCode: pool.inviteCode
+                        });
+                    } catch (e) {
+                        console.error('Error saving invite:', e);
+                    }
                 }
 
                 // Store locally too
@@ -8513,60 +8262,13 @@ See you on the course!`
                 
                 console.log('Looking for pool with invite code:', inviteCode.toUpperCase());
                 
-                // Find the pool by invite code
-                const { data: pool, error: poolError } = await supabaseRetry(() =>
-                    supabaseClient
-                        .from('pools')
-                        .select('*')
-                        .eq('invite_code', inviteCode.toUpperCase())
-                        .maybeSingle()
-                );
+                const result = await callAPI('join-pool', { inviteCode: inviteCode.toUpperCase() });
+                const pool = result.data;
 
-                console.log('Pool lookup result:', pool, poolError);
-
-                if (poolError) {
-                    console.error('Pool lookup error:', poolError);
-                    showToast('Error finding pool', true);
-                    return;
-                }
-
-                if (!pool) {
-                    showToast('Invalid invite code', true);
-                    return;
-                }
-
-                // Check if already a member
-                const { data: existingMember } = await supabaseRetry(() =>
-                    supabaseClient
-                        .from('pool_members')
-                        .select('*')
-                        .eq('pool_id', pool.id)
-                        .eq('user_id', store.currentUser.id)
-                        .maybeSingle()
-                );
-
-                if (existingMember) {
+                if (result.alreadyMember) {
                     showToast('You\'re already in this pool!');
-                    // Open the pool
                     await loadUserData();
                     openPool(pool.id);
-                    return;
-                }
-
-                // Add user to pool
-                const { error: memberError } = await supabaseRetry(() =>
-                    supabaseClient
-                        .from('pool_members')
-                        .insert({
-                            pool_id: pool.id,
-                            user_id: store.currentUser.id,
-                            role: 'member'
-                        })
-                );
-
-                if (memberError) {
-                    console.error('Join pool error:', memberError);
-                    showToast('Failed to join pool', true);
                     return;
                 }
 
@@ -8577,7 +8279,10 @@ See you on the course!`
 
             } catch (error) {
                 console.error('Join pool error:', error);
-                showToast('Failed to join pool', true);
+                const msg = error.message?.includes('Invalid invite code')
+                    ? 'Invalid invite code'
+                    : 'Failed to join pool';
+                showToast(msg, true);
             }
         }
 
