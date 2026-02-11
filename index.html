@@ -6907,12 +6907,19 @@ See you on the course!`
                     
                     // Bulk-fetch ALL picks for this pool so streak lookback works
                     try {
-                        const { data: allPoolPicks } = await supabaseClient
+                        const { data: allPoolPicks, error: bulkError } = await supabaseClient
                             .from('picks')
                             .select('*')
                             .eq('pool_id', currentPoolId);
                         
+                        console.log('Streak bulk fetch:', { 
+                            count: allPoolPicks?.length, 
+                            error: bulkError,
+                            poolId: currentPoolId 
+                        });
+                        
                         if (allPoolPicks) {
+                            let newPicksAdded = 0;
                             allPoolPicks.forEach(pick => {
                                 if (!store.picks.find(p => p.id === pick.id)) {
                                     store.picks.push({
@@ -6926,8 +6933,11 @@ See you on the course!`
                                         earnings: pick.final_earnings || 0,
                                         finish: pick.finish_position || null
                                     });
+                                    newPicksAdded++;
                                 }
                             });
+                            console.log('Streak: added', newPicksAdded, 'new picks to store, total store picks for this pool:', 
+                                store.picks.filter(p => p.poolId === currentPoolId).length);
                         }
                     } catch (e) {
                         console.error('Error bulk-fetching picks for streak detection:', e);
@@ -6944,8 +6954,11 @@ See you on the course!`
                             (p.tournamentId === tId || p.tournamentId === tIdAlt)
                         );
                         
+                        console.log(`Streak loop [${i}] ${t.name}: tId=${tId}, alt=${tIdAlt}, picks found=${tournamentPicks.length}`, 
+                            tournamentPicks.map(p => ({ user: (p.userId || p.user_id)?.substring(0,8), earnings: p.earnings, tid: p.tournamentId })));
+                        
                         // Need at least 2 picks and at least one finalized to compare
-                        if (tournamentPicks.length < 2) continue;
+                        if (tournamentPicks.length < 2) { console.log(`  Skipping: only ${tournamentPicks.length} picks`); continue; }
                         const hasBeenFinalized = tournamentPicks.some(p => (p.earnings || p.final_earnings || 0) > 0);
                         if (!hasBeenFinalized) continue;
                         
@@ -6961,6 +6974,11 @@ See you on the course!`
                         const worstUserIds = tournamentPicks
                             .filter(p => (p.earnings || p.final_earnings || 0) === worstEarnings)
                             .map(p => p.userId || p.user_id);
+                        
+                        console.log(`  Best: $${bestEarnings} by`, bestUserIds.map(u => u?.substring(0,8)));
+                        console.log(`  Worst: $${worstEarnings} by`, worstUserIds.map(u => u?.substring(0,8)));
+                        console.log(`  hotStreakBroken before:`, {...hotStreakBroken});
+                        console.log(`  iceStreakBroken before:`, {...iceStreakBroken});
                         
                         // Extend hot streaks for users who were best AND haven't been broken yet
                         bestUserIds.forEach(uid => {
