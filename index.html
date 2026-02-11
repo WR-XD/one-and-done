@@ -2944,9 +2944,6 @@
             console.log('Supabase not available, using local storage', e);
         }
 
-        // Helper function to retry Supabase operations that fail with AbortError
-        async function supabaseRetry(operation, maxRetries = 3) {
-
         // ==================== API PROXY ====================
         // All data operations go through the edge function to hide database schema
         const API_URL = SUPABASE_URL + '/functions/v1/api';
