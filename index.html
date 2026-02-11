@@ -6905,55 +6905,44 @@ See you on the course!`
                     let hotStreakBroken = {};
                     let iceStreakBroken = {};
                     
+                    // Bulk-fetch ALL picks for this pool so streak lookback works
+                    try {
+                        const { data: allPoolPicks } = await supabaseClient
+                            .from('picks')
+                            .select('*')
+                            .eq('pool_id', currentPoolId);
+                        
+                        if (allPoolPicks) {
+                            allPoolPicks.forEach(pick => {
+                                if (!store.picks.find(p => p.id === pick.id)) {
+                                    store.picks.push({
+                                        id: pick.id,
+                                        poolId: pick.pool_id,
+                                        userId: pick.user_id,
+                                        tournamentId: pick.tournament_id,
+                                        playerId: pick.player_id,
+                                        playerName: pick.player_name,
+                                        tournamentName: pick.tournament_name,
+                                        earnings: pick.final_earnings || 0,
+                                        finish: pick.finish_position || null
+                                    });
+                                }
+                            });
+                        }
+                    } catch (e) {
+                        console.error('Error bulk-fetching picks for streak detection:', e);
+                    }
+                    
                     for (let i = emojiIdx; i >= 0; i--) {
                         const t = schedule[i];
                         const tId = t.id;
                         const tIdAlt = tId.includes('-') ? tId.replace('-', '') : tId.replace(/(\d+)$/, '-$1');
                         
-                        // Get picks for this tournament from store
+                        // Get picks for this tournament from store (now guaranteed loaded)
                         let tournamentPicks = store.picks.filter(p => 
                             p.poolId === currentPoolId && 
                             (p.tournamentId === tId || p.tournamentId === tIdAlt)
                         );
-                        
-                        // If no picks in store for most recent tournament, try to fetch from database
-                        if (tournamentPicks.length === 0 && i === emojiIdx) {
-                            try {
-                                const { data: dbPicks } = await supabaseClient
-                                    .from('picks')
-                                    .select('*')
-                                    .eq('pool_id', currentPoolId)
-                                    .in('tournament_id', [tId, tIdAlt]);
-                                
-                                if (dbPicks) {
-                                    dbPicks.forEach(pick => {
-                                        if (!store.picks.find(p => p.id === pick.id)) {
-                                            store.picks.push({
-                                                id: pick.id,
-                                                poolId: pick.pool_id,
-                                                userId: pick.user_id,
-                                                tournamentId: pick.tournament_id,
-                                                playerId: pick.player_id,
-                                                playerName: pick.player_name,
-                                                tournamentName: pick.tournament_name,
-                                                earnings: pick.final_earnings || 0,
-                                                finish: pick.finish_position || null
-                                            });
-                                        }
-                                    });
-                                    tournamentPicks = dbPicks.map(p => ({
-                                        ...p,
-                                        poolId: p.pool_id,
-                                        userId: p.user_id,
-                                        tournamentId: p.tournament_id,
-                                        earnings: p.final_earnings || 0,
-                                        finish: p.finish_position || null
-                                    }));
-                                }
-                            } catch (e) {
-                                console.error('Error fetching picks for streak detection:', e);
-                            }
-                        }
                         
                         // Need at least 2 picks and at least one finalized to compare
                         if (tournamentPicks.length < 2) continue;
