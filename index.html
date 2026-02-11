@@ -7069,7 +7069,21 @@ See you on the course!`
             document.getElementById('current-tournament-name').textContent = headerTournament.name;
             document.getElementById('tournament-dates').textContent = headerTournament.dates;
             document.getElementById('tournament-course').textContent = headerTournament.course;
-            document.getElementById('tournament-logo').src = headerTournament.logo;
+            
+            // Set logo - for LIV, use circular badge from tournamentLogos instead of wide banner
+            const logoEl = document.getElementById('tournament-logo');
+            if (currentPoolTour === 'liv') {
+                const circularLogo = tournamentLogos[headerTournament.id] || headerTournament.logo;
+                logoEl.src = circularLogo;
+                logoEl.className = 'tournament-logo-liv';
+                logoEl.style.width = '70px';
+                logoEl.style.height = '70px';
+            } else {
+                logoEl.src = headerTournament.logo;
+                logoEl.className = 'tournament-logo';
+                logoEl.style.width = '';
+                logoEl.style.height = '';
+            }
 
             // Always try to fetch ESPN data first
             await fetchESPNLeaderboard();
@@ -7346,7 +7360,21 @@ See you on the course!`
             // Update tournament info display
             document.getElementById('pick-tournament-info').textContent = 
                 `${currentTournament.name} • ${currentTournament.dates}`;
-            document.getElementById('pick-tournament-logo').src = currentTournament.logo;
+            
+            // Set logo - for LIV, use circular badge
+            const pickLogoEl = document.getElementById('pick-tournament-logo');
+            if (currentPoolTour === 'liv') {
+                const circularLogo = tournamentLogos[currentTournament.id] || currentTournament.logo;
+                pickLogoEl.src = circularLogo;
+                pickLogoEl.className = 'tournament-logo-liv';
+                pickLogoEl.style.width = '70px';
+                pickLogoEl.style.height = '70px';
+            } else {
+                pickLogoEl.src = currentTournament.logo;
+                pickLogoEl.className = 'tournament-logo';
+                pickLogoEl.style.width = '';
+                pickLogoEl.style.height = '';
+            }
 
             // Get ALL players this user has picked in this pool (any tournament)
             // But EXCLUDE the current tournament pick (so they can change it)
