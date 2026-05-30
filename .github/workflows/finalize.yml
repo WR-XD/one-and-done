@@ -1,0 +1,58 @@
+name: Finalize Tournament Results
+
+on:
+  schedule:
+    # 7am UTC = 8am BST (UK summer, covers most of golf season)
+    # 8am UTC = 8am GMT (UK winter, Jan-March)
+    # Run at both times - the script is idempotent (safe to run twice)
+    - cron: '0 7 * * 1'   # Monday 7am UTC (8am BST)
+    - cron: '0 8 * * 1'   # Monday 8am UTC (8am GMT)
+  
+  # Allow manual trigger from GitHub UI
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: 'Dry run (show what would be finalized)'
+        required: false
+        default: 'false'
+        type: boolean
+      date_override:
+        description: 'Override date (YYYY-MM-DD) for testing'
+        required: false
+        type: string
+
+jobs:
+  finalize:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      
+      - name: Install dependencies
+        run: pip install requests
+      
+      - name: Run auto-finalize
+        working-directory: .
+        run: |
+          ARGS=""
+          if [ "${{ github.event.inputs.dry_run }}" = "true" ]; then
+            ARGS="$ARGS --dry-run"
+          fi
+          if [ -n "${{ github.event.inputs.date_override }}" ]; then
+            ARGS="$ARGS --date ${{ github.event.inputs.date_override }}"
+          fi
+          python auto_finalize.py $ARGS
+      
+      - name: Commit finalize log
+        run: |
+          git config user.name "GitHub Actions"
+          git config user.email "actions@github.com"
+          git add finalize_log.json 2>/dev/null || true
+          git diff --staged --quiet || git commit -m "Auto-finalize log update $(date +%Y-%m-%d)"
+          git push || true
