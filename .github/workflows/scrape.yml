@@ -1,0 +1,68 @@
+name: Scrape Tournament Field
+
+on:
+  schedule:
+    # 8am UTC = 9am BST (UK summer), 9am UTC = 9am GMT (UK winter)
+    - cron: '0 8 * * 1'   # Monday 8am UTC (9am BST)
+    - cron: '0 9 * * 1'   # Monday 9am UTC (9am GMT)
+  
+  # Allow manual trigger
+  workflow_dispatch:
+    inputs:
+      tournament_url:
+        description: 'PGA Tour URL (leave empty for auto-detect)'
+        required: false
+        type: string
+      tour:
+        description: 'Tour type'
+        required: false
+        default: 'pga'
+        type: choice
+        options:
+          - pga
+          - champions
+      team_event:
+        description: 'Team event (Zurich etc)'
+        required: false
+        default: false
+        type: boolean
+
+jobs:
+  scrape:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      
+      - name: Install dependencies
+        run: |
+          pip install selenium webdriver-manager requests
+          # Chrome is pre-installed on ubuntu-latest
+      
+      - name: Run field scraper
+        run: |
+          ARGS=""
+          if [ -n "${{ github.event.inputs.tournament_url }}" ]; then
+            ARGS="${{ github.event.inputs.tournament_url }}"
+          fi
+          if [ "${{ github.event.inputs.tour }}" = "champions" ]; then
+            ARGS="$ARGS --champions"
+          fi
+          if [ "${{ github.event.inputs.team_event }}" = "true" ]; then
+            ARGS="$ARGS --team"
+          fi
+          python scrape_field.py $ARGS
+      
+      - name: Upload field JSON as artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: field-data
+          path: field_*.json
+          retention-days: 30
