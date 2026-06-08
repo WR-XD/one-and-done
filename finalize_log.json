@@ -8,5 +8,15 @@
         "status": "success"
       }
     ]
+  },
+  {
+    "date": "2026-06-08",
+    "tournaments": [
+      {
+        "tournament": "the Memorial Tournament",
+        "tour": "pga",
+        "status": "success"
+      }
+    ]
   }
 ]
