@@ -28,5 +28,15 @@
         "status": "success"
       }
     ]
+  },
+  {
+    "date": "2026-06-15",
+    "tournaments": [
+      {
+        "tournament": "RBC Canadian Open",
+        "tour": "pga",
+        "status": "success"
+      }
+    ]
   }
 ]
